@@ -1,6 +1,7 @@
 <?php
 
 use App\Modules\Core\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Modules\Core\Http\Controllers\OrganizationController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -25,5 +26,7 @@ Route::middleware('web')->prefix('super')->name('super.')->group(function () {
         Route::inertia('dashboard', 'super/dashboard')->name('dashboard');
 
         Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+
+        Route::resource('organizations', OrganizationController::class);
     });
 });
