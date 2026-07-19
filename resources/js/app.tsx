@@ -14,6 +14,11 @@ createInertiaApp({
         switch (true) {
             case name === 'welcome':
                 return null;
+            case name.startsWith('super/auth/'):
+                return AuthLayout;
+            case name.startsWith('super/'):
+                // Admin platform: dedicated shell added in a later step.
+                return null;
             case name.startsWith('auth/'):
                 return AuthLayout;
             case name.startsWith('settings/'):
