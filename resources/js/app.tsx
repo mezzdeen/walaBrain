@@ -5,6 +5,7 @@ import { initializeTheme } from '@/hooks/use-appearance';
 import AppLayout from '@/layouts/app-layout';
 import AuthLayout from '@/layouts/auth-layout';
 import SettingsLayout from '@/layouts/settings/layout';
+import SuperLayout from '@/layouts/super-layout';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -17,8 +18,7 @@ createInertiaApp({
             case name.startsWith('super/auth/'):
                 return AuthLayout;
             case name.startsWith('super/'):
-                // Admin platform: dedicated shell added in a later step.
-                return null;
+                return SuperLayout;
             case name.startsWith('auth/'):
                 return AuthLayout;
             case name.startsWith('settings/'):
