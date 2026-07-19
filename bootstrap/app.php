@@ -22,6 +22,12 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
         ]);
+
+        // Send unauthenticated visitors to the login screen of the platform
+        // they were trying to reach, keeping the two platforms isolated.
+        $middleware->redirectGuestsTo(fn (Request $request): string => $request->is('super', 'super/*')
+            ? route('super.login')
+            : route('login'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
