@@ -68,6 +68,7 @@ return [
         'roles' => 'Roles',
         'organization' => 'Organization',
         'members' => 'Members',
+        'diagnostics' => 'Diagnostics',
     ],
 
     /*
@@ -83,6 +84,7 @@ return [
         'delete' => 'Delete',
         'invite' => 'Invite',
         'remove' => 'Remove',
+        'run' => 'Run',
         'roles' => [
             'manage' => 'Manage roles',
         ],

@@ -2,6 +2,7 @@
 
 use App\Modules\Core\Enums\SuperPermission;
 use App\Modules\Core\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Modules\Core\Http\Controllers\MailDiagnosticsController;
 use App\Modules\Core\Http\Controllers\OrganizationController;
 use App\Modules\Core\Http\Controllers\OrganizationRoleController;
 use App\Modules\Core\Http\Controllers\RoleController;
@@ -57,6 +58,18 @@ Route::middleware('web')->prefix('super')->name('super.')->group(function () {
             Route::put('organizations/{organization}/members/{user}/roles', [OrganizationRoleController::class, 'update'])
                 ->name('organizations.members.roles.update');
         });
+
+        // Verifies the mail configuration end to end after it changes. GET so it
+        // can be run by pasting the URL in a browser, which is the whole point
+        // of a diagnostic — it has to work when the UI might not. That makes it
+        // a side effect on a GET, and a prefetch can therefore fire it; the cost
+        // of that is bounded to one throttled mail to the admin's own address.
+        Route::get('diagnostics/mail', MailDiagnosticsController::class)
+            ->middleware([
+                'permission:'.SuperPermission::RunDiagnostics->value.',super',
+                'throttle:6,1',
+            ])
+            ->name('diagnostics.mail');
 
         Route::resource('roles', RoleController::class)->except('show')
             ->middlewareFor('index', 'permission:'.SuperPermission::ViewRoles->value.',super')

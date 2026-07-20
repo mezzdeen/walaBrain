@@ -24,6 +24,8 @@ enum SuperPermission: string
     case UpdateRoles = 'roles.update';
     case DeleteRoles = 'roles.delete';
 
+    case RunDiagnostics = 'diagnostics.run';
+
     /**
      * @return list<string>
      */

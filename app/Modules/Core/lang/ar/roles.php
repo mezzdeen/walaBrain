@@ -68,6 +68,7 @@ return [
         'roles' => 'الأدوار',
         'organization' => 'المؤسسة',
         'members' => 'الأعضاء',
+        'diagnostics' => 'الفحوصات',
     ],
 
     /*
@@ -83,6 +84,7 @@ return [
         'delete' => 'حذف',
         'invite' => 'دعوة',
         'remove' => 'إزالة',
+        'run' => 'تشغيل',
         'roles' => [
             'manage' => 'إدارة الأدوار',
         ],
