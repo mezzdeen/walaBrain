@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Modules\Core\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class UserSearchController extends Controller
 {
@@ -32,6 +33,8 @@ class UserSearchController extends Controller
      */
     public function __invoke(Request $request): JsonResponse
     {
+        Gate::authorize('viewAny', User::class);
+
         $query = trim((string) $request->query('q', ''));
 
         if (mb_strlen($query) < self::MINIMUM_QUERY_LENGTH) {

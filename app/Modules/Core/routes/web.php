@@ -25,7 +25,11 @@ Route::middleware(['web', 'guest'])->group(function () {
         ->name('invitations.store');
 });
 
-Route::middleware(['web', 'auth'])->group(function () {
+// The guard is named rather than left to the default, which `actingAs` and any
+// future middleware can repoint. It is what keeps a platform admin out of the
+// company platform: they would otherwise satisfy `auth`, and the `Gate::before`
+// bypass in AppServiceProvider would then wave them past every policy here.
+Route::middleware(['web', 'auth:web'])->group(function () {
     Route::put('organizations/{organization}/switch', [OrganizationSwitchController::class, 'update'])
         ->name('organizations.switch');
 

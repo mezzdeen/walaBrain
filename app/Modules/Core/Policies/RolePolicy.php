@@ -4,58 +4,80 @@ namespace App\Modules\Core\Policies;
 
 use App\Modules\Core\Enums\OrganizationPermission;
 use App\Modules\Core\Enums\OrganizationRole;
+use App\Modules\Core\Enums\SuperPermission;
+use App\Modules\Core\Models\Admin;
 use App\Modules\Core\Models\Role;
 use App\Modules\Core\Models\User;
 use App\Modules\Core\Support\OrganizationContext;
 
 /**
- * Authorizes a company user managing the roles of the organization they are
- * currently acting on.
+ * Authorizes role management on both platforms. The `roles` table is shared —
+ * an organization's roles and the platform's global roles are rows in it — so
+ * Laravel resolves both rule sets to this one policy and each method branches
+ * on the identity asking.
  *
- * A policy rather than the `permission:` middleware, because holding the
- * permission is only half the question — the role also has to belong to the
- * organization the request is scoped to. The middleware can only answer the
- * first half, and a user with `roles.update` in their own organization would
- * otherwise be able to edit another organization's role by id.
+ * A policy rather than the `permission:` middleware, because on the company
+ * side holding the permission is only half the question — the role also has to
+ * belong to the organization the request is scoped to. The middleware can only
+ * answer the first half, and a user with `roles.update` in their own
+ * organization would otherwise be able to edit another organization's role by
+ * id.
+ *
+ * The two branches are deliberately asymmetric. A super admin passes every
+ * gate through the `Gate::before` bypass in `AppServiceProvider`, so anything
+ * that must hold *even for them* cannot live here: {@see RoleController} keeps
+ * the scope check (an organization role is 404 on the platform screens, so the
+ * screens do not disclose that it exists) and the protected-role check (the
+ * super admin role stays as provisioned, or the platform locks itself out).
+ * Those are structural invariants that outrank permission. This policy answers
+ * only the permission question for admins.
  */
 class RolePolicy
 {
     /**
-     * Determine whether the user can see the organization's roles.
+     * Determine whether the identity can see roles.
      */
-    public function viewAny(User $user): bool
+    public function viewAny(User|Admin $identity): bool
     {
-        return $this->inOrganization()
-            && $user->can(OrganizationPermission::ViewRoles->value);
+        return $identity instanceof Admin
+            ? $identity->can(SuperPermission::ViewRoles->value)
+            : $this->inOrganization()
+                && $identity->can(OrganizationPermission::ViewRoles->value);
     }
 
     /**
-     * Determine whether the user can create a role.
+     * Determine whether the identity can create a role.
      */
-    public function create(User $user): bool
+    public function create(User|Admin $identity): bool
     {
-        return $this->inOrganization()
-            && $user->can(OrganizationPermission::CreateRoles->value);
+        return $identity instanceof Admin
+            ? $identity->can(SuperPermission::CreateRoles->value)
+            : $this->inOrganization()
+                && $identity->can(OrganizationPermission::CreateRoles->value);
     }
 
     /**
-     * Determine whether the user can update the given role.
+     * Determine whether the identity can update the given role.
      */
-    public function update(User $user, Role $role): bool
+    public function update(User|Admin $identity, Role $role): bool
     {
-        return $this->owns($role)
-            && ! $this->isProtected($role)
-            && $user->can(OrganizationPermission::UpdateRoles->value);
+        return $identity instanceof Admin
+            ? $identity->can(SuperPermission::UpdateRoles->value)
+            : $this->owns($role)
+                && ! $this->isProtected($role)
+                && $identity->can(OrganizationPermission::UpdateRoles->value);
     }
 
     /**
-     * Determine whether the user can delete the given role.
+     * Determine whether the identity can delete the given role.
      */
-    public function delete(User $user, Role $role): bool
+    public function delete(User|Admin $identity, Role $role): bool
     {
-        return $this->owns($role)
-            && ! $this->isProtected($role)
-            && $user->can(OrganizationPermission::DeleteRoles->value);
+        return $identity instanceof Admin
+            ? $identity->can(SuperPermission::DeleteRoles->value)
+            : $this->owns($role)
+                && ! $this->isProtected($role)
+                && $identity->can(OrganizationPermission::DeleteRoles->value);
     }
 
     /**

@@ -13,7 +13,10 @@ use Inertia\Response;
 
 class OrganizationController extends Controller
 {
-    public function __construct(private readonly OrganizationService $organizations) {}
+    public function __construct(private readonly OrganizationService $organizations)
+    {
+        $this->authorizeResource(Organization::class);
+    }
 
     /**
      * Show a listing of the organizations.

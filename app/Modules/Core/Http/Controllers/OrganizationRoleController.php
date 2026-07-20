@@ -12,6 +12,7 @@ use App\Modules\Core\Support\OrganizationRoles;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -27,6 +28,8 @@ class OrganizationRoleController extends Controller
      */
     public function index(Organization $organization): Response
     {
+        Gate::authorize('manageRoles', $organization);
+
         return OrganizationRoles::within($organization, fn (): Response => Inertia::render('super/organizations/roles', [
             'organization' => $organization->only(['id', 'name']),
             'roles' => $this->rolesFor($organization)
@@ -53,6 +56,11 @@ class OrganizationRoleController extends Controller
      */
     public function update(Request $request, Organization $organization, User $user): RedirectResponse
     {
+        Gate::authorize('updateRoles', $user);
+
+        // Scope rather than permission, and 404 rather than 403 on purpose: the
+        // screen only ever lists members, so a user from outside the
+        // organization is not a resource this route has.
         abort_unless($user->belongsToOrganization($organization), 404);
 
         $validated = $request->validate([

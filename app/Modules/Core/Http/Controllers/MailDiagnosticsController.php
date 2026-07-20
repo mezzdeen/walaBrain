@@ -3,10 +3,12 @@
 namespace App\Modules\Core\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Core\Enums\SuperPermission;
 use App\Modules\Core\Models\Admin;
 use App\Modules\Core\Notifications\MailDeliveryCheck;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class MailDiagnosticsController extends Controller
 {
@@ -26,6 +28,11 @@ class MailDiagnosticsController extends Controller
      */
     public function __invoke(Request $request): JsonResponse
     {
+        // An action rather than something done to a model, so it authorizes
+        // against the permission name directly — the permission package
+        // registers every permission as a gate ability.
+        Gate::authorize(SuperPermission::RunDiagnostics->value);
+
         /** @var Admin $admin */
         $admin = $request->user('super');
 

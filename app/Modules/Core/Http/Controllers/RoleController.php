@@ -21,6 +21,11 @@ use Inertia\Response;
  */
 class RoleController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(Role::class);
+    }
+
     /**
      * Show a listing of the platform roles.
      */
@@ -121,6 +126,12 @@ class RoleController extends Controller
     /**
      * Refuse anything that is not a global role of the admin platform, so an
      * organization's roles cannot be reached through these screens.
+     *
+     * Stays here rather than moving into {@see RolePolicy} for two reasons: a
+     * super admin passes every gate through the `Gate::before` bypass, so a
+     * policy could not enforce it against them; and the answer is 404 rather
+     * than 403 on purpose, so these screens do not disclose that the role
+     * exists. The policy answers the permission question, this answers scope.
      */
     private function authorizeManaging(Role $role): void
     {
