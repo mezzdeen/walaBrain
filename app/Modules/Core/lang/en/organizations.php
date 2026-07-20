@@ -46,4 +46,8 @@ return [
     'delete_title' => 'Delete organization',
     'delete_description' => 'Are you sure you want to delete :name? This action cannot be undone.',
 
+    'switch' => 'Switch organization',
+    'switched' => 'You are now working in :name.',
+    'current' => 'Current organization',
+
 ];

@@ -14,6 +14,7 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog';
 import { Spinner } from '@/components/ui/spinner';
+import { useCan } from '@/hooks/use-can';
 import { useTranslations } from '@/hooks/use-translations';
 import {
     create,
@@ -35,6 +36,7 @@ type Props = {
 
 export default function OrganizationsIndex({ organizations }: Props) {
     const { t } = useTranslations();
+    const { can } = useCan();
 
     setLayoutProps({
         breadcrumbs: [{ title: t('core.organizations.title'), href: index() }],
@@ -54,12 +56,14 @@ export default function OrganizationsIndex({ organizations }: Props) {
                             {t('core.organizations.description')}
                         </p>
                     </div>
-                    <Button asChild>
-                        <Link href={create()}>
-                            <Plus className="size-4" />
-                            {t('core.organizations.new')}
-                        </Link>
-                    </Button>
+                    {can('organizations.create') && (
+                        <Button asChild>
+                            <Link href={create()}>
+                                <Plus className="size-4" />
+                                {t('core.organizations.new')}
+                            </Link>
+                        </Button>
+                    )}
                 </div>
 
                 <Card className="overflow-hidden p-0">
@@ -109,27 +113,35 @@ export default function OrganizationsIndex({ organizations }: Props) {
                                             </td>
                                             <td className="px-4 py-3">
                                                 <div className="flex items-center justify-end gap-2">
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        asChild
-                                                    >
-                                                        <Link
-                                                            href={edit(
-                                                                organization.id,
-                                                            )}
+                                                    {can(
+                                                        'organizations.update',
+                                                    ) && (
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            asChild
                                                         >
-                                                            <Pencil className="size-4" />
-                                                            {t(
-                                                                'core.common.edit',
-                                                            )}
-                                                        </Link>
-                                                    </Button>
-                                                    <DeleteOrganization
-                                                        organization={
-                                                            organization
-                                                        }
-                                                    />
+                                                            <Link
+                                                                href={edit(
+                                                                    organization.id,
+                                                                )}
+                                                            >
+                                                                <Pencil className="size-4" />
+                                                                {t(
+                                                                    'core.common.edit',
+                                                                )}
+                                                            </Link>
+                                                        </Button>
+                                                    )}
+                                                    {can(
+                                                        'organizations.delete',
+                                                    ) && (
+                                                        <DeleteOrganization
+                                                            organization={
+                                                                organization
+                                                            }
+                                                        />
+                                                    )}
                                                 </div>
                                             </td>
                                         </tr>

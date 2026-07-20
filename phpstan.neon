@@ -10,4 +10,10 @@ parameters:
         - database/
         - routes/
 
+    # Module tests live under app/ and are analysed, but the global helpers they
+    # call are defined here. Scanned rather than analysed: it makes the symbols
+    # known without reporting on the file itself.
+    scanFiles:
+        - tests/Pest.php
+
     level: 7

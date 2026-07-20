@@ -1,9 +1,11 @@
 import { Head, Link, setLayoutProps } from '@inertiajs/react';
-import { Pencil } from 'lucide-react';
+import { Pencil, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useCan } from '@/hooks/use-can';
 import { useTranslations } from '@/hooks/use-translations';
 import { edit, index } from '@/routes/super/organizations';
+import { index as organizationRoles } from '@/routes/super/organizations/roles';
 
 type OrganizationMember = {
     id: number;
@@ -21,6 +23,7 @@ type Props = {
 
 export default function ShowOrganization({ organization, users }: Props) {
     const { t } = useTranslations();
+    const { can } = useCan();
 
     setLayoutProps({
         breadcrumbs: [
@@ -57,12 +60,22 @@ export default function ShowOrganization({ organization, users }: Props) {
                                 {t('core.organizations.back')}
                             </Link>
                         </Button>
-                        <Button asChild>
-                            <Link href={edit(organization.id)}>
-                                <Pencil className="size-4" />
-                                {t('core.common.edit')}
-                            </Link>
-                        </Button>
+                        {can('organizations.roles.manage') && (
+                            <Button variant="outline" asChild>
+                                <Link href={organizationRoles(organization.id)}>
+                                    <ShieldCheck className="size-4" />
+                                    {t('core.roles.manage_roles')}
+                                </Link>
+                            </Button>
+                        )}
+                        {can('organizations.update') && (
+                            <Button asChild>
+                                <Link href={edit(organization.id)}>
+                                    <Pencil className="size-4" />
+                                    {t('core.common.edit')}
+                                </Link>
+                            </Button>
+                        )}
                     </div>
                 </div>
 

@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Modules\Core\Http\Requests\StoreOrganizationRequest;
 use App\Modules\Core\Http\Requests\UpdateOrganizationRequest;
 use App\Modules\Core\Models\Organization;
+use App\Modules\Core\Support\OrganizationRoles;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -38,7 +40,11 @@ class OrganizationController extends Controller
      */
     public function store(StoreOrganizationRequest $request): RedirectResponse
     {
-        Organization::create($request->validated());
+        // An organization without its roles cannot be administered, so the two
+        // either happen together or not at all.
+        DB::transaction(function () use ($request): void {
+            OrganizationRoles::provision(Organization::create($request->validated()));
+        });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Organization created.')]);
 
