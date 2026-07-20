@@ -1,4 +1,4 @@
-import { Form, Head } from '@inertiajs/react';
+import { Form, Head, setLayoutProps } from '@inertiajs/react';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
 import { Button } from '@/components/ui/button';
@@ -6,12 +6,20 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
+import { useTranslations } from '@/hooks/use-translations';
 import { store } from '@/routes/super/login';
 
 export default function SuperLogin() {
+    const { t } = useTranslations();
+
+    setLayoutProps({
+        title: t('core.auth.admin_platform_title'),
+        description: t('core.auth.admin_platform_description'),
+    });
+
     return (
         <>
-            <Head title="Admin log in" />
+            <Head title={t('core.auth.admin_log_in')} />
 
             <Form
                 {...store.form()}
@@ -21,7 +29,9 @@ export default function SuperLogin() {
                 {({ processing, errors }) => (
                     <div className="grid gap-6">
                         <div className="grid gap-2">
-                            <Label htmlFor="email">Email address</Label>
+                            <Label htmlFor="email">
+                                {t('core.auth.email_address')}
+                            </Label>
                             <Input
                                 id="email"
                                 type="email"
@@ -36,21 +46,29 @@ export default function SuperLogin() {
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="password">Password</Label>
+                            <Label htmlFor="password">
+                                {t('core.auth.password')}
+                            </Label>
                             <PasswordInput
                                 id="password"
                                 name="password"
                                 required
                                 tabIndex={2}
                                 autoComplete="current-password"
-                                placeholder="Password"
+                                placeholder={t('core.auth.password')}
                             />
                             <InputError message={errors.password} />
                         </div>
 
                         <div className="flex items-center space-x-3">
-                            <Checkbox id="remember" name="remember" tabIndex={3} />
-                            <Label htmlFor="remember">Remember me</Label>
+                            <Checkbox
+                                id="remember"
+                                name="remember"
+                                tabIndex={3}
+                            />
+                            <Label htmlFor="remember">
+                                {t('core.auth.remember_me')}
+                            </Label>
                         </div>
 
                         <Button
@@ -61,7 +79,7 @@ export default function SuperLogin() {
                             data-test="super-login-button"
                         >
                             {processing && <Spinner />}
-                            Log in
+                            {t('core.auth.log_in')}
                         </Button>
                     </div>
                 )}
@@ -69,8 +87,3 @@ export default function SuperLogin() {
         </>
     );
 }
-
-SuperLogin.layout = {
-    title: 'Admin platform',
-    description: 'Sign in to the administration console',
-};

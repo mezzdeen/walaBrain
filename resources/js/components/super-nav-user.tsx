@@ -46,7 +46,7 @@ export function SuperNavUser() {
                                     {getInitials(admin.name)}
                                 </AvatarFallback>
                             </Avatar>
-                            <div className="grid flex-1 text-left text-sm leading-tight">
+                            <div className="grid flex-1 text-start text-sm leading-tight">
                                 <span className="truncate font-medium">
                                     {admin.name}
                                 </span>
@@ -54,7 +54,7 @@ export function SuperNavUser() {
                                     {admin.email}
                                 </span>
                             </div>
-                            <ChevronsUpDown className="ml-auto size-4" />
+                            <ChevronsUpDown className="ms-auto size-4" />
                         </SidebarMenuButton>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
@@ -69,7 +69,7 @@ export function SuperNavUser() {
                         }
                     >
                         <DropdownMenuLabel className="p-0 font-normal">
-                            <div className="flex flex-col px-1 py-1.5 text-left text-sm">
+                            <div className="flex flex-col px-1 py-1.5 text-start text-sm">
                                 <span className="truncate font-medium">
                                     {admin.name}
                                 </span>
@@ -87,7 +87,7 @@ export function SuperNavUser() {
                                 onClick={() => router.flushAll()}
                                 data-test="super-logout-button"
                             >
-                                <LogOut className="mr-2" />
+                                <LogOut className="me-2" />
                                 Log out
                             </Link>
                         </DropdownMenuItem>

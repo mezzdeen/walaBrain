@@ -1,12 +1,8 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, setLayoutProps } from '@inertiajs/react';
 import { Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useTranslations } from '@/hooks/use-translations';
 import { edit, index } from '@/routes/super/organizations';
 
 type OrganizationMember = {
@@ -24,6 +20,18 @@ type Props = {
 };
 
 export default function ShowOrganization({ organization, users }: Props) {
+    const { t } = useTranslations();
+
+    setLayoutProps({
+        breadcrumbs: [
+            { title: t('core.organizations.title'), href: index() },
+            {
+                title: t('core.organizations.details_breadcrumb'),
+                href: index(),
+            },
+        ],
+    });
+
     return (
         <>
             <Head title={organization.name} />
@@ -35,17 +43,24 @@ export default function ShowOrganization({ organization, users }: Props) {
                             {organization.name}
                         </h1>
                         <p className="text-sm text-muted-foreground">
-                            {users.length} member{users.length === 1 ? '' : 's'}
+                            {t(
+                                users.length === 1
+                                    ? 'core.organizations.member_count_one'
+                                    : 'core.organizations.member_count_other',
+                                { count: users.length },
+                            )}
                         </p>
                     </div>
                     <div className="flex items-center gap-2">
                         <Button variant="ghost" asChild>
-                            <Link href={index()}>Back</Link>
+                            <Link href={index()}>
+                                {t('core.organizations.back')}
+                            </Link>
                         </Button>
                         <Button asChild>
                             <Link href={edit(organization.id)}>
                                 <Pencil className="size-4" />
-                                Edit
+                                {t('core.common.edit')}
                             </Link>
                         </Button>
                     </div>
@@ -53,23 +68,23 @@ export default function ShowOrganization({ organization, users }: Props) {
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Members</CardTitle>
+                        <CardTitle>{t('core.organizations.members')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         {users.length === 0 ? (
                             <p className="text-sm text-muted-foreground">
-                                No members linked to this organization yet.
+                                {t('core.organizations.no_members')}
                             </p>
                         ) : (
                             <div className="overflow-x-auto">
                                 <table className="w-full text-sm">
                                     <thead>
-                                        <tr className="border-b text-left text-muted-foreground">
+                                        <tr className="border-b text-start text-muted-foreground">
                                             <th className="px-4 py-3 font-medium">
-                                                Name
+                                                {t('core.organizations.name')}
                                             </th>
                                             <th className="px-4 py-3 font-medium">
-                                                Email
+                                                {t('core.organizations.email')}
                                             </th>
                                         </tr>
                                     </thead>
@@ -97,10 +112,3 @@ export default function ShowOrganization({ organization, users }: Props) {
         </>
     );
 }
-
-ShowOrganization.layout = {
-    breadcrumbs: [
-        { title: 'Organizations', href: index() },
-        { title: 'Details', href: index() },
-    ],
-};

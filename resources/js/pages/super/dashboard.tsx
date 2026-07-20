@@ -1,11 +1,23 @@
-import { Head } from '@inertiajs/react';
+import { Head, setLayoutProps } from '@inertiajs/react';
 import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
+import { useTranslations } from '@/hooks/use-translations';
 import { dashboard } from '@/routes/super';
 
 export default function SuperDashboard() {
+    const { t } = useTranslations();
+
+    setLayoutProps({
+        breadcrumbs: [
+            {
+                title: t('core.nav.dashboard'),
+                href: dashboard(),
+            },
+        ],
+    });
+
     return (
         <>
-            <Head title="Admin dashboard" />
+            <Head title={t('core.nav.admin_dashboard')} />
 
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div className="grid auto-rows-min gap-4 md:grid-cols-3">
@@ -25,12 +37,3 @@ export default function SuperDashboard() {
         </>
     );
 }
-
-SuperDashboard.layout = {
-    breadcrumbs: [
-        {
-            title: 'Dashboard',
-            href: dashboard(),
-        },
-    ],
-};

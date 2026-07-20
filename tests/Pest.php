@@ -16,7 +16,20 @@ use Tests\TestCase;
 
 pest()->extend(TestCase::class)
     ->use(RefreshDatabase::class)
-    ->in('Feature', __DIR__.'/../app/Modules');
+    ->in('Feature', 'Browser', __DIR__.'/../app/Modules');
+
+/*
+|--------------------------------------------------------------------------
+| Browser Testing
+|--------------------------------------------------------------------------
+|
+| Browser tests boot the compiled front-end in a real browser, so they wait
+| a little longer than the default to let Inertia hydrate and the full page
+| reloads that follow a locale change settle.
+|
+*/
+
+pest()->browser()->timeout(10000);
 
 /*
 |--------------------------------------------------------------------------

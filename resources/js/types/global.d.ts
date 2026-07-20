@@ -1,3 +1,4 @@
+import type { Direction } from '@/hooks/use-translations';
 import type { Auth } from '@/types/auth';
 
 declare module 'react' {
@@ -13,6 +14,10 @@ declare module '@inertiajs/core' {
             name: string;
             auth: Auth;
             sidebarOpen: boolean;
+            locale: string;
+            direction: Direction;
+            supportedLocales: readonly string[];
+            translations: Record<string, unknown>;
             [key: string]: unknown;
         };
     }

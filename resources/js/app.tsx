@@ -1,4 +1,5 @@
 import { createInertiaApp } from '@inertiajs/react';
+import { DirectionProvider } from '@radix-ui/react-direction';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { initializeTheme } from '@/hooks/use-appearance';
@@ -28,12 +29,17 @@ createInertiaApp({
         }
     },
     strictMode: true,
-    withApp(app) {
+    // Radix reads the direction from context rather than the document, and the
+    // page is handed to us here so it stays identical on the server and during
+    // hydration. A language switch reloads the page, so this never goes stale.
+    withApp(app, { page }) {
         return (
-            <TooltipProvider delayDuration={0}>
-                {app}
-                <Toaster />
-            </TooltipProvider>
+            <DirectionProvider dir={page.props.direction}>
+                <TooltipProvider delayDuration={0}>
+                    {app}
+                    <Toaster />
+                </TooltipProvider>
+            </DirectionProvider>
         );
     },
     progress: {

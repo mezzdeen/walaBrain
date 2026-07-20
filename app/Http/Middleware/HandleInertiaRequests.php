@@ -2,7 +2,10 @@
 
 namespace App\Http\Middleware;
 
+use App\Modules\Core\Support\Locale;
+use App\Modules\Core\Support\Translations;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -43,6 +46,15 @@ class HandleInertiaRequests extends Middleware
                 'admin' => $request->user('super'),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'locale' => app()->getLocale(),
+            'direction' => Locale::direction(app()->getLocale()),
+            'supportedLocales' => Locale::SUPPORTED,
+            // Sent on the initial load only, never on subsequent visits. The
+            // key changes with the locale and the translation version, so a
+            // language switch or an edited lang file re-sends the dictionary.
+            'translations' => Inertia::once(
+                fn (): array => Translations::for(app()->getLocale()),
+            )->as('translations.'.app()->getLocale().'.'.Locale::version()),
         ];
     }
 }

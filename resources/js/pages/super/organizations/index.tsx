@@ -1,4 +1,4 @@
-import { Form, Head, Link } from '@inertiajs/react';
+import { Form, Head, Link, setLayoutProps } from '@inertiajs/react';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -14,7 +14,14 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog';
 import { Spinner } from '@/components/ui/spinner';
-import { create, destroy, edit, index, show } from '@/routes/super/organizations';
+import { useTranslations } from '@/hooks/use-translations';
+import {
+    create,
+    destroy,
+    edit,
+    index,
+    show,
+} from '@/routes/super/organizations';
 
 type OrganizationRow = {
     id: number;
@@ -27,22 +34,30 @@ type Props = {
 };
 
 export default function OrganizationsIndex({ organizations }: Props) {
+    const { t } = useTranslations();
+
+    setLayoutProps({
+        breadcrumbs: [{ title: t('core.organizations.title'), href: index() }],
+    });
+
     return (
         <>
-            <Head title="Organizations" />
+            <Head title={t('core.organizations.title')} />
 
             <div className="flex h-full flex-1 flex-col gap-4 p-4">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-xl font-semibold">Organizations</h1>
+                        <h1 className="text-xl font-semibold">
+                            {t('core.organizations.title')}
+                        </h1>
                         <p className="text-sm text-muted-foreground">
-                            Manage the companies on the platform.
+                            {t('core.organizations.description')}
                         </p>
                     </div>
                     <Button asChild>
                         <Link href={create()}>
                             <Plus className="size-4" />
-                            New organization
+                            {t('core.organizations.new')}
                         </Link>
                     </Button>
                 </div>
@@ -51,25 +66,25 @@ export default function OrganizationsIndex({ organizations }: Props) {
                     {organizations.length === 0 ? (
                         <div className="flex flex-col items-center gap-2 p-12 text-center">
                             <p className="text-sm font-medium">
-                                No organizations yet
+                                {t('core.organizations.empty_title')}
                             </p>
                             <p className="text-sm text-muted-foreground">
-                                Create your first organization to get started.
+                                {t('core.organizations.empty_description')}
                             </p>
                         </div>
                     ) : (
                         <div className="overflow-x-auto">
                             <table className="w-full text-sm">
                                 <thead>
-                                    <tr className="border-b text-left text-muted-foreground">
+                                    <tr className="border-b text-start text-muted-foreground">
                                         <th className="px-4 py-3 font-medium">
-                                            Name
+                                            {t('core.organizations.name')}
                                         </th>
                                         <th className="px-4 py-3 font-medium">
-                                            Users
+                                            {t('core.organizations.users')}
                                         </th>
-                                        <th className="px-4 py-3 text-right font-medium">
-                                            Actions
+                                        <th className="px-4 py-3 text-end font-medium">
+                                            {t('core.organizations.actions')}
                                         </th>
                                     </tr>
                                 </thead>
@@ -105,7 +120,9 @@ export default function OrganizationsIndex({ organizations }: Props) {
                                                             )}
                                                         >
                                                             <Pencil className="size-4" />
-                                                            Edit
+                                                            {t(
+                                                                'core.common.edit',
+                                                            )}
                                                         </Link>
                                                     </Button>
                                                     <DeleteOrganization
@@ -132,6 +149,8 @@ function DeleteOrganization({
 }: {
     organization: OrganizationRow;
 }) {
+    const { t } = useTranslations();
+
     return (
         <Dialog>
             <DialogTrigger asChild>
@@ -141,16 +160,18 @@ function DeleteOrganization({
                     className="text-destructive hover:text-destructive"
                 >
                     <Trash2 className="size-4" />
-                    Delete
+                    {t('core.common.delete')}
                 </Button>
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Delete organization</DialogTitle>
+                    <DialogTitle>
+                        {t('core.organizations.delete_title')}
+                    </DialogTitle>
                     <DialogDescription>
-                        Are you sure you want to delete{' '}
-                        <span className="font-medium">{organization.name}</span>?
-                        This action cannot be undone.
+                        {t('core.organizations.delete_description', {
+                            name: organization.name,
+                        })}
                     </DialogDescription>
                 </DialogHeader>
                 <Form {...destroy.form(organization.id)}>
@@ -158,7 +179,7 @@ function DeleteOrganization({
                         <DialogFooter className="gap-2">
                             <DialogClose asChild>
                                 <Button variant="secondary" type="button">
-                                    Cancel
+                                    {t('core.common.cancel')}
                                 </Button>
                             </DialogClose>
                             <Button
@@ -167,7 +188,7 @@ function DeleteOrganization({
                                 disabled={processing}
                             >
                                 {processing && <Spinner />}
-                                Delete
+                                {t('core.common.delete')}
                             </Button>
                         </DialogFooter>
                     )}
@@ -176,7 +197,3 @@ function DeleteOrganization({
         </Dialog>
     );
 }
-
-OrganizationsIndex.layout = {
-    breadcrumbs: [{ title: 'Organizations', href: index() }],
-};

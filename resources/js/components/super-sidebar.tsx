@@ -12,24 +12,27 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import { useTranslations } from '@/hooks/use-translations';
 import { dashboard } from '@/routes/super';
 import { index as organizationsIndex } from '@/routes/super/organizations';
 import type { NavItem } from '@/types';
 
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
-    },
-    {
-        title: 'Organizations',
-        href: organizationsIndex(),
-        icon: Building2,
-    },
-];
-
 export function SuperSidebar() {
+    const { t } = useTranslations();
+
+    const mainNavItems: NavItem[] = [
+        {
+            title: t('core.nav.dashboard'),
+            href: dashboard(),
+            icon: LayoutGrid,
+        },
+        {
+            title: t('core.organizations.title'),
+            href: organizationsIndex(),
+            icon: Building2,
+        },
+    ];
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
