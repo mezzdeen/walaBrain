@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Concerns;
+namespace App\Modules\Core\Concerns;
 
 use App\Modules\Core\Models\User;
 use Illuminate\Contracts\Validation\ValidationRule;

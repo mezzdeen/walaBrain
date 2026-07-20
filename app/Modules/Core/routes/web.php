@@ -3,6 +3,9 @@
 use App\Modules\Core\Http\Controllers\InvitationController;
 use App\Modules\Core\Http\Controllers\OrganizationSwitchController;
 use App\Modules\Core\Http\Controllers\Settings\OrganizationRoleSettingsController;
+use App\Modules\Core\Http\Controllers\Settings\ProfileController;
+use App\Modules\Core\Http\Controllers\Settings\SecurityController;
+use Illuminate\Auth\Middleware\RequirePassword;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -33,6 +36,11 @@ Route::middleware(['web', 'auth:web'])->group(function () {
     Route::put('organizations/{organization}/switch', [OrganizationSwitchController::class, 'update'])
         ->name('organizations.switch');
 
+    Route::redirect('settings', '/settings/profile');
+
+    Route::get('settings/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('settings/profile', [ProfileController::class, 'update'])->name('profile.update');
+
     // Authorized by RolePolicy rather than the `permission:` middleware: holding
     // the permission is only half of it, the role also has to belong to the
     // organization the request is acting on.
@@ -43,3 +51,28 @@ Route::middleware(['web', 'auth:web'])->group(function () {
         Route::delete('settings/roles/{role}', [OrganizationRoleSettingsController::class, 'destroy'])->name('roles.destroy');
     });
 });
+
+// Closing an account and changing credentials are held to a verified address:
+// the address is what a password reset and every security notice go to.
+Route::middleware(['web', 'auth:web', 'verified'])->group(function () {
+    Route::delete('settings/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::get('settings/security', [SecurityController::class, 'edit'])
+        ->middleware(RequirePassword::class)
+        ->name('security.edit');
+
+    Route::put('settings/password', [SecurityController::class, 'update'])
+        ->middleware('throttle:6,1')
+        ->name('user-password.update');
+
+    Route::inertia('settings/appearance', 'settings/appearance')->name('appearance.edit');
+});
+
+// Advertises where passkeys are enrolled and managed, for password managers
+// that look it up. Unauthenticated on purpose: it only ever returns a URL.
+Route::middleware('web')->get('.well-known/passkey-endpoints', function () {
+    return response()->json([
+        'enroll' => route('security.edit'),
+        'manage' => route('security.edit'),
+    ]);
+})->name('well-known.passkeys');
