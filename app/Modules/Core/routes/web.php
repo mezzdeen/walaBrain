@@ -1,5 +1,6 @@
 <?php
 
+use App\Modules\Core\Http\Controllers\InvitationController;
 use App\Modules\Core\Http\Controllers\OrganizationSwitchController;
 use App\Modules\Core\Http\Controllers\Settings\OrganizationRoleSettingsController;
 use Illuminate\Support\Facades\Route;
@@ -14,6 +15,15 @@ use Illuminate\Support\Facades\Route;
 | middleware has to be declared here rather than inherited.
 |
 */
+
+// With self-registration switched off, an invitation link is the only way into
+// the application, so these have to be reachable while signed out.
+Route::middleware(['web', 'guest'])->group(function () {
+    Route::get('invitations/{token}', [InvitationController::class, 'show'])->name('invitations.show');
+    Route::post('invitations/{token}', [InvitationController::class, 'store'])
+        ->middleware('throttle:10,1')
+        ->name('invitations.store');
+});
 
 Route::middleware(['web', 'auth'])->group(function () {
     Route::put('organizations/{organization}/switch', [OrganizationSwitchController::class, 'update'])

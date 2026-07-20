@@ -1,7 +1,14 @@
 import { Form, Head, Link, setLayoutProps } from '@inertiajs/react';
 import InputError from '@/components/input-error';
+import { OwnerEmailCombobox } from '@/components/owner-email-combobox';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
@@ -32,15 +39,15 @@ export default function CreateOrganization() {
                     </p>
                 </div>
 
-                <Card className="max-w-xl">
-                    <CardContent>
-                        <Form
-                            {...store.form()}
-                            resetOnSuccess
-                            className="flex flex-col gap-6"
-                        >
-                            {({ processing, errors }) => (
-                                <>
+                <Form
+                    {...store.form()}
+                    resetOnSuccess
+                    className="flex max-w-xl flex-col gap-4"
+                >
+                    {({ processing, errors }) => (
+                        <>
+                            <Card>
+                                <CardContent>
                                     <div className="grid gap-2">
                                         <Label htmlFor="name">
                                             {t('core.organizations.name')}
@@ -56,28 +63,42 @@ export default function CreateOrganization() {
                                         />
                                         <InputError message={errors.name} />
                                     </div>
+                                </CardContent>
+                            </Card>
 
-                                    <div className="flex items-center gap-3">
-                                        <Button
-                                            type="submit"
-                                            disabled={processing}
-                                        >
-                                            {processing && <Spinner />}
-                                            {t(
-                                                'core.organizations.create_action',
-                                            )}
-                                        </Button>
-                                        <Button variant="ghost" asChild>
-                                            <Link href={index()}>
-                                                {t('core.common.cancel')}
-                                            </Link>
-                                        </Button>
-                                    </div>
-                                </>
-                            )}
-                        </Form>
-                    </CardContent>
-                </Card>
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>
+                                        {t('core.organizations.owner_title')}
+                                    </CardTitle>
+                                    <CardDescription>
+                                        {t(
+                                            'core.organizations.owner_description',
+                                        )}
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <OwnerEmailCombobox
+                                        name="owner_email"
+                                        error={errors.owner_email}
+                                    />
+                                </CardContent>
+                            </Card>
+
+                            <div className="flex items-center gap-3">
+                                <Button type="submit" disabled={processing}>
+                                    {processing && <Spinner />}
+                                    {t('core.organizations.create_action')}
+                                </Button>
+                                <Button variant="ghost" asChild>
+                                    <Link href={index()}>
+                                        {t('core.common.cancel')}
+                                    </Link>
+                                </Button>
+                            </div>
+                        </>
+                    )}
+                </Form>
             </div>
         </>
     );

@@ -9,7 +9,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { useTranslations } from '@/hooks/use-translations';
-import { register } from '@/routes';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
 
@@ -106,12 +105,6 @@ export default function Login({ status, canResetPassword }: Props) {
                             </Button>
                         </div>
 
-                        <div className="text-center text-sm text-muted-foreground">
-                            {t('core.auth.no_account')}{' '}
-                            <TextLink href={register()} tabIndex={5}>
-                                {t('core.auth.sign_up')}
-                            </TextLink>
-                        </div>
                     </>
                 )}
             </Form>

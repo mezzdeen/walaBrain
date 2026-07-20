@@ -128,6 +128,6 @@ test('the guest pages render without javascript errors', function () {
     visit([
         route('home', absolute: false),
         route('login', absolute: false),
-        route('register', absolute: false),
+        route('password.request', absolute: false),
     ])->assertNoJavaScriptErrors();
 });

@@ -50,4 +50,20 @@ return [
     'switched' => 'You are now working in :name.',
     'current' => 'Current organization',
 
+    'created_with_owner' => 'Organization created. :email has been added as its owner.',
+    'created_with_invitation' => 'Organization created. An invitation has been sent to :email.',
+    'updated' => 'Organization updated.',
+    'deleted' => 'Organization deleted.',
+
+    'owner_title' => 'Owner',
+    'owner_description' => 'Every organization needs an owner. Start typing an email address to find an existing user, or enter a new one to send an invitation.',
+    'owner_email' => 'Owner email',
+    'owner_email_placeholder' => 'name@example.com',
+    'owner_searching' => 'Searching…',
+    'owner_no_results' => 'No account uses this address yet.',
+    'owner_will_be_invited' => 'An invitation to own this organization will be sent to this address.',
+    'owner_will_be_added' => 'This user will be made the owner as soon as the organization is created.',
+    'owner_independent' => 'Their access to any other organization is unaffected.',
+    'owner_clear' => 'Choose someone else',
+
 ];

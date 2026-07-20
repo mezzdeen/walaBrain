@@ -4,6 +4,7 @@ namespace App\Modules\Core\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Modules\Core\Database\Factories\UserFactory;
+use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Collection;
@@ -37,7 +38,7 @@ use Spatie\Permission\Traits\HasRoles;
  */
 #[Fillable(['name', 'email', 'password', 'locale'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
-class User extends Authenticatable implements PasskeyUser
+class User extends Authenticatable implements HasLocalePreference, PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, HasRoles, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
@@ -64,6 +65,17 @@ class User extends Authenticatable implements PasskeyUser
     public function organizations(): BelongsToMany
     {
         return $this->belongsToMany(Organization::class)->withTimestamps();
+    }
+
+    /**
+     * The locale queued notifications should be rendered in.
+     *
+     * Returning null leaves Laravel on the application locale, which is the
+     * right fallback for a user who has never chosen one.
+     */
+    public function preferredLocale(): ?string
+    {
+        return $this->locale;
     }
 
     /**

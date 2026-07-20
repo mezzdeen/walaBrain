@@ -6,24 +6,22 @@ use App\Http\Controllers\Controller;
 use App\Modules\Core\Http\Requests\StoreOrganizationRequest;
 use App\Modules\Core\Http\Requests\UpdateOrganizationRequest;
 use App\Modules\Core\Models\Organization;
-use App\Modules\Core\Support\OrganizationRoles;
+use App\Modules\Core\Services\OrganizationService;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class OrganizationController extends Controller
 {
+    public function __construct(private readonly OrganizationService $organizations) {}
+
     /**
      * Show a listing of the organizations.
      */
     public function index(): Response
     {
         return Inertia::render('super/organizations/index', [
-            'organizations' => Organization::query()
-                ->withCount('users')
-                ->latest()
-                ->get(['id', 'name', 'created_at']),
+            'organizations' => $this->organizations->listing(),
         ]);
     }
 
@@ -36,17 +34,24 @@ class OrganizationController extends Controller
     }
 
     /**
-     * Store a newly created organization.
+     * Store a newly created organization and settle its ownership.
      */
     public function store(StoreOrganizationRequest $request): RedirectResponse
     {
-        // An organization without its roles cannot be administered, so the two
-        // either happen together or not at all.
-        DB::transaction(function () use ($request): void {
-            OrganizationRoles::provision(Organization::create($request->validated()));
-        });
+        $email = $request->validated('owner_email');
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => __('Organization created.')]);
+        $result = $this->organizations->create(
+            $request->validated('name'),
+            $email,
+            $request->user('super'),
+        );
+
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => $result->ownerWasAttached()
+                ? __('core::organizations.created_with_owner', ['email' => $email])
+                : __('core::organizations.created_with_invitation', ['email' => $email]),
+        ]);
 
         return to_route('super.organizations.index');
     }
@@ -58,7 +63,7 @@ class OrganizationController extends Controller
     {
         return Inertia::render('super/organizations/show', [
             'organization' => $organization,
-            'users' => $organization->users()->get(['users.id', 'name', 'email']),
+            'users' => $this->organizations->members($organization),
         ]);
     }
 
@@ -77,9 +82,9 @@ class OrganizationController extends Controller
      */
     public function update(UpdateOrganizationRequest $request, Organization $organization): RedirectResponse
     {
-        $organization->update($request->validated());
+        $this->organizations->update($organization, $request->validated('name'));
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => __('Organization updated.')]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('core::organizations.updated')]);
 
         return to_route('super.organizations.index');
     }
@@ -89,9 +94,9 @@ class OrganizationController extends Controller
      */
     public function destroy(Organization $organization): RedirectResponse
     {
-        $organization->delete();
+        $this->organizations->delete($organization);
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => __('Organization deleted.')]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('core::organizations.deleted')]);
 
         return to_route('super.organizations.index');
     }

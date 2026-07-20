@@ -5,6 +5,7 @@ use App\Modules\Core\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Modules\Core\Http\Controllers\OrganizationController;
 use App\Modules\Core\Http\Controllers\OrganizationRoleController;
 use App\Modules\Core\Http\Controllers\RoleController;
+use App\Modules\Core\Http\Controllers\UserSearchController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -39,6 +40,16 @@ Route::middleware('web')->prefix('super')->name('super.')->group(function () {
             ->middlewareFor(['create', 'store'], 'permission:'.SuperPermission::CreateOrganizations->value.',super')
             ->middlewareFor(['edit', 'update'], 'permission:'.SuperPermission::UpdateOrganizations->value.',super')
             ->middlewareFor('destroy', 'permission:'.SuperPermission::DeleteOrganizations->value.',super');
+
+        // Backs the owner field on the organization create form. Gated on the
+        // same permission as creating an organization rather than one of its
+        // own, so it cannot become a general user directory.
+        Route::get('users/search', UserSearchController::class)
+            ->middleware([
+                'permission:'.SuperPermission::CreateOrganizations->value.',super',
+                'throttle:30,1',
+            ])
+            ->name('users.search');
 
         Route::middleware('permission:'.SuperPermission::ManageOrganizationRoles->value.',super')->group(function () {
             Route::get('organizations/{organization}/roles', [OrganizationRoleController::class, 'index'])
