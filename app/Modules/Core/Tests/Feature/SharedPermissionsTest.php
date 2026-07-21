@@ -105,8 +105,10 @@ test('the organizations prop carries no pivot data', function () {
 test('a user with no organization is given no permissions', function () {
     $user = User::factory()->create();
 
+    // The notice page rather than the dashboard: the dashboard now bounces a
+    // user with no organization, and this is the screen they land on.
     $this->actingAs($user)
-        ->get(route('dashboard'))
+        ->get(route('organizations.none'))
         ->assertInertia(fn (Assert $page) => $page
             ->where('permissions', [])
             ->where('organization', null)

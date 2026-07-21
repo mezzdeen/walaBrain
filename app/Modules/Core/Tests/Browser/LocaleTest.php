@@ -1,5 +1,6 @@
 <?php
 
+use App\Modules\Core\Models\Organization;
 use App\Modules\Core\Models\User;
 
 /*
@@ -25,6 +26,19 @@ function appearancePage(): string
 function dashboardPage(): string
 {
     return route('dashboard', absolute: false);
+}
+
+/**
+ * A signed-in user who can actually reach the application shell.
+ *
+ * The dashboard turns away anyone with no organization, and the notice they
+ * land on carries the same two switchers — so a bare user would leave these
+ * tests passing against a screen they are not about.
+ */
+function memberWithLocale(?string $locale): User
+{
+    return tap(memberOf(Organization::factory()->create()))
+        ->update(['locale' => $locale]);
 }
 
 test('the interface is rendered left to right in english by default', function () {
@@ -94,7 +108,7 @@ test('the chosen language survives a later visit and is stored on the user', fun
 });
 
 test('the arabic dictionary reaches the client and labels the switcher', function () {
-    $this->actingAs(User::factory()->create(['locale' => 'ar']));
+    $this->actingAs(memberWithLocale('ar'));
 
     visit(dashboardPage())
         ->click('@language-switcher')
@@ -104,7 +118,7 @@ test('the arabic dictionary reaches the client and labels the switcher', functio
 });
 
 test('the appearance switcher applies the dark theme', function () {
-    $this->actingAs(User::factory()->create());
+    $this->actingAs(memberWithLocale(null));
 
     visit(dashboardPage())
         ->click('@appearance-switcher')
@@ -114,7 +128,7 @@ test('the appearance switcher applies the dark theme', function () {
 });
 
 test('the signed in pages render without javascript errors in arabic', function () {
-    $this->actingAs(User::factory()->create(['locale' => 'ar']));
+    $this->actingAs(memberWithLocale('ar'));
 
     visit([
         dashboardPage(),

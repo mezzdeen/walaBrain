@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Actions\Fortify;
+namespace App\Modules\Core\Actions\Fortify;
 
 use App\Modules\Core\Concerns\PasswordValidationRules;
 use App\Modules\Core\Models\User;

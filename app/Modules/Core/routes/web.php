@@ -5,8 +5,10 @@ use App\Modules\Core\Http\Controllers\OrganizationSwitchController;
 use App\Modules\Core\Http\Controllers\Settings\OrganizationRoleSettingsController;
 use App\Modules\Core\Http\Controllers\Settings\ProfileController;
 use App\Modules\Core\Http\Controllers\Settings\SecurityController;
+use App\Modules\Core\Support\OrganizationContext;
 use Illuminate\Auth\Middleware\RequirePassword;
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,6 +38,15 @@ Route::middleware(['web', 'auth:web'])->group(function () {
     Route::put('organizations/{organization}/switch', [OrganizationSwitchController::class, 'update'])
         ->name('organizations.switch');
 
+    // Deliberately outside the `organization` middleware: this is the page it
+    // redirects to. Bounced the other way for anyone who does have one, so it
+    // cannot become a dead end someone reaches by bookmark.
+    Route::get('no-organization', function () {
+        return OrganizationContext::current() !== null
+            ? to_route('dashboard')
+            : Inertia::render('no-organization');
+    })->name('organizations.none');
+
     Route::redirect('settings', '/settings/profile');
 
     Route::get('settings/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -44,7 +55,7 @@ Route::middleware(['web', 'auth:web'])->group(function () {
     // Authorized by RolePolicy rather than the `permission:` middleware: holding
     // the permission is only half of it, the role also has to belong to the
     // organization the request is acting on.
-    Route::name('settings.')->group(function () {
+    Route::middleware('organization')->name('settings.')->group(function () {
         Route::get('settings/roles', [OrganizationRoleSettingsController::class, 'index'])->name('roles.index');
         Route::post('settings/roles', [OrganizationRoleSettingsController::class, 'store'])->name('roles.store');
         Route::put('settings/roles/{role}', [OrganizationRoleSettingsController::class, 'update'])->name('roles.update');

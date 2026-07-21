@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Middleware;
+namespace App\Modules\Core\Http\Middleware;
 
 use App\Modules\Core\Models\User;
 use App\Modules\Core\Support\OrganizationContext;
@@ -28,10 +28,12 @@ class SetOrganizationContext
         // both at once — a super admin who is also a company user must not
         // inherit that user's organization while administering the platform.
         if ($request->is('super', 'super/*')) {
-            // Cleared first: the context is static, so a company request
-            // earlier in the same process would otherwise hand this one an
-            // organization that belongs to a different user entirely.
-            OrganizationContext::clear();
+            // Opened up rather than merely cleared: the context is static, so a
+            // company request earlier in the same process would otherwise hand
+            // this one an organization belonging to a different user entirely.
+            // The admin platform administers organizations instead of acting
+            // inside one, so it reads across all of them by design.
+            OrganizationContext::useGlobal();
             setPermissionsTeamId(PermissionTeam::SUPER);
             $this->forgetLoadedRoles($request->user('super'));
 

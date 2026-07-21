@@ -27,6 +27,10 @@ class OrganizationSwitchController extends Controller
             'message' => __('core::organizations.switched', ['name' => $organization->name]),
         ]);
 
-        return back();
+        // Not `back()`: the page the switch was made from may address a record
+        // of the organization just left, which after the switch is at best a
+        // 404 and at worst another organization's data on screen. The dashboard
+        // is the one page guaranteed to mean something in every organization.
+        return to_route('dashboard');
     }
 }

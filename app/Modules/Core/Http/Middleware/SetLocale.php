@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Middleware;
+namespace App\Modules\Core\Http\Middleware;
 
 use App\Modules\Core\Models\Admin;
 use App\Modules\Core\Models\User;

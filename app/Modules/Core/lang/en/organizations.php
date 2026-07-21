@@ -50,6 +50,9 @@ return [
     'switched' => 'You are now working in :name.',
     'current' => 'Current organization',
 
+    'none_title' => 'No organization yet',
+    'none_description' => 'Your account is not linked to an organization. Ask an administrator to invite you, or sign out to use a different account.',
+
     'created_with_owner' => 'Organization created. :email has been added as its owner.',
     'created_with_invitation' => 'Organization created. An invitation has been sent to :email.',
     'updated' => 'Organization updated.',

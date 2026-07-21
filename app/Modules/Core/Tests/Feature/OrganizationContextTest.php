@@ -49,7 +49,9 @@ test('a session organization is discarded once membership is revoked', function 
 test('a user with no organizations has no permission team', function () {
     $user = User::factory()->create();
 
-    $this->actingAs($user)->get(route('dashboard'))->assertOk();
+    $this->actingAs($user)
+        ->get(route('organizations.none'))
+        ->assertOk();
 
     expect(getPermissionsTeamId())->toBeNull();
 });
@@ -65,9 +67,12 @@ test('a user can switch to another of their organizations', function () {
     $user = User::factory()->create();
     $user->organizations()->attach([$first->id, $second->id]);
 
+    // Switched from somewhere other than the dashboard, so the assertion below
+    // proves the redirect rather than merely echoing where the request came
+    // from — which is all it would prove if this were `back()`.
     $this->actingAs($user)
         ->withSession([OrganizationContext::SESSION_KEY => $first->id])
-        ->from(route('dashboard'))
+        ->from(route('profile.edit'))
         ->put(route('organizations.switch', $second))
         ->assertRedirect(route('dashboard'));
 

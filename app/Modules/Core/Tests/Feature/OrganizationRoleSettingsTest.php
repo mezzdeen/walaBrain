@@ -47,10 +47,12 @@ test('a member can not view the roles', function () {
         ->assertForbidden();
 });
 
-test('a user with no organization can not view the roles', function () {
+// Sent away rather than refused: with no organization there is no set of roles
+// this screen could even be about, so the explanation is more use than a 403.
+test('a user with no organization is sent away from the roles', function () {
     $this->actingAs(User::factory()->create())
         ->get(route('settings.roles.index'))
-        ->assertForbidden();
+        ->assertRedirect(route('organizations.none'));
 });
 
 test('an owner can create a role for their organization', function () {

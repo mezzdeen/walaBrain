@@ -2,8 +2,8 @@
 
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
-use App\Http\Middleware\SetLocale;
-use App\Http\Middleware\SetOrganizationContext;
+use App\Modules\Core\Http\Middleware\SetLocale;
+use App\Modules\Core\Http\Middleware\SetOrganizationContext;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -25,6 +25,8 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Spatie's service provider registers Blade directives and commands but
         // not the middleware aliases, so they have to be declared here.
+        // The `organization` alias is not here: it belongs to the Core module,
+        // which registers it alongside its own routes and policies.
         $middleware->alias([
             'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class,
