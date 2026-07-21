@@ -30,6 +30,13 @@
             }
         </style>
 
+        {{-- The active organization's brand colour, written here so the first
+             paint is already branded. Empty for the admin platform, for a
+             signed-out visitor, and for an organization that has chosen none.
+             Unescaped on purpose: this is CSS built by BrandColor from a
+             validated hex value, never free text. --}}
+        <style id="brand-color">{!! $brandColorCss ?? '' !!}</style>
+
         <link rel="icon" href="/favicon.ico" sizes="any">
         <link rel="icon" href="/favicon.svg" type="image/svg+xml">
         <link rel="apple-touch-icon" href="/apple-touch-icon.png">

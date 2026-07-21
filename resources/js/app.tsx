@@ -7,6 +7,7 @@ import AppLayout from '@/layouts/app-layout';
 import AuthLayout from '@/layouts/auth-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import SuperLayout from '@/layouts/super-layout';
+import { initializeBrandColor } from '@/lib/brand-color';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -49,3 +50,7 @@ createInertiaApp({
 
 // This will set light / dark mode on load...
 initializeTheme();
+
+// Keeps the organization's brand colour in step across visits. The root view
+// has already applied it for this page; this is what carries it to the next.
+initializeBrandColor();

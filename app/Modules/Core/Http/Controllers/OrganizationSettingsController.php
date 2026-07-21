@@ -42,7 +42,7 @@ class OrganizationSettingsController extends Controller
         Gate::authorize('update', $organization);
 
         return Inertia::render('organization', [
-            'organization' => $organization->only(['id', 'name']),
+            'organization' => $organization->only(['id', 'name', 'color']),
         ]);
     }
 

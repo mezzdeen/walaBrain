@@ -1,5 +1,6 @@
 import { Form, Head, setLayoutProps } from '@inertiajs/react';
 import OrganizationSettingsController from '@/actions/App/Modules/Core/Http/Controllers/OrganizationSettingsController';
+import { BrandColorPicker } from '@/components/brand-color-picker';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -10,10 +11,18 @@ import { useTranslations } from '@/hooks/use-translations';
 import { edit } from '@/routes/organization';
 import type { OrganizationSummary } from '@/types/organization';
 
+/**
+ * Richer than the shared `organization` prop, which carries only what the
+ * sidebar needs. The colour is edited here and nowhere else.
+ */
+type EditableOrganization = OrganizationSummary & {
+    color: string | null;
+};
+
 export default function Organization({
     organization,
 }: {
-    organization: OrganizationSummary;
+    organization: EditableOrganization;
 }) {
     const { t } = useTranslations();
 
@@ -66,6 +75,14 @@ export default function Organization({
                                         />
 
                                         <InputError message={errors.name} />
+                                    </div>
+
+                                    <div className="grid gap-2">
+                                        <BrandColorPicker
+                                            value={organization.color}
+                                        />
+
+                                        <InputError message={errors.color} />
                                     </div>
 
                                     <div className="flex items-center gap-3">

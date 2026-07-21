@@ -34,6 +34,10 @@ return [
 
     'name' => 'Name',
     'name_placeholder' => 'Acme Inc',
+    'color' => 'Organization colour',
+    'color_description' => 'This becomes the primary colour of the application for everyone working in this organization.',
+    'color_default' => 'Default',
+    'color_custom' => 'Custom colour',
     'users' => 'Users',
     'actions' => 'Actions',
     'email' => 'Email',

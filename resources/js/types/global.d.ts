@@ -22,6 +22,7 @@ declare module '@inertiajs/core' {
             permissions: string[];
             organization: OrganizationSummary | null;
             organizations: OrganizationSummary[];
+            brandColorCss: string;
             [key: string]: unknown;
         };
     }

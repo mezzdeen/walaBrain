@@ -3,11 +3,13 @@
 namespace App\Modules\Core\Http\Middleware;
 
 use App\Modules\Core\Models\User;
+use App\Modules\Core\Support\BrandColor;
 use App\Modules\Core\Support\OrganizationContext;
 use App\Modules\Core\Support\PermissionTeam;
 use Closure;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\View;
 use Symfony\Component\HttpFoundation\Response;
 
 class SetOrganizationContext
@@ -37,16 +39,25 @@ class SetOrganizationContext
             setPermissionsTeamId(PermissionTeam::SUPER);
             $this->forgetLoadedRoles($request->user('super'));
 
+            // The platform administers organizations rather than belonging to
+            // one, so it keeps the application's own colours.
+            View::share('brandColorCss', '');
+
             return $next($request);
         }
 
         $user = $request->user('web');
 
-        OrganizationContext::use(
-            $user instanceof User ? OrganizationContext::resolve($user) : null,
-        );
+        $organization = $user instanceof User ? OrganizationContext::resolve($user) : null;
+
+        OrganizationContext::use($organization);
 
         $this->forgetLoadedRoles($user);
+
+        // Shared with the Blade root view rather than only as an Inertia prop:
+        // the stylesheet has to be in the document before the first paint, or
+        // the page renders in the default colours and then jumps to the brand.
+        View::share('brandColorCss', BrandColor::css($organization?->color));
 
         return $next($request);
     }

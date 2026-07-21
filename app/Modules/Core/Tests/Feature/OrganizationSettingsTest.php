@@ -32,6 +32,57 @@ test('an owner can update their organization', function () {
     expect($organization->fresh()->name)->toBe('Acme Holdings');
 });
 
+test('an owner can set a brand colour', function () {
+    $organization = Organization::factory()->create(['name' => 'Acme']);
+    $owner = memberOf($organization, OrganizationRole::Owner);
+
+    $this->actingAs($owner)
+        ->patch(route('organization.update'), ['name' => 'Acme', 'color' => '#DC2626'])
+        ->assertRedirect(route('organization.edit'));
+
+    // Lowercased on the way in, so the stored value and the swatch the picker
+    // compares against are the same string.
+    expect($organization->fresh()->color)->toBe('#dc2626');
+});
+
+test('an owner can clear the brand colour back to the default', function () {
+    $organization = Organization::factory()->create(['color' => '#dc2626']);
+    $owner = memberOf($organization, OrganizationRole::Owner);
+
+    $this->actingAs($owner)
+        ->patch(route('organization.update'), ['name' => $organization->name, 'color' => ''])
+        ->assertSessionHasNoErrors();
+
+    expect($organization->fresh()->color)->toBeNull();
+});
+
+test('the brand colour must be a valid hex colour', function () {
+    $organization = Organization::factory()->create(['color' => '#dc2626']);
+    $owner = memberOf($organization, OrganizationRole::Owner);
+
+    $this->actingAs($owner)
+        ->from(route('organization.edit'))
+        ->patch(route('organization.update'), ['name' => $organization->name, 'color' => 'red'])
+        ->assertSessionHasErrors('color');
+
+    expect($organization->fresh()->color)->toBe('#dc2626');
+});
+
+// The platform's own edit form submits no colour at all. An absent key never
+// reaches validated(), so renaming from there must not wipe the branding.
+test('renaming without a colour leaves the saved one alone', function () {
+    $organization = Organization::factory()->create(['name' => 'Acme', 'color' => '#dc2626']);
+    $owner = memberOf($organization, OrganizationRole::Owner);
+
+    $this->actingAs($owner)
+        ->patch(route('organization.update'), ['name' => 'Acme Holdings'])
+        ->assertSessionHasNoErrors();
+
+    expect($organization->fresh())
+        ->name->toBe('Acme Holdings')
+        ->color->toBe('#dc2626');
+});
+
 test('the organization name is required', function () {
     $organization = Organization::factory()->create(['name' => 'Acme']);
     $owner = memberOf($organization, OrganizationRole::Owner);

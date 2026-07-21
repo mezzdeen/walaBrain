@@ -5,6 +5,7 @@ use App\Modules\Core\Enums\OrganizationRole;
 use App\Modules\Core\Enums\SuperPermission;
 use App\Modules\Core\Models\Organization;
 use App\Modules\Core\Models\User;
+use App\Modules\Core\Support\BrandColor;
 use App\Modules\Core\Support\OrganizationContext;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -114,4 +115,35 @@ test('a user with no organization is given no permissions', function () {
             ->where('organization', null)
             ->where('organizations', [])
         );
+});
+
+test('the brand stylesheet follows the organization the user is acting on', function () {
+    $organization = Organization::factory()->create(['color' => '#dc2626']);
+    $user = memberOf($organization, OrganizationRole::Owner);
+
+    $this->actingAs($user)
+        ->get(route('dashboard'))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('brandColorCss', BrandColor::css('#dc2626'))
+        );
+});
+
+test('an organization with no colour ships no stylesheet', function () {
+    $organization = Organization::factory()->create(['color' => null]);
+    $user = memberOf($organization, OrganizationRole::Owner);
+
+    $this->actingAs($user)
+        ->get(route('dashboard'))
+        ->assertInertia(fn (Assert $page) => $page->where('brandColorCss', ''));
+});
+
+// The platform administers organizations rather than belonging to one, so it
+// must not inherit the branding of whichever tenant was served last.
+test('the admin platform is never branded', function () {
+    $organization = Organization::factory()->create(['color' => '#dc2626']);
+    memberOf($organization, OrganizationRole::Owner);
+
+    $this->actingAs(superAdmin(), 'super')
+        ->get(route('super.dashboard'))
+        ->assertInertia(fn (Assert $page) => $page->where('brandColorCss', ''));
 });

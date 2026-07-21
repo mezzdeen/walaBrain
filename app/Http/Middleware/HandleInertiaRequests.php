@@ -6,6 +6,7 @@ use App\Modules\Core\Enums\SuperPermission;
 use App\Modules\Core\Models\Admin;
 use App\Modules\Core\Models\Organization;
 use App\Modules\Core\Models\User;
+use App\Modules\Core\Support\BrandColor;
 use App\Modules\Core\Support\Locale;
 use App\Modules\Core\Support\OrganizationContext;
 use App\Modules\Core\Support\Translations;
@@ -61,6 +62,14 @@ class HandleInertiaRequests extends Middleware
                 ? null
                 : OrganizationContext::current()?->only(['id', 'name']),
             'organizations' => fn (): array => $this->switchableOrganizations($request),
+            // The finished stylesheet, not the colour: the Blade root view has
+            // already written this exact text for the first paint, and sending
+            // it rather than rebuilding it on the client is what keeps the two
+            // from ever disagreeing. An Inertia visit never re-renders the root
+            // view, so without this the colour would be stale until a reload.
+            'brandColorCss' => fn (): string => $this->isAdminPlatform($request)
+                ? ''
+                : BrandColor::css(OrganizationContext::current()?->color),
             'locale' => app()->getLocale(),
             'direction' => Locale::direction(app()->getLocale()),
             'supportedLocales' => Locale::SUPPORTED,

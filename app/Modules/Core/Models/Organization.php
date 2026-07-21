@@ -13,10 +13,11 @@ use Illuminate\Support\Carbon;
 /**
  * @property int $id
  * @property string $name
+ * @property string|null $color
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['name'])]
+#[Fillable(['name', 'color'])]
 class Organization extends Model
 {
     /** @use HasFactory<OrganizationFactory> */
