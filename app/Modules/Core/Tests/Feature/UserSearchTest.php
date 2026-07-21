@@ -19,11 +19,24 @@ test('admins can find users by the start of their email', function () {
 
 test('admins can find users by part of their name', function () {
     $admin = superAdmin();
-    $match = User::factory()->create(['name' => 'Ada Lovelace']);
-    User::factory()->create(['name' => 'Grace Hopper']);
+    $match = User::factory()->create(['first_name' => 'Ada', 'last_name' => 'Lovelace']);
+    User::factory()->create(['first_name' => 'Grace', 'last_name' => 'Hopper']);
 
     $response = $this->actingAs($admin, 'super')
         ->getJson(route('super.users.search', ['q' => 'ovelac']));
+
+    $response->assertOk();
+    expect($response->json('users'))->toHaveCount(1)
+        ->and($response->json('users.0.id'))->toBe($match->id);
+});
+
+test('admins can find users by their whole name', function () {
+    $admin = superAdmin();
+    $match = User::factory()->create(['first_name' => 'Ada', 'last_name' => 'Lovelace']);
+    User::factory()->create(['first_name' => 'Grace', 'last_name' => 'Hopper']);
+
+    $response = $this->actingAs($admin, 'super')
+        ->getJson(route('super.users.search', ['q' => 'Ada Lov']));
 
     $response->assertOk();
     expect($response->json('users'))->toHaveCount(1)
@@ -38,7 +51,7 @@ test('the search only exposes the fields the typeahead renders', function () {
         ->getJson(route('super.users.search', ['q' => 'ada']));
 
     expect(array_keys($response->json('users.0')))
-        ->toEqualCanonicalizing(['id', 'name', 'email']);
+        ->toEqualCanonicalizing(['id', 'first_name', 'last_name', 'full_name', 'email']);
 });
 
 test('a query shorter than two characters returns nothing', function () {
@@ -64,7 +77,8 @@ test('a missing query returns nothing', function () {
 test('the search caps how many users it returns', function () {
     $admin = superAdmin();
     User::factory()->count(12)->create([
-        'name' => 'Ada Lovelace',
+        'first_name' => 'Ada',
+        'last_name' => 'Lovelace',
     ]);
 
     $response = $this->actingAs($admin, 'super')
@@ -75,7 +89,7 @@ test('the search caps how many users it returns', function () {
 
 test('wildcards in the query are treated as literal characters', function () {
     $admin = superAdmin();
-    User::factory()->create(['email' => 'ada@example.com', 'name' => 'Ada']);
+    User::factory()->create(['email' => 'ada@example.com', 'first_name' => 'Ada']);
 
     $this->actingAs($admin, 'super')
         ->getJson(route('super.users.search', ['q' => '%%']))

@@ -17,8 +17,10 @@ return [
 
     'profile_title' => 'Profile settings',
     'profile_description' => 'Update your name and email address',
-    'name' => 'Name',
-    'name_placeholder' => 'Full name',
+    'first_name' => 'First name',
+    'first_name_placeholder' => 'First name',
+    'last_name' => 'Last name',
+    'last_name_placeholder' => 'Last name',
     'email_address' => 'Email address',
     'email_unverified' => 'Your email address is unverified.',
     'resend_verification_email' => 'Click here to re-send the verification email.',

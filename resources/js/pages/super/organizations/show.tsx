@@ -9,7 +9,7 @@ import { index as organizationRoles } from '@/routes/super/organizations/roles';
 
 type OrganizationMember = {
     id: number;
-    name: string;
+    full_name: string;
     email: string;
 };
 
@@ -108,7 +108,7 @@ export default function ShowOrganization({ organization, users }: Props) {
                                                 className="border-b last:border-0"
                                             >
                                                 <td className="px-4 py-3 font-medium">
-                                                    {user.name}
+                                                    {user.full_name}
                                                 </td>
                                                 <td className="px-4 py-3 text-muted-foreground">
                                                     {user.email}

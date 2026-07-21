@@ -17,7 +17,7 @@ type RoleRow = {
 
 type MemberRow = {
     id: number;
-    name: string;
+    full_name: string;
     email: string;
     roles: string[];
 };
@@ -120,7 +120,7 @@ export default function OrganizationRoles({
                                 >
                                     <div>
                                         <p className="text-sm font-medium">
-                                            {member.name}
+                                            {member.full_name}
                                         </p>
                                         <p className="text-sm text-muted-foreground">
                                             {member.email}

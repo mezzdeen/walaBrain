@@ -41,7 +41,7 @@ final class OrganizationService
      */
     public function members(Organization $organization): Collection
     {
-        return $organization->users()->get(['users.id', 'name', 'email']);
+        return $organization->users()->get(['users.id', 'first_name', 'last_name', 'email']);
     }
 
     /**

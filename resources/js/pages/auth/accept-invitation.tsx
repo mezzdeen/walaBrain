@@ -87,23 +87,43 @@ export default function AcceptInvitation({
                             </p>
                         </div>
 
-                        <div className="grid gap-2">
-                            <Label htmlFor="name">
-                                {t('core.invitations.name')}
-                            </Label>
-                            <Input
-                                id="name"
-                                type="text"
-                                required
-                                autoFocus
-                                tabIndex={1}
-                                autoComplete="name"
-                                name="name"
-                                placeholder={t(
-                                    'core.invitations.name_placeholder',
-                                )}
-                            />
-                            <InputError message={errors.name} />
+                        <div className="grid gap-4 sm:grid-cols-2">
+                            <div className="grid gap-2">
+                                <Label htmlFor="first_name">
+                                    {t('core.invitations.first_name')}
+                                </Label>
+                                <Input
+                                    id="first_name"
+                                    type="text"
+                                    required
+                                    autoFocus
+                                    tabIndex={1}
+                                    autoComplete="given-name"
+                                    name="first_name"
+                                    placeholder={t(
+                                        'core.invitations.first_name_placeholder',
+                                    )}
+                                />
+                                <InputError message={errors.first_name} />
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="last_name">
+                                    {t('core.invitations.last_name')}
+                                </Label>
+                                <Input
+                                    id="last_name"
+                                    type="text"
+                                    required
+                                    tabIndex={2}
+                                    autoComplete="family-name"
+                                    name="last_name"
+                                    placeholder={t(
+                                        'core.invitations.last_name_placeholder',
+                                    )}
+                                />
+                                <InputError message={errors.last_name} />
+                            </div>
                         </div>
 
                         <div className="grid gap-2">
@@ -113,7 +133,7 @@ export default function AcceptInvitation({
                             <PasswordInput
                                 id="password"
                                 required
-                                tabIndex={2}
+                                tabIndex={3}
                                 autoComplete="new-password"
                                 name="password"
                                 placeholder={t('core.invitations.password')}
@@ -129,7 +149,7 @@ export default function AcceptInvitation({
                             <PasswordInput
                                 id="password_confirmation"
                                 required
-                                tabIndex={3}
+                                tabIndex={4}
                                 autoComplete="new-password"
                                 name="password_confirmation"
                                 placeholder={t(
@@ -145,7 +165,7 @@ export default function AcceptInvitation({
                         <Button
                             type="submit"
                             className="mt-2 w-full"
-                            tabIndex={4}
+                            tabIndex={5}
                             data-test="accept-invitation-button"
                         >
                             {processing && <Spinner />}

@@ -5,8 +5,10 @@ namespace App\Modules\Core\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Modules\Core\Database\Factories\UserFactory;
 use Illuminate\Contracts\Translation\HasLocalePreference;
+use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -21,7 +23,9 @@ use Spatie\Permission\Traits\HasRoles;
 
 /**
  * @property int $id
- * @property string $name
+ * @property string $first_name
+ * @property string $last_name
+ * @property-read string $full_name
  * @property string $email
  * @property string|null $locale
  * @property Carbon|null $email_verified_at
@@ -36,7 +40,8 @@ use Spatie\Permission\Traits\HasRoles;
  * @property-read Collection<int, Permission> $permissions
  * @property-read Collection<int, Organization> $organizations
  */
-#[Fillable(['name', 'email', 'password', 'locale'])]
+#[Appends(['full_name'])]
+#[Fillable(['first_name', 'last_name', 'email', 'password', 'locale'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements HasLocalePreference, PasskeyUser
 {
@@ -55,6 +60,21 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
         ];
+    }
+
+    /**
+     * The user's full name.
+     *
+     * Appended to the model's array form because the interface addresses people
+     * by their whole name almost everywhere it addresses them at all.
+     *
+     * @return Attribute<string, never>
+     */
+    protected function fullName(): Attribute
+    {
+        return Attribute::get(fn (mixed $value, array $attributes): string => trim(
+            ($attributes['first_name'] ?? '').' '.($attributes['last_name'] ?? '')
+        ));
     }
 
     /**

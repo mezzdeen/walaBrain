@@ -17,8 +17,10 @@ return [
 
     'profile_title' => 'إعدادات الملف الشخصي',
     'profile_description' => 'حدّث اسمك وبريدك الإلكتروني',
-    'name' => 'الاسم',
-    'name_placeholder' => 'الاسم الكامل',
+    'first_name' => 'الاسم الأول',
+    'first_name_placeholder' => 'الاسم الأول',
+    'last_name' => 'اسم العائلة',
+    'last_name_placeholder' => 'اسم العائلة',
     'email_address' => 'البريد الإلكتروني',
     'email_unverified' => 'لم يتم تأكيد بريدك الإلكتروني.',
     'resend_verification_email' => 'اضغط هنا لإعادة إرسال رسالة التأكيد.',

@@ -82,7 +82,8 @@ test('accepting an invitation creates the owner and signs them in', function () 
     [$invitation, $plainToken] = invitationFor($organization);
 
     $response = $this->post(route('invitations.store', ['token' => $plainToken]), [
-        'name' => 'New Owner',
+        'first_name' => 'New',
+        'last_name' => 'Owner',
         'password' => 'Str0ng-Password!',
         'password_confirmation' => 'Str0ng-Password!',
     ]);
@@ -92,7 +93,7 @@ test('accepting an invitation creates the owner and signs them in', function () 
 
     $user = User::query()->firstWhere('email', 'stranger@example.com');
 
-    expect($user->name)->toBe('New Owner')
+    expect($user->full_name)->toBe('New Owner')
         ->and($user->email_verified_at)->not->toBeNull()
         ->and($user->belongsToOrganization($organization))->toBeTrue();
 
@@ -109,7 +110,8 @@ test('an invitation can not be accepted twice', function () {
     [, $plainToken] = invitationFor($organization);
 
     $payload = [
-        'name' => 'New Owner',
+        'first_name' => 'New',
+        'last_name' => 'Owner',
         'password' => 'Str0ng-Password!',
         'password_confirmation' => 'Str0ng-Password!',
     ];
@@ -129,7 +131,8 @@ test('accepting requires a confirmed password', function () {
 
     $this->from(route('invitations.show', ['token' => $plainToken]))
         ->post(route('invitations.store', ['token' => $plainToken]), [
-            'name' => 'New Owner',
+            'first_name' => 'New',
+            'last_name' => 'Owner',
             'password' => 'Str0ng-Password!',
             'password_confirmation' => 'something-else',
         ])
@@ -149,7 +152,8 @@ test('an invitee whose address was registered in the meantime is sent to log in'
         ->assertRedirect(route('login'));
 
     $this->post(route('invitations.store', ['token' => $plainToken]), [
-        'name' => 'New Owner',
+        'first_name' => 'New',
+        'last_name' => 'Owner',
         'password' => 'Str0ng-Password!',
         'password_confirmation' => 'Str0ng-Password!',
     ])->assertRedirect(route('login'));

@@ -31,8 +31,8 @@ class DemoSeeder extends Seeder
      */
     public function run(): void
     {
-        $asmaa = $this->user('Asmaa', 'asmaa@app.com');
-        $tysier = $this->user('Tysier', 'tysier@app.com');
+        $asmaa = $this->user('Asmaa', 'Izz', 'asmaa@app.com');
+        $tysier = $this->user('Tysier', 'Saleh', 'tysier@app.com');
 
         $this->organization('Nakheel', owner: $asmaa, member: $tysier);
 
@@ -46,12 +46,13 @@ class DemoSeeder extends Seeder
      * Verified on creation so the demo accounts can sign in without first
      * having to collect a verification mail.
      */
-    private function user(string $name, string $email): User
+    private function user(string $firstName, string $lastName, string $email): User
     {
         return User::firstOrCreate(
             ['email' => $email],
             [
-                'name' => $name,
+                'first_name' => $firstName,
+                'last_name' => $lastName,
                 'password' => Hash::make(self::PASSWORD),
                 'email_verified_at' => now(),
             ],

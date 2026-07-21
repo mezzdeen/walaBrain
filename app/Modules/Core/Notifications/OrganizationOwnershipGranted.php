@@ -38,7 +38,7 @@ class OrganizationOwnershipGranted extends Notification implements ShouldQueue
     {
         return (new MailMessage)
             ->subject(__('core::invitations.granted.subject', ['name' => $this->organization->name]))
-            ->greeting(__('core::invitations.greeting', ['name' => $notifiable->name]))
+            ->greeting(__('core::invitations.greeting', ['name' => $notifiable->full_name]))
             ->line(__('core::invitations.granted.intro', ['name' => $this->organization->name]))
             ->line(__('core::invitations.granted.scope'))
             ->action(__('core::invitations.granted.action'), route('dashboard'));

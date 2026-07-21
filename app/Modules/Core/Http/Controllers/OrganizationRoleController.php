@@ -42,9 +42,9 @@ class OrganizationRoleController extends Controller
                 ]),
             // Eager loaded inside the organization's context, so the relation
             // captures this team rather than querying once per member.
-            'members' => $organization->users()->with('roles')->get(['users.id', 'name', 'email'])
+            'members' => $organization->users()->with('roles')->get(['users.id', 'first_name', 'last_name', 'email'])
                 ->map(fn (User $member): array => [
-                    ...$member->only(['id', 'name', 'email']),
+                    ...$member->only(['id', 'first_name', 'last_name', 'full_name', 'email']),
                     'roles' => $member->roles->pluck('name')->all(),
                 ]),
             'permissionGroups' => $this->permissionGroups(),

@@ -55,6 +55,7 @@ return [
         'numeric' => 'يجب أن تكون قيمة :attribute أكبر من أو تساوي :value.',
         'string' => 'يجب أن يكون طول :attribute أكبر من أو يساوي :value حرفًا.',
     ],
+    'hex_color' => 'يجب أن يكون :attribute لونًا سداسيًا صالحًا.',
     'image' => 'يجب أن يكون :attribute صورة.',
     'in' => 'قيمة :attribute المحددة غير صحيحة.',
     'integer' => 'يجب أن يكون :attribute عددًا صحيحًا.',
@@ -142,6 +143,8 @@ return [
 
     'attributes' => [
         'name' => 'الاسم',
+        'first_name' => 'الاسم الأول',
+        'last_name' => 'اسم العائلة',
         'email' => 'البريد الإلكتروني',
         'password' => 'كلمة المرور',
         'password_confirmation' => 'تأكيد كلمة المرور',

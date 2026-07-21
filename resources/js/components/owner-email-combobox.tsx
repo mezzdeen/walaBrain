@@ -12,7 +12,9 @@ import { search } from '@/routes/super/users';
 
 interface SearchUser {
     id: number;
-    name: string;
+    first_name: string;
+    last_name: string;
+    full_name: string;
     email: string;
 }
 
@@ -224,12 +226,12 @@ export function OwnerEmailCombobox({ name, error }: OwnerEmailComboboxProps) {
                                 >
                                     <Avatar className="size-7">
                                         <AvatarFallback className="bg-neutral-200 text-xs text-black dark:bg-neutral-700 dark:text-white">
-                                            {getInitials(user.name)}
+                                            {getInitials(user.full_name)}
                                         </AvatarFallback>
                                     </Avatar>
                                     <span className="grid flex-1 leading-tight">
                                         <span className="truncate text-sm font-medium">
-                                            {user.name}
+                                            {user.full_name}
                                         </span>
                                         <span className="truncate text-xs text-muted-foreground">
                                             {user.email}
@@ -248,12 +250,12 @@ export function OwnerEmailCombobox({ name, error }: OwnerEmailComboboxProps) {
                 <div className="flex items-center gap-3 rounded-md border bg-muted/40 p-3">
                     <Avatar className="size-9">
                         <AvatarFallback className="bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
-                            {getInitials(selected.name)}
+                            {getInitials(selected.full_name)}
                         </AvatarFallback>
                     </Avatar>
                     <div className="grid flex-1 leading-tight">
                         <span className="truncate text-sm font-medium">
-                            {selected.name}
+                            {selected.full_name}
                         </span>
                         <span className="truncate text-xs text-muted-foreground">
                             {t('core.organizations.owner_will_be_added')}{' '}

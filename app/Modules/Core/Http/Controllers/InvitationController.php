@@ -70,7 +70,8 @@ class InvitationController extends Controller
 
         $user = DB::transaction(function () use ($request, $invitation): User {
             $user = User::create([
-                'name' => $request->validated('name'),
+                'first_name' => $request->validated('first_name'),
+                'last_name' => $request->validated('last_name'),
                 'email' => $invitation->email,
                 'password' => $request->validated('password'),
             ]);
