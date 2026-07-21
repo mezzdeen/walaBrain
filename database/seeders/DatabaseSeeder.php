@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use App\Modules\Core\Database\Seeders\AdminSeeder;
-use App\Modules\Core\Database\Seeders\OrganizationSeeder;
+use App\Modules\Core\Database\Seeders\DemoSeeder;
 use App\Modules\Core\Database\Seeders\RolesAndPermissionsSeeder;
 use App\Modules\Core\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -29,6 +29,6 @@ class DatabaseSeeder extends Seeder
         // organization's roles are provisioned against the permissions in it.
         $this->call(RolesAndPermissionsSeeder::class);
         $this->call(AdminSeeder::class);
-        $this->call(OrganizationSeeder::class);
+        $this->call(DemoSeeder::class);
     }
 }
