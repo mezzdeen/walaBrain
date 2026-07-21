@@ -1,5 +1,6 @@
 <?php
 
+use App\Modules\Core\Http\Controllers\Auth\RegistrationController;
 use App\Modules\Core\Http\Controllers\InvitationController;
 use App\Modules\Core\Http\Controllers\MemberInvitationController;
 use App\Modules\Core\Http\Controllers\OrganizationRoleSettingsController;
@@ -23,8 +24,9 @@ use Inertia\Inertia;
 |
 */
 
-// With self-registration switched off, an invitation link is the only way into
-// the application, so these have to be reachable while signed out.
+// An invitation link is a way into the application that does not depend on
+// self-registration being open, so these have to be reachable while signed out
+// whichever way the platform is set.
 Route::middleware(['web', 'guest'])->group(function () {
     Route::get('invitations/{token}', [InvitationController::class, 'show'])->name('invitations.show');
     Route::post('invitations/{token}', [InvitationController::class, 'store'])
@@ -32,11 +34,28 @@ Route::middleware(['web', 'guest'])->group(function () {
         ->name('invitations.store');
 });
 
+// The other way in, and only while the platform is open to it — `registration`
+// 404s these when it is not. Not Fortify's registration feature: that is
+// decided from static configuration at boot and so cannot follow a switch that
+// lives in the database. See RegistrationController.
+Route::middleware(['web', 'guest', 'registration'])->group(function () {
+    Route::get('register', [RegistrationController::class, 'create'])->name('register');
+    Route::post('register', [RegistrationController::class, 'store'])
+        ->middleware('throttle:10,1')
+        ->name('register.store');
+});
+
 // The guard is named rather than left to the default, which `actingAs` and any
 // future middleware can repoint. It is what keeps a platform admin out of the
 // company platform: they would otherwise satisfy `auth`, and the `Gate::before`
 // bypass in AppServiceProvider would then wave them past every policy here.
-Route::middleware(['web', 'auth:web'])->group(function () {
+//
+// `verified` covers the whole group rather than the few screens that used to
+// name it: a confirmed address is the price of entry to the application, not a
+// condition on its more sensitive corners. Nothing needed while confirming is
+// in here — the notice, the resend and signing out are all Fortify's, and the
+// language and appearance switchers work off a cookie.
+Route::middleware(['web', 'auth:web', 'verified'])->group(function () {
     Route::put('organizations/{organization}/switch', [OrganizationSwitchController::class, 'update'])
         ->name('organizations.switch');
 

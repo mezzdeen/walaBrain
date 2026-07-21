@@ -24,6 +24,13 @@ export type Auth = {
     admin?: Admin | null;
 };
 
+/** Whether and how someone may create their own account. */
+export type Registration = {
+    open: boolean;
+    /** Enabled identity providers. Stored ahead of the sign-in buttons that will use them. */
+    providers: string[];
+};
+
 /* @chisel-passkeys */
 export type Passkey = {
     id: number;

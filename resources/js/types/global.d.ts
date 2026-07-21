@@ -1,5 +1,5 @@
 import type { Direction } from '@/hooks/use-translations';
-import type { Auth } from '@/types/auth';
+import type { Auth, Registration } from '@/types/auth';
 import type { OrganizationSummary } from '@/types/organization';
 
 declare module 'react' {
@@ -22,6 +22,8 @@ declare module '@inertiajs/core' {
             permissions: string[];
             organization: OrganizationSummary | null;
             organizations: OrganizationSummary[];
+            /** Null on the admin platform, where accounts are never self-created. */
+            registration: Registration | null;
             brandColorCss: string;
             [key: string]: unknown;
         };

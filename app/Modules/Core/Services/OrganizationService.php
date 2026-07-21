@@ -6,6 +6,7 @@ use App\Modules\Core\Models\Admin;
 use App\Modules\Core\Models\Organization;
 use App\Modules\Core\Models\User;
 use App\Modules\Core\Notifications\OrganizationOwnershipGranted;
+use App\Modules\Core\Support\OrganizationContext;
 use App\Modules\Core\Support\OrganizationInvitations;
 use App\Modules\Core\Support\OrganizationOwners;
 use App\Modules\Core\Support\OrganizationRoles;
@@ -59,20 +60,44 @@ final class OrganizationService
         // without an owner cannot be reached at all, so all of it either happens
         // together or not at all.
         $organization = DB::transaction(function () use ($name, $ownerEmail, $owner, $invitedBy): Organization {
+            if ($owner instanceof User) {
+                $organization = $this->createForOwner($owner, $name);
+                $owner->notify(new OrganizationOwnershipGranted($organization));
+
+                return $organization;
+            }
+
             $organization = Organization::create(['name' => $name]);
             OrganizationRoles::provision($organization);
-
-            if ($owner instanceof User) {
-                OrganizationOwners::assign($organization, $owner);
-                $owner->notify(new OrganizationOwnershipGranted($organization));
-            } else {
-                OrganizationInvitations::issue($organization, $ownerEmail, $invitedBy);
-            }
+            OrganizationInvitations::issue($organization, $ownerEmail, $invitedBy);
 
             return $organization;
         });
 
         return new OrganizationCreationResult($organization, $owner);
+    }
+
+    /**
+     * Create an organization that already has its owner.
+     *
+     * The other half of {@see self::create()}, and the whole of what someone
+     * who signs themselves up needs: there is nobody to invite and nobody to
+     * notify, because the owner is the person waiting on the response.
+     *
+     * Callers outside a request have no organization context, and `Role` is
+     * scoped by one — see {@see OrganizationContext}
+     * for what that costs if it is skipped.
+     */
+    public function createForOwner(User $owner, string $name): Organization
+    {
+        return DB::transaction(function () use ($owner, $name): Organization {
+            $organization = Organization::create(['name' => $name]);
+
+            OrganizationRoles::provision($organization);
+            OrganizationOwners::assign($organization, $owner);
+
+            return $organization;
+        });
     }
 
     /**

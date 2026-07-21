@@ -32,6 +32,8 @@ const UNAUTHORIZED_ACTIONS = [
     'Auth\AuthenticatedSessionController@destroy' => 'signing out is always allowed to the signed-in',
     'InvitationController@show' => 'guest facing: the signed token is the authorization',
     'InvitationController@store' => 'guest facing: the signed token is the authorization',
+    'Auth\RegistrationController@create' => 'guest facing: the `registration` middleware is the authorization',
+    'Auth\RegistrationController@store' => 'guest facing: the `registration` middleware is the authorization',
 ];
 
 test('every controller action is authorized', function () {

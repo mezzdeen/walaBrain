@@ -28,6 +28,8 @@ return [
     'register' => 'إنشاء حساب',
     'name' => 'الاسم',
     'full_name' => 'الاسم الكامل',
+    'first_name' => 'الاسم الأول',
+    'last_name' => 'اسم العائلة',
     'email' => 'البريد الإلكتروني',
     'confirm_password' => 'تأكيد كلمة المرور',
     'create_account' => 'إنشاء الحساب',

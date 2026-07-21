@@ -34,6 +34,9 @@ return [
 
     'name' => 'الاسم',
     'name_placeholder' => 'شركة المثال',
+
+    // What a self-created organization is called until its owner renames it.
+    'default_name' => 'مؤسسة :name',
     'color' => 'لون المؤسسة',
     'color_description' => 'يصبح هذا اللون هو اللون الأساسي للنظام لكل من يعمل في هذه المؤسسة.',
     'color_default' => 'الافتراضي',

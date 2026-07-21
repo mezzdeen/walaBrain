@@ -2,8 +2,8 @@
 
 namespace App\Modules\Core\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Modules\Core\Database\Factories\UserFactory;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -43,7 +43,7 @@ use Spatie\Permission\Traits\HasRoles;
 #[Appends(['full_name'])]
 #[Fillable(['first_name', 'last_name', 'email', 'password', 'locale'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
-class User extends Authenticatable implements HasLocalePreference, PasskeyUser
+class User extends Authenticatable implements HasLocalePreference, MustVerifyEmail, PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, HasRoles, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;

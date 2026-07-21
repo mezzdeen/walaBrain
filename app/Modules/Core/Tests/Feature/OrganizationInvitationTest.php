@@ -170,10 +170,10 @@ test('a signed in user is kept away from the invitation pages', function () {
         ->assertRedirect();
 });
 
-test('public registration is disabled', function () {
+test('public registration is disabled unless the platform opens it', function () {
     Notification::fake();
 
-    expect(fn () => route('register'))->toThrow(Exception::class);
-
+    // The route now always exists — whether it answers is the platform's own
+    // setting, which starts closed. See RegistrationTest for the open half.
     $this->get('/register')->assertNotFound();
 });

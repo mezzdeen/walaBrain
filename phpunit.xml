@@ -29,6 +29,10 @@
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="BROADCAST_CONNECTION" value="null"/>
         <env name="CACHE_STORE" value="array"/>
+        <!-- Checking that an address's domain accepts mail is a DNS lookup, and
+             a test must not depend on name resolution or on records that are
+             not ours to control. -->
+        <env name="CORE_VERIFY_EMAIL_DNS" value="false"/>
         <env name="DB_CONNECTION" value="sqlite"/>
         <env name="DB_DATABASE" value=":memory:"/>
         <env name="DB_URL" value=""/>

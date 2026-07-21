@@ -9,6 +9,7 @@ use App\Modules\Core\Models\User;
 use App\Modules\Core\Support\BrandColor;
 use App\Modules\Core\Support\Locale;
 use App\Modules\Core\Support\OrganizationContext;
+use App\Modules\Core\Support\PlatformSettings;
 use App\Modules\Core\Support\Translations;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -70,6 +71,15 @@ class HandleInertiaRequests extends Middleware
             'brandColorCss' => fn (): string => $this->isAdminPlatform($request)
                 ? ''
                 : BrandColor::css(OrganizationContext::current()?->color),
+            // What the sign-in screen needs to know to offer a way to sign up,
+            // and nothing more. Admin platform excluded: an admin account is
+            // never self-created, so the question does not arise there.
+            'registration' => fn (): ?array => $this->isAdminPlatform($request)
+                ? null
+                : [
+                    'open' => PlatformSettings::registrationIsOpen(),
+                    'providers' => array_keys(array_filter(PlatformSettings::socialProviders())),
+                ],
             'locale' => app()->getLocale(),
             'direction' => Locale::direction(app()->getLocale()),
             'supportedLocales' => Locale::SUPPORTED,

@@ -34,6 +34,9 @@ return [
 
     'name' => 'Name',
     'name_placeholder' => 'Acme Inc',
+
+    // What a self-created organization is called until its owner renames it.
+    'default_name' => ":name's workspace",
     'color' => 'Organization colour',
     'color_description' => 'This becomes the primary colour of the application for everyone working in this organization.',
     'color_default' => 'Default',

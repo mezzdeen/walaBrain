@@ -28,6 +28,8 @@ return [
     'register' => 'Register',
     'name' => 'Name',
     'full_name' => 'Full name',
+    'first_name' => 'First name',
+    'last_name' => 'Last name',
     'email' => 'Email',
     'confirm_password' => 'Confirm password',
     'create_account' => 'Create account',

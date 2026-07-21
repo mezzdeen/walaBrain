@@ -2,7 +2,9 @@
 
 namespace App\Modules\Core;
 
+use App\Modules\Core\Http\Middleware\EnsureRegistrationIsOpen;
 use App\Modules\Core\Http\Middleware\RequiresOrganization;
+use App\Modules\Core\Listeners\ProvisionOrganizationForNewUser;
 use App\Modules\Core\Models\Admin;
 use App\Modules\Core\Models\Organization;
 use App\Modules\Core\Models\PlatformSetting;
@@ -12,8 +14,10 @@ use App\Modules\Core\Policies\OrganizationPolicy;
 use App\Modules\Core\Policies\PlatformSettingPolicy;
 use App\Modules\Core\Policies\RolePolicy;
 use App\Modules\Core\Policies\UserPolicy;
+use Illuminate\Auth\Events\Verified;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Routing\Router;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -27,6 +31,7 @@ class CoreServiceProvider extends ServiceProvider
         $this->registerMorphMap();
         $this->registerPolicies();
         $this->registerMiddleware();
+        $this->registerListeners();
 
         $this->loadMigrationsFrom(__DIR__.'/Database/Migrations');
         $this->loadTranslationsFrom(__DIR__.'/lang', 'core');
@@ -62,8 +67,22 @@ class CoreServiceProvider extends ServiceProvider
      */
     private function registerMiddleware(): void
     {
-        $this->app->make(Router::class)
-            ->aliasMiddleware('organization', RequiresOrganization::class);
+        $router = $this->app->make(Router::class);
+
+        $router->aliasMiddleware('organization', RequiresOrganization::class);
+        $router->aliasMiddleware('registration', EnsureRegistrationIsOpen::class);
+    }
+
+    /**
+     * Register what the module does in response to framework events.
+     *
+     * Declared here for the same reason the middleware is: the module carries
+     * everything it needs to work when it is registered, and nothing about it
+     * has to be remembered elsewhere.
+     */
+    private function registerListeners(): void
+    {
+        Event::listen(Verified::class, ProvisionOrganizationForNewUser::class);
     }
 
     /**

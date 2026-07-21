@@ -54,3 +54,19 @@ test('the provider checkboxes only appear once the open card is picked', functio
         ->assertSee('Login providers')
         ->assertNoJavaScriptErrors();
 });
+
+test('the sign-up page is reachable from the login page once the platform is open', function () {
+    PlatformSettings::update([PlatformSettings::RegistrationOpen => true]);
+
+    visit(route('login', absolute: false))
+        ->assertSee('Sign up')
+        ->click('Sign up')
+        ->assertSee('Create an account')
+        ->assertNoJavaScriptErrors();
+});
+
+test('the login page offers no way to sign up while the platform is closed', function () {
+    visit(route('login', absolute: false))
+        ->assertDontSee('Sign up')
+        ->assertNoJavaScriptErrors();
+});
