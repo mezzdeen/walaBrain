@@ -2,8 +2,6 @@
 
 namespace App\Providers;
 
-use App\Modules\Core\Actions\Fortify\CreateNewUser;
-use App\Modules\Core\Actions\Fortify\ResetUserPassword;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -29,18 +27,10 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $this->configureActions();
+        // No `configureActions()`: creating and updating a user is the module
+        // that owns the user model's business, and it registers its own.
         $this->configureViews();
         $this->configureRateLimiting();
-    }
-
-    /**
-     * Configure Fortify actions.
-     */
-    private function configureActions(): void
-    {
-        Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
-        Fortify::createUsersUsing(CreateNewUser::class);
     }
 
     /**

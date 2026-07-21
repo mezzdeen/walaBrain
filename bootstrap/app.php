@@ -2,14 +2,12 @@
 
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
-use App\Modules\Core\Http\Middleware\SetLocale;
-use App\Modules\Core\Http\Middleware\SetOrganizationContext;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Middleware\SubstituteBindings;
+use Illuminate\Support\Facades\Route;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
@@ -25,38 +23,32 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Spatie's service provider registers Blade directives and commands but
         // not the middleware aliases, so they have to be declared here.
-        // The `organization` alias is not here: it belongs to the Core module,
-        // which registers it alongside its own routes and policies.
+        // Module-owned aliases are not here: a module registers its own
+        // alongside its routes and policies.
         $middleware->alias([
             'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,
         ]);
 
+        // Only what the application itself owns. A module appends its own
+        // middleware from its service provider, so that nothing here has to be
+        // edited when one is added or removed.
         $middleware->web(append: [
             HandleAppearance::class,
-            SetLocale::class,
-            SetOrganizationContext::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
         ]);
 
-        // Permission checks are meaningless until the active organization is
-        // known, and route model binding may scope a lookup by it, so the
-        // context has to be in place before bindings are substituted. Without
-        // this a request that should be forbidden 404s instead. Injected into
-        // the framework's list rather than replacing it, which would silently
-        // drop the entries this file never mentions.
-        $middleware->prependToPriorityList(
-            before: SubstituteBindings::class,
-            prepend: SetOrganizationContext::class,
-        );
-
         // Send unauthenticated visitors to the login screen of the platform
         // they were trying to reach, keeping the two platforms isolated.
-        $middleware->redirectGuestsTo(fn (Request $request): string => $request->is('super', 'super/*')
-            ? route('super.login')
-            : route('login'));
+        // `Route::has`: the admin platform is a module's, and without it there
+        // is only one login screen to send anyone to.
+        $middleware->redirectGuestsTo(
+            fn (Request $request): string => $request->is('super', 'super/*') && Route::has('super.login')
+                ? route('super.login')
+                : route('login'),
+        );
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
