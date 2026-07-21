@@ -90,6 +90,20 @@ class OrganizationPolicy
     }
 
     /**
+     * Determine whether the identity can invite people into the organization.
+     *
+     * A company ability only. The platform provisions an organization with its
+     * owner and leaves the owner to staff it, so there is no super permission
+     * that would let an admin add members from the outside.
+     */
+    public function inviteMembers(User|Admin $identity, Organization $organization): bool
+    {
+        return $identity instanceof User
+            && $identity->belongsToOrganization($organization)
+            && $identity->can(OrganizationPermission::InviteMembers->value);
+    }
+
+    /**
      * Determine whether the user can make the organization the one they are
      * acting on.
      *

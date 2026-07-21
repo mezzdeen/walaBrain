@@ -50,4 +50,11 @@ return [
     'accepted_description' => 'تم إنشاء الحساب بالفعل. سجّل الدخول للمتابعة.',
     'back_to_login' => 'الذهاب إلى تسجيل الدخول',
 
+    // The screen an organization invites its own members from. Kept apart from
+    // the `invited.*` lines above, which are worded for ownership specifically.
+    'manage' => [
+        'title' => 'دعوة مستخدم',
+        'description' => 'ادعُ شخصاً للانضمام إلى مؤسستك.',
+    ],
+
 ];

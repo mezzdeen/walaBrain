@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\Core\Http\Controllers\Settings;
+namespace App\Modules\Core\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Core\Enums\OrganizationPermission;
@@ -17,6 +17,11 @@ use Inertia\Response;
 /**
  * Lets an organization manage its own roles from the company platform.
  *
+ * Sits beside {@see OrganizationSettingsController} at the top level rather
+ * than under `/settings`: roles belong to the organization, not to the
+ * signed-in user's account, and grouping them with profile and password would
+ * say otherwise.
+ *
  * Everything here is scoped to the organization the request is acting on, which
  * the middleware has already resolved from the session.
  */
@@ -31,7 +36,7 @@ class OrganizationRoleSettingsController extends Controller
 
         $organization = OrganizationContext::current();
 
-        return Inertia::render('settings/roles/index', [
+        return Inertia::render('roles/index', [
             'roles' => Role::query()
                 ->where('guard_name', 'web')
                 ->where('organization_id', $organization->getKey())
@@ -67,7 +72,7 @@ class OrganizationRoleSettingsController extends Controller
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('core::roles.created')]);
 
-        return to_route('settings.roles.index');
+        return to_route('roles.index');
     }
 
     /**
@@ -82,7 +87,7 @@ class OrganizationRoleSettingsController extends Controller
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('core::roles.updated')]);
 
-        return to_route('settings.roles.index');
+        return to_route('roles.index');
     }
 
     /**
@@ -96,7 +101,7 @@ class OrganizationRoleSettingsController extends Controller
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('core::roles.deleted')]);
 
-        return to_route('settings.roles.index');
+        return to_route('roles.index');
     }
 
     /**

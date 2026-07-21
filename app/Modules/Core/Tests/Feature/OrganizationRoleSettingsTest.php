@@ -14,10 +14,10 @@ test('an owner can view their organization roles', function () {
     $owner = memberOf($organization, OrganizationRole::Owner);
 
     $this->actingAs($owner)
-        ->get(route('settings.roles.index'))
+        ->get(route('roles.index'))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('settings/roles/index')
+            ->component('roles/index')
             ->has('roles', count(OrganizationRole::cases()))
             ->has('permissionGroups')
         );
@@ -34,7 +34,7 @@ test('the page only lists roles the current organization owns', function () {
     ]));
 
     $this->actingAs($owner)
-        ->get(route('settings.roles.index'))
+        ->get(route('roles.index'))
         ->assertInertia(fn (Assert $page) => $page->has('roles', count(OrganizationRole::cases())));
 });
 
@@ -43,7 +43,7 @@ test('a member can not view the roles', function () {
     $member = memberOf($organization, OrganizationRole::Member);
 
     $this->actingAs($member)
-        ->get(route('settings.roles.index'))
+        ->get(route('roles.index'))
         ->assertForbidden();
 });
 
@@ -51,7 +51,7 @@ test('a member can not view the roles', function () {
 // this screen could even be about, so the explanation is more use than a 403.
 test('a user with no organization is sent away from the roles', function () {
     $this->actingAs(User::factory()->create())
-        ->get(route('settings.roles.index'))
+        ->get(route('roles.index'))
         ->assertRedirect(route('organizations.none'));
 });
 
@@ -60,11 +60,11 @@ test('an owner can create a role for their organization', function () {
     $owner = memberOf($organization, OrganizationRole::Owner);
 
     $this->actingAs($owner)
-        ->post(route('settings.roles.store'), [
+        ->post(route('roles.store'), [
             'name' => 'auditor',
             'permissions' => [OrganizationPermission::ViewMembers->value],
         ])
-        ->assertRedirect(route('settings.roles.index'));
+        ->assertRedirect(route('roles.index'));
 
     $role = Role::query()->firstWhere('name', 'auditor');
 
@@ -79,8 +79,8 @@ test('a role name must be unique within the organization', function () {
     $owner = memberOf($organization, OrganizationRole::Owner);
 
     $this->actingAs($owner)
-        ->from(route('settings.roles.index'))
-        ->post(route('settings.roles.store'), ['name' => OrganizationRole::Member->value])
+        ->from(route('roles.index'))
+        ->post(route('roles.store'), ['name' => OrganizationRole::Member->value])
         ->assertSessionHasErrors('name');
 });
 
@@ -95,7 +95,7 @@ test('two organizations may each have a role of the same name', function () {
     ]));
 
     $this->actingAs($owner)
-        ->post(route('settings.roles.store'), ['name' => 'auditor'])
+        ->post(route('roles.store'), ['name' => 'auditor'])
         ->assertSessionHasNoErrors();
 
     expect(Role::query()->where('name', 'auditor')->count())->toBe(2);
@@ -106,8 +106,8 @@ test('a super guard permission can not be granted to an organization role', func
     $owner = memberOf($organization, OrganizationRole::Owner);
 
     $this->actingAs($owner)
-        ->from(route('settings.roles.index'))
-        ->post(route('settings.roles.store'), [
+        ->from(route('roles.index'))
+        ->post(route('roles.store'), [
             'name' => 'auditor',
             'permissions' => ['organizations.delete'],
         ])
@@ -124,11 +124,11 @@ test('an owner can update a role', function () {
     ]));
 
     $this->actingAs($owner)
-        ->put(route('settings.roles.update', $role), [
+        ->put(route('roles.update', $role), [
             'name' => 'reviewer',
             'permissions' => [OrganizationPermission::ViewMembers->value],
         ])
-        ->assertRedirect(route('settings.roles.index'));
+        ->assertRedirect(route('roles.index'));
 
     expect($role->fresh()->name)->toBe('reviewer');
 });
@@ -143,8 +143,8 @@ test('an owner can delete a role', function () {
     ]));
 
     $this->actingAs($owner)
-        ->delete(route('settings.roles.destroy', $role))
-        ->assertRedirect(route('settings.roles.index'));
+        ->delete(route('roles.destroy', $role))
+        ->assertRedirect(route('roles.index'));
 
     $this->assertDatabaseMissing('roles', ['id' => $role->id]);
 });
@@ -157,7 +157,7 @@ test('the owner role can not be deleted', function () {
         ->firstWhere('name', OrganizationRole::Owner->value);
 
     $this->actingAs($owner)
-        ->delete(route('settings.roles.destroy', $role))
+        ->delete(route('roles.destroy', $role))
         ->assertForbidden();
 
     $this->assertDatabaseHas('roles', ['id' => $role->id]);
@@ -174,11 +174,11 @@ test('an owner can not touch another organization role', function () {
     ]));
 
     $this->actingAs($owner)
-        ->put(route('settings.roles.update', $foreign), ['name' => 'hijacked'])
+        ->put(route('roles.update', $foreign), ['name' => 'hijacked'])
         ->assertForbidden();
 
     $this->actingAs($owner)
-        ->delete(route('settings.roles.destroy', $foreign))
+        ->delete(route('roles.destroy', $foreign))
         ->assertForbidden();
 
     expect($foreign->fresh()->name)->toBe('auditor');
@@ -191,7 +191,7 @@ test('an owner can not touch a super platform role', function () {
     $platformRole = Role::query()->where('guard_name', 'super')->first();
 
     $this->actingAs($owner)
-        ->delete(route('settings.roles.destroy', $platformRole))
+        ->delete(route('roles.destroy', $platformRole))
         ->assertForbidden();
 
     $this->assertDatabaseHas('roles', ['id' => $platformRole->id]);
@@ -208,15 +208,15 @@ test('permissions follow the organization the owner is acting on', function () {
     // one and refused in the other.
     $this->actingAs($user)
         ->withSession([OrganizationContext::SESSION_KEY => $first->id])
-        ->get(route('settings.roles.index'))
+        ->get(route('roles.index'))
         ->assertOk();
 
     $this->actingAs($user)
         ->withSession([OrganizationContext::SESSION_KEY => $second->id])
-        ->get(route('settings.roles.index'))
+        ->get(route('roles.index'))
         ->assertForbidden();
 });
 
 test('guests can not access the role settings', function () {
-    $this->get(route('settings.roles.index'))->assertRedirect(route('login'));
+    $this->get(route('roles.index'))->assertRedirect(route('login'));
 });

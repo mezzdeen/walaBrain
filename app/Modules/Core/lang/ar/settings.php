@@ -32,6 +32,9 @@ return [
     'new_password' => 'كلمة المرور الجديدة',
     'confirm_password' => 'تأكيد كلمة المرور',
 
+    'organization_title' => 'إعدادات المؤسسة',
+    'organization_description' => 'حدّث بيانات مؤسستك',
+
     'appearance_title' => 'إعدادات المظهر',
     'appearance_description' => 'حدّث إعدادات المظهر الخاصة بحسابك',
 

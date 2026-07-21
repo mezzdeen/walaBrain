@@ -32,6 +32,9 @@ return [
     'new_password' => 'New password',
     'confirm_password' => 'Confirm password',
 
+    'organization_title' => 'Organization settings',
+    'organization_description' => "Update your organization's information",
+
     'appearance_title' => 'Appearance settings',
     'appearance_description' => 'Update the appearance settings for your account',
 

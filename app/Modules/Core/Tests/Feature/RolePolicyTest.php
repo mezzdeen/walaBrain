@@ -46,7 +46,7 @@ test('a member without the view permission can not see the organization roles', 
     // `roles.view`.
     $this->actingAs($member)
         ->withSession([OrganizationContext::SESSION_KEY => $organization->id])
-        ->get(route('settings.roles.index'))
+        ->get(route('roles.index'))
         ->assertForbidden();
 });
 
@@ -58,7 +58,7 @@ test('an owner can not reach a platform role through the company screens', funct
 
     $this->actingAs($owner)
         ->withSession([OrganizationContext::SESSION_KEY => $organization->id])
-        ->put(route('settings.roles.update', $platformRole), ['name' => 'hijacked'])
+        ->put(route('roles.update', $platformRole), ['name' => 'hijacked'])
         ->assertForbidden();
 
     expect($platformRole->fresh()->name)->not->toBe('hijacked');

@@ -4,6 +4,7 @@ use App\Modules\Core\Enums\OrganizationRole;
 use App\Modules\Core\Enums\SuperPermission;
 use App\Modules\Core\Models\Organization;
 use App\Modules\Core\Support\OrganizationContext;
+use App\Modules\Core\Support\OrganizationRoles;
 
 /*
 |--------------------------------------------------------------------------
@@ -93,4 +94,21 @@ test('an admin can not switch organizations', function () {
     $this->actingAs($admin, 'super')
         ->put(route('organizations.switch', $organization))
         ->assertRedirect(route('login'));
+});
+
+test('an owner can invite members, a member can not', function () {
+    $organization = Organization::factory()->create();
+    $owner = memberOf($organization, OrganizationRole::Owner);
+    $member = memberOf($organization, OrganizationRole::Member);
+
+    expect($owner->can('inviteMembers', $organization))->toBeTrue()
+        ->and($member->can('inviteMembers', $organization))->toBeFalse();
+});
+
+test('a user can not invite into an organization they do not belong to', function () {
+    [$mine, $theirs] = Organization::factory()->count(2)->create()->all();
+    $owner = memberOf($mine, OrganizationRole::Owner);
+    OrganizationRoles::provision($theirs);
+
+    expect($owner->can('inviteMembers', $theirs))->toBeFalse();
 });

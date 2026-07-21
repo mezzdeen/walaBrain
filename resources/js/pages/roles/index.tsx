@@ -1,7 +1,6 @@
-import { Form, Head } from '@inertiajs/react';
+import { Form, Head, setLayoutProps } from '@inertiajs/react';
 import { Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
-import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { PermissionMatrix } from '@/components/permission-matrix';
 import type { PermissionGroups } from '@/components/permission-matrix';
@@ -23,7 +22,7 @@ import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { useCan } from '@/hooks/use-can';
 import { useTranslations } from '@/hooks/use-translations';
-import { destroy, store, update } from '@/routes/settings/roles';
+import { destroy, index, store, update } from '@/routes/roles';
 
 type RoleRow = {
     id: number;
@@ -45,33 +44,45 @@ export default function OrganizationRoleSettings({
     const { t } = useTranslations();
     const { can, organization } = useCan();
 
+    setLayoutProps({
+        breadcrumbs: [
+            {
+                title: t('core.roles.title'),
+                href: index(),
+            },
+        ],
+    });
+
     return (
         <>
             <Head title={t('core.roles.title')} />
 
-            <div className="space-y-6">
-                <Heading
-                    variant="small"
-                    title={t('core.roles.title')}
-                    description={
-                        organization
+            <div className="flex h-full flex-1 flex-col gap-4 p-4">
+                <div>
+                    <h1 className="text-xl font-semibold">
+                        {t('core.roles.title')}
+                    </h1>
+                    <p className="text-sm text-muted-foreground">
+                        {organization
                             ? t('core.roles.organization_title', {
                                   name: organization.name,
                               })
-                            : t('core.roles.description')
-                    }
-                />
+                            : t('core.roles.description')}
+                    </p>
+                </div>
 
                 {can('roles.create') && (
-                    <RoleDialog
-                        permissionGroups={permissionGroups}
-                        trigger={
-                            <Button size="sm">
-                                <Plus className="size-4" />
-                                {t('core.roles.new')}
-                            </Button>
-                        }
-                    />
+                    <div>
+                        <RoleDialog
+                            permissionGroups={permissionGroups}
+                            trigger={
+                                <Button size="sm">
+                                    <Plus className="size-4" />
+                                    {t('core.roles.new')}
+                                </Button>
+                            }
+                        />
+                    </div>
                 )}
 
                 <div className="flex flex-col gap-3">

@@ -50,4 +50,11 @@ return [
     'accepted_description' => 'The account has already been created. Sign in to continue.',
     'back_to_login' => 'Go to sign in',
 
+    // The screen an organization invites its own members from. Kept apart from
+    // the `invited.*` lines above, which are worded for ownership specifically.
+    'manage' => [
+        'title' => 'Invite user',
+        'description' => 'Invite someone to join your organization.',
+    ],
+
 ];

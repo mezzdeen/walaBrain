@@ -3,20 +3,20 @@ import type { PropsWithChildren } from 'react';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { useCan } from '@/hooks/use-can';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { useTranslations } from '@/hooks/use-translations';
 import { cn, toUrl } from '@/lib/utils';
 import { edit as editAppearance } from '@/routes/appearance';
 import { edit } from '@/routes/profile';
 import { edit as editSecurity } from '@/routes/security';
-import { index as rolesIndex } from '@/routes/settings/roles';
 import type { NavItem } from '@/types';
 
+// The signed-in user's own account, and nothing else. Anything belonging to the
+// organization — its details, roles, members — lives under the sidebar's
+// administration heading instead.
 export default function SettingsLayout({ children }: PropsWithChildren) {
     const { isCurrentOrParentUrl } = useCurrentUrl();
     const { t } = useTranslations();
-    const { can } = useCan();
 
     const sidebarNavItems: NavItem[] = [
         {
@@ -34,15 +34,6 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
             href: editAppearance(),
             icon: null,
         },
-        ...(can('roles.view')
-            ? [
-                  {
-                      title: t('core.roles.title'),
-                      href: rolesIndex(),
-                      icon: null,
-                  },
-              ]
-            : []),
     ];
 
     return (

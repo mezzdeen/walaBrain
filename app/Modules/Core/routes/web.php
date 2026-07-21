@@ -1,8 +1,10 @@
 <?php
 
 use App\Modules\Core\Http\Controllers\InvitationController;
+use App\Modules\Core\Http\Controllers\MemberInvitationController;
+use App\Modules\Core\Http\Controllers\OrganizationRoleSettingsController;
+use App\Modules\Core\Http\Controllers\OrganizationSettingsController;
 use App\Modules\Core\Http\Controllers\OrganizationSwitchController;
-use App\Modules\Core\Http\Controllers\Settings\OrganizationRoleSettingsController;
 use App\Modules\Core\Http\Controllers\Settings\ProfileController;
 use App\Modules\Core\Http\Controllers\Settings\SecurityController;
 use App\Modules\Core\Support\OrganizationContext;
@@ -47,20 +49,31 @@ Route::middleware(['web', 'auth:web'])->group(function () {
             : Inertia::render('no-organization');
     })->name('organizations.none');
 
+    // The administration screens, grouped in the sidebar under one heading.
+    // Top level rather than under `/settings`, which is the signed-in user's own
+    // account: the organization, its roles and its members are not preferences.
+    //
+    // The role routes are authorized by RolePolicy rather than the `permission:`
+    // middleware: holding the permission is only half of it, the role also has
+    // to belong to the organization the request is acting on.
+    Route::middleware('organization')->group(function () {
+        Route::get('organization', [OrganizationSettingsController::class, 'edit'])->name('organization.edit');
+        Route::patch('organization', [OrganizationSettingsController::class, 'update'])->name('organization.update');
+
+        Route::get('roles', [OrganizationRoleSettingsController::class, 'index'])->name('roles.index');
+        Route::post('roles', [OrganizationRoleSettingsController::class, 'store'])->name('roles.store');
+        Route::put('roles/{role}', [OrganizationRoleSettingsController::class, 'update'])->name('roles.update');
+        Route::delete('roles/{role}', [OrganizationRoleSettingsController::class, 'destroy'])->name('roles.destroy');
+
+        // Distinct from the guest `invitations.show`/`store` pair below, which
+        // accept an invitation by token. This is where one is issued from.
+        Route::get('invitations', [MemberInvitationController::class, 'index'])->name('invitations.index');
+    });
+
     Route::redirect('settings', '/settings/profile');
 
     Route::get('settings/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('settings/profile', [ProfileController::class, 'update'])->name('profile.update');
-
-    // Authorized by RolePolicy rather than the `permission:` middleware: holding
-    // the permission is only half of it, the role also has to belong to the
-    // organization the request is acting on.
-    Route::middleware('organization')->name('settings.')->group(function () {
-        Route::get('settings/roles', [OrganizationRoleSettingsController::class, 'index'])->name('roles.index');
-        Route::post('settings/roles', [OrganizationRoleSettingsController::class, 'store'])->name('roles.store');
-        Route::put('settings/roles/{role}', [OrganizationRoleSettingsController::class, 'update'])->name('roles.update');
-        Route::delete('settings/roles/{role}', [OrganizationRoleSettingsController::class, 'destroy'])->name('roles.destroy');
-    });
 });
 
 // Closing an account and changing credentials are held to a verified address:
