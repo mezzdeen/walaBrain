@@ -101,7 +101,31 @@ test('admins can delete an organization', function () {
     $response = $this->actingAs($admin, 'super')->delete(route('super.organizations.destroy', $organization));
 
     $response->assertRedirect(route('super.organizations.index'));
-    $this->assertDatabaseMissing('organizations', ['id' => $organization->id]);
+    $this->assertSoftDeleted('organizations', ['id' => $organization->id]);
+});
+
+test('a deleted organization disappears from the organizations index', function () {
+    $admin = superAdmin();
+    $organization = Organization::factory()->create();
+    $organization->delete();
+
+    $this->actingAs($admin, 'super')
+        ->get(route('super.organizations.index'))
+        ->assertInertia(fn (Assert $page) => $page->has('organizations', 0));
+});
+
+test('a deleted organization keeps its memberships so it can be restored', function () {
+    $organization = Organization::factory()->create();
+    $user = User::factory()->create();
+    $organization->users()->attach($user);
+
+    $organization->delete();
+
+    expect($user->fresh()->organizations)->toHaveCount(0);
+
+    $organization->restore();
+
+    expect($user->fresh()->organizations->pluck('id'))->toContain($organization->id);
 });
 
 test('guests can not access the organizations area', function () {
@@ -377,7 +401,7 @@ test('only the hash of the invitation token is stored', function () {
         ->toBe(hash('sha256', $sent->plainToken));
 });
 
-test('deleting an organization takes its pending invitations with it', function () {
+test('deleting an organization revokes its pending invitations', function () {
     Notification::fake();
 
     $organization = Organization::factory()->create();

@@ -22,8 +22,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
+            $table->string('locale', 8)->nullable()->after('email');
             $table->string('first_name')->nullable()->after('id');
             $table->string('last_name')->nullable()->after('first_name');
+            $table->softDeletes();
         });
 
         $this->splitExistingNames();
@@ -40,6 +42,11 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('locale');
+            $table->dropSoftDeletes();
+        });
+
         Schema::table('users', function (Blueprint $table) {
             $table->string('name')->nullable()->after('id');
         });

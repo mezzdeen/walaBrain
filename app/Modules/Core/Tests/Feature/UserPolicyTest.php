@@ -52,8 +52,8 @@ test('a user can not delete another account', function () {
         ->delete(route('profile.destroy'), ['password' => 'password'])
         ->assertRedirect('/');
 
-    $this->assertDatabaseHas('users', ['id' => $other->id]);
-    $this->assertDatabaseMissing('users', ['id' => $user->id]);
+    $this->assertNotSoftDeleted('users', ['id' => $other->id]);
+    $this->assertSoftDeleted('users', ['id' => $user->id]);
 });
 
 test('a platform admin can not reach the company profile settings', function () {

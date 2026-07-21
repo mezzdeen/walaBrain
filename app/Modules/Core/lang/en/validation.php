@@ -14,5 +14,6 @@ return [
     */
 
     'disposable_email' => 'This email provider gives out temporary addresses. Please use an address you will still be able to read later.',
+    'deleted_account' => 'This address belongs to an account that has been deleted, so it cannot be used.',
 
 ];

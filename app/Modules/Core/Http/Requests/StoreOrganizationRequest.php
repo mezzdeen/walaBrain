@@ -2,6 +2,7 @@
 
 namespace App\Modules\Core\Http\Requests;
 
+use App\Modules\Core\Rules\NotADeletedAccount;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
@@ -20,8 +21,10 @@ class StoreOrganizationRequest extends FormRequest
 
             // An organization nobody can administer is not worth creating, so
             // the owner is named up front. The address may or may not belong to
-            // an existing account; the controller decides what that means.
-            'owner_email' => ['required', 'string', 'lowercase', 'email', 'max:255'],
+            // an existing account; the controller decides what that means. What
+            // it may not belong to is a deleted one — that address is spent, and
+            // the invitation it would trigger could never be accepted.
+            'owner_email' => ['required', 'string', 'lowercase', 'email', 'max:255', new NotADeletedAccount],
         ];
     }
 

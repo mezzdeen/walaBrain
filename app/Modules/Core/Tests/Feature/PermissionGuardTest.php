@@ -87,7 +87,7 @@ test('a user can not be assigned a super guard role', function () {
     expect(fn () => $user->assignRole($role))->toThrow(GuardDoesNotMatch::class);
 });
 
-test('an organization owns its roles and deleting it deletes them', function () {
+test('an organization owns its roles and erasing it erases them', function () {
     $organization = Organization::factory()->create();
     setPermissionsTeamId($organization->id);
     $role = Role::create([
@@ -96,8 +96,13 @@ test('an organization owns its roles and deleting it deletes them', function () 
         'organization_id' => $organization->id,
     ]);
 
+    // Deleting an organization is reversible, so its roles stay put — they are
+    // half of what a restored organization needs to work again. The database
+    // cascade is what erases them, and it only fires on the irreversible path.
     $organization->delete();
+    $this->assertDatabaseHas('roles', ['id' => $role->id]);
 
+    $organization->forceDelete();
     $this->assertDatabaseMissing('roles', ['id' => $role->id]);
 });
 

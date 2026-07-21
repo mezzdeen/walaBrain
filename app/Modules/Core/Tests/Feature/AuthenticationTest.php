@@ -21,6 +21,19 @@ test('admins can authenticate on the super guard', function () {
     $response->assertRedirect(route('super.dashboard', absolute: false));
 });
 
+test('a deleted admin can not authenticate on the super guard', function () {
+    $admin = Admin::factory()->create();
+    $admin->delete();
+
+    $this->post(route('super.login.store'), [
+        'email' => $admin->email,
+        'password' => 'password',
+    ]);
+
+    $this->assertGuest('super');
+    $this->assertSoftDeleted('admins', ['id' => $admin->id]);
+});
+
 test('admins can not authenticate with an invalid password', function () {
     $admin = Admin::factory()->create();
 

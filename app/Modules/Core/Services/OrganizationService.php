@@ -113,10 +113,11 @@ final class OrganizationService
     }
 
     /**
-     * Delete the organization.
+     * Soft delete the organization.
      *
-     * Its memberships, roles and pending invitations go with it on the database
-     * side, through the cascades declared in their migrations.
+     * The row stays, so the organization can be brought back with its
+     * memberships and roles intact. Its pending invitations are discarded on
+     * the way out — see {@see Organization::booted()}.
      */
     public function delete(Organization $organization): void
     {

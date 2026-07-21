@@ -66,7 +66,19 @@ test('user can delete their account', function () {
         ->assertRedirect(route('home'));
 
     $this->assertGuest();
-    expect($user->fresh())->toBeNull();
+    $this->assertSoftDeleted('users', ['id' => $user->id]);
+});
+
+test('a deleted account can no longer be signed in to', function () {
+    $user = User::factory()->create(['email' => 'gone@example.com']);
+    $user->delete();
+
+    $this->post(route('login'), [
+        'email' => 'gone@example.com',
+        'password' => 'password',
+    ])->assertSessionHasErrors('email');
+
+    $this->assertGuest();
 });
 
 test('correct password must be provided to delete account', function () {

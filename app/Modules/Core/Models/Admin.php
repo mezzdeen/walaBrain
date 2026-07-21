@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
@@ -26,6 +27,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property string|null $remember_token
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ * @property Carbon|null $deleted_at
  * @property-read Collection<int, Role> $roles
  * @property-read Collection<int, Permission> $permissions
  */
@@ -41,7 +43,7 @@ class Admin extends Authenticatable
      *
      * @use HasFactory<AdminFactory>
      */
-    use HasFactory, HasHashId, HasRoles, Notifiable;
+    use HasFactory, HasHashId, HasRoles, Notifiable, SoftDeletes;
 
     /**
      * Get the attributes that should be cast.

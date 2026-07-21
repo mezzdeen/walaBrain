@@ -104,10 +104,15 @@ class InvitationController extends Controller
 
     /**
      * Whether the invited address already belongs to an account.
+     *
+     * Deleted accounts count. They are invisible to an ordinary query but the
+     * unique index on `users.email` still sees them, so reading a deleted
+     * account's address as free renders a registration form whose submit can
+     * only fail on the constraint.
      */
     private function addressIsTaken(OrganizationInvitation $invitation): bool
     {
-        return User::query()->where('email', $invitation->email)->exists();
+        return User::withTrashed()->where('email', $invitation->email)->exists();
     }
 
     /**
