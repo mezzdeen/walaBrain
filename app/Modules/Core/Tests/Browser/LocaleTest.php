@@ -131,3 +131,51 @@ test('the guest pages render without javascript errors', function () {
         route('password.request', absolute: false),
     ])->assertNoJavaScriptErrors();
 });
+
+/*
+|--------------------------------------------------------------------------
+| Guest Switchers
+|--------------------------------------------------------------------------
+|
+| A visitor decides how to read the interface before they ever sign in, so
+| the same two controls the header carries are also within reach on the
+| welcome screen and on every auth screen behind it.
+|
+*/
+
+test('the welcome page switcher flips the whole document to arabic', function () {
+    visit(route('home', absolute: false))
+        ->click('@language-switcher')
+        ->click('@language-option-ar')
+        ->waitForEvent('networkidle')
+        ->assertAttribute(':root', 'lang', 'ar')
+        ->assertAttribute(':root', 'dir', 'rtl')
+        ->assertNoJavaScriptErrors();
+});
+
+test('the welcome page switcher applies the dark theme', function () {
+    visit(route('home', absolute: false))
+        ->click('@appearance-switcher')
+        ->click('@appearance-option-dark')
+        ->assertAttributeContains(':root', 'class', 'dark')
+        ->assertNoJavaScriptErrors();
+});
+
+test('the login page switcher flips the whole document to arabic', function () {
+    visit(route('login', absolute: false))
+        ->click('@language-switcher')
+        ->click('@language-option-ar')
+        ->waitForEvent('networkidle')
+        ->assertAttribute(':root', 'dir', 'rtl')
+        // The form itself has to move with the document, not just the shell.
+        ->assertSee('تسجيل الدخول إلى حسابك')
+        ->assertNoJavaScriptErrors();
+});
+
+test('the login page switcher applies the dark theme', function () {
+    visit(route('login', absolute: false))
+        ->click('@appearance-switcher')
+        ->click('@appearance-option-dark')
+        ->assertAttributeContains(':root', 'class', 'dark')
+        ->assertNoJavaScriptErrors();
+});
