@@ -16,6 +16,7 @@ return [
     'admin_dashboard' => 'Admin dashboard',
 
     'platform' => 'Platform',
+    'platform_settings' => 'General settings',
     'general_administration' => 'General administration',
     'invite_user' => 'Invite user',
     'navigation_menu' => 'Navigation menu',

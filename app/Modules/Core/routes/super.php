@@ -4,6 +4,7 @@ use App\Modules\Core\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Modules\Core\Http\Controllers\MailDiagnosticsController;
 use App\Modules\Core\Http\Controllers\OrganizationController;
 use App\Modules\Core\Http\Controllers\OrganizationRoleController;
+use App\Modules\Core\Http\Controllers\PlatformSettingsController;
 use App\Modules\Core\Http\Controllers\RoleController;
 use App\Modules\Core\Http\Controllers\UserSearchController;
 use Illuminate\Support\Facades\Route;
@@ -62,5 +63,11 @@ Route::middleware('web')->prefix('super')->name('super.')->group(function () {
             ->name('diagnostics.mail');
 
         Route::resource('roles', RoleController::class)->except('show');
+
+        // How the platform itself behaves, chiefly whether an account can be
+        // created without an invitation. No `show` counterpart: the screen is
+        // the form.
+        Route::get('settings', [PlatformSettingsController::class, 'edit'])->name('settings.edit');
+        Route::patch('settings', [PlatformSettingsController::class, 'update'])->name('settings.update');
     });
 });

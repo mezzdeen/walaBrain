@@ -16,6 +16,7 @@ return [
     'admin_dashboard' => 'لوحة تحكم المشرف',
 
     'platform' => 'المنصة',
+    'platform_settings' => 'الإعدادات العامة',
     'general_administration' => 'الإدارة العامة',
     'invite_user' => 'دعوة مستخدم',
     'navigation_menu' => 'قائمة التنقل',

@@ -69,6 +69,7 @@ return [
         'organization' => 'المؤسسة',
         'members' => 'الأعضاء',
         'diagnostics' => 'الفحوصات',
+        'settings' => 'إعدادات المنصة',
     ],
 
     /*
@@ -85,6 +86,7 @@ return [
         'invite' => 'دعوة',
         'remove' => 'إزالة',
         'run' => 'تشغيل',
+        'manage' => 'إدارة',
         'roles' => [
             'manage' => 'إدارة الأدوار',
         ],

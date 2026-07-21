@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { Building2, LayoutGrid, ShieldCheck } from 'lucide-react';
+import { Building2, LayoutGrid, Settings2, ShieldCheck } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
 import { SuperNavUser } from '@/components/super-nav-user';
@@ -17,6 +17,7 @@ import { useTranslations } from '@/hooks/use-translations';
 import { dashboard } from '@/routes/super';
 import { index as organizationsIndex } from '@/routes/super/organizations';
 import { index as rolesIndex } from '@/routes/super/roles';
+import { edit as settingsEdit } from '@/routes/super/settings';
 import type { NavItem } from '@/types';
 
 export function SuperSidebar() {
@@ -44,6 +45,15 @@ export function SuperSidebar() {
                       title: t('core.roles.title'),
                       href: rolesIndex(),
                       icon: ShieldCheck,
+                  },
+              ]
+            : []),
+        ...(can('settings.manage')
+            ? [
+                  {
+                      title: t('core.nav.platform_settings'),
+                      href: settingsEdit(),
+                      icon: Settings2,
                   },
               ]
             : []),

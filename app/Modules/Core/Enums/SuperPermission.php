@@ -27,6 +27,14 @@ enum SuperPermission: string
     case RunDiagnostics = 'diagnostics.run';
 
     /**
+     * Settling how the platform itself behaves — whether accounts can be
+     * created without an invitation, and by which means. There is no matching
+     * `.view` case on purpose: the screen is an edit form, so being able to
+     * read it and being able to submit it are the same ability.
+     */
+    case ManagePlatformSettings = 'settings.manage';
+
+    /**
      * @return list<string>
      */
     public static function values(): array
