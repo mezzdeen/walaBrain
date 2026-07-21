@@ -11,7 +11,7 @@ import { useTranslations } from '@/hooks/use-translations';
 import { search } from '@/routes/super/users';
 
 interface SearchUser {
-    id: number;
+    hash_id: string;
     first_name: string;
     last_name: string;
     full_name: string;
@@ -130,8 +130,7 @@ export function OwnerEmailCombobox({ name, error }: OwnerEmailComboboxProps) {
     const settled = resultsQuery === query;
     const showSpinner = searchable && !settled;
     const showResults = open && searchable && settled && results.length > 0;
-    const showNoResults =
-        open && searchable && settled && results.length === 0;
+    const showNoResults = open && searchable && settled && results.length === 0;
 
     function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
         if (event.key === 'Escape') {
@@ -183,7 +182,9 @@ export function OwnerEmailCombobox({ name, error }: OwnerEmailComboboxProps) {
                     aria-expanded={open}
                     aria-controls={listboxId}
                     aria-autocomplete="list"
-                    placeholder={t('core.organizations.owner_email_placeholder')}
+                    placeholder={t(
+                        'core.organizations.owner_email_placeholder',
+                    )}
                     value={email}
                     onChange={(event) => {
                         setEmail(event.target.value);
@@ -211,7 +212,7 @@ export function OwnerEmailCombobox({ name, error }: OwnerEmailComboboxProps) {
                         className="absolute inset-x-0 top-full z-50 mt-1 max-h-64 overflow-y-auto rounded-md border bg-popover p-1 shadow-md"
                     >
                         {results.map((user, index) => (
-                            <li key={user.id}>
+                            <li key={user.hash_id}>
                                 <button
                                     type="button"
                                     role="option"

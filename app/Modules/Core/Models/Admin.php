@@ -2,6 +2,7 @@
 
 namespace App\Modules\Core\Models;
 
+use App\Modules\Core\Concerns\HasHashId;
 use App\Modules\Core\Database\Factories\AdminFactory;
 use App\Modules\Core\Enums\SuperRole;
 use App\Modules\Core\Support\PermissionTeam;
@@ -40,7 +41,7 @@ class Admin extends Authenticatable
      *
      * @use HasFactory<AdminFactory>
      */
-    use HasFactory, HasRoles, Notifiable;
+    use HasFactory, HasHashId, HasRoles, Notifiable;
 
     /**
      * Get the attributes that should be cast.

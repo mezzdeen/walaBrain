@@ -60,7 +60,7 @@ test('switching organization drops the previous brand colour', function () {
     visit(route('dashboard', absolute: false))
         ->assertSourceInHas('#brand-color', '--primary: #ca8a04')
         ->click('@org-switcher-trigger')
-        ->click("@org-switcher-option-{$plain->id}")
+        ->click("@org-switcher-option-{$plain->getRouteKey()}")
         // The switch redirects, so the assertions have to wait for the new page
         // rather than racing the one being replaced.
         ->waitForEvent('networkidle')
@@ -77,7 +77,7 @@ test('switching organization picks up the next one s brand colour', function () 
 
     visit(route('dashboard', absolute: false))
         ->click('@org-switcher-trigger')
-        ->click("@org-switcher-option-{$second->id}")
+        ->click("@org-switcher-option-{$second->getRouteKey()}")
         ->waitForEvent('networkidle')
         ->assertSourceInHas('#brand-color', '--primary: #2563eb')
         ->assertSourceInMissing('#brand-color', '#ca8a04')

@@ -68,7 +68,7 @@ test('admins can view an organization and its members', function () {
     $response->assertOk();
     $response->assertInertia(fn (Assert $page) => $page
         ->component('super/organizations/show')
-        ->where('organization.id', $organization->id)
+        ->where('organization.hash_id', $organization->getRouteKey())
         ->has('users', 2)
     );
 });

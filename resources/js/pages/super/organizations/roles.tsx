@@ -9,21 +9,21 @@ import { update as updateMemberRoles } from '@/routes/super/organizations/member
 import { index as rolesIndex } from '@/routes/super/organizations/roles';
 
 type RoleRow = {
-    id: number;
+    hash_id: string;
     name: string;
     permissions_count: number;
     protected: boolean;
 };
 
 type MemberRow = {
-    id: number;
+    hash_id: string;
     full_name: string;
     email: string;
     roles: string[];
 };
 
 type Props = {
-    organization: { id: number; name: string };
+    organization: { hash_id: string; name: string };
     roles: RoleRow[];
     members: MemberRow[];
 };
@@ -43,7 +43,7 @@ export default function OrganizationRoles({
             },
             {
                 title: t('core.roles.organization_breadcrumb'),
-                href: rolesIndex(organization.id),
+                href: rolesIndex(organization),
             },
         ],
     });
@@ -53,11 +53,14 @@ export default function OrganizationRoles({
         role: string,
         checked: boolean,
     ): void => {
-        router.put(updateMemberRoles([organization.id, member.id]).url, {
-            roles: checked
-                ? [...member.roles, role]
-                : member.roles.filter((name) => name !== role),
-        });
+        router.put(
+            updateMemberRoles([organization.hash_id, member.hash_id]).url,
+            {
+                roles: checked
+                    ? [...member.roles, role]
+                    : member.roles.filter((name) => name !== role),
+            },
+        );
     };
 
     return (
@@ -88,7 +91,7 @@ export default function OrganizationRoles({
                     </CardHeader>
                     <CardContent className="flex flex-wrap gap-2">
                         {roles.map((role) => (
-                            <Badge key={role.id} variant="secondary">
+                            <Badge key={role.hash_id} variant="secondary">
                                 {role.name}
                                 <span className="ms-2 text-muted-foreground">
                                     {role.permissions_count}
@@ -115,7 +118,7 @@ export default function OrganizationRoles({
                         ) : (
                             members.map((member) => (
                                 <div
-                                    key={member.id}
+                                    key={member.hash_id}
                                     className="flex flex-col gap-3 border-b pb-6 last:border-0 last:pb-0"
                                 >
                                     <div>
@@ -129,11 +132,11 @@ export default function OrganizationRoles({
                                     <div className="flex flex-wrap gap-4">
                                         {roles.map((role) => (
                                             <div
-                                                key={role.id}
+                                                key={role.hash_id}
                                                 className="flex items-center gap-2"
                                             >
                                                 <Checkbox
-                                                    id={`member-${member.id}-role-${role.id}`}
+                                                    id={`member-${member.hash_id}-role-${role.hash_id}`}
                                                     checked={member.roles.includes(
                                                         role.name,
                                                     )}
@@ -148,7 +151,7 @@ export default function OrganizationRoles({
                                                     }
                                                 />
                                                 <Label
-                                                    htmlFor={`member-${member.id}-role-${role.id}`}
+                                                    htmlFor={`member-${member.hash_id}-role-${role.hash_id}`}
                                                     className="text-sm font-normal text-muted-foreground"
                                                 >
                                                     {role.name}

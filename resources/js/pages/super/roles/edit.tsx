@@ -13,7 +13,7 @@ import { edit, index, update } from '@/routes/super/roles';
 
 type Props = {
     role: {
-        id: number;
+        hash_id: string;
         name: string;
         permissions: string[];
         protected: boolean;
@@ -28,7 +28,7 @@ export default function EditRole({ role, permissionGroups }: Props) {
     setLayoutProps({
         breadcrumbs: [
             { title: t('core.roles.title'), href: index() },
-            { title: t('core.roles.edit_breadcrumb'), href: edit(role.id) },
+            { title: t('core.roles.edit_breadcrumb'), href: edit(role) },
         ],
     });
 
@@ -51,7 +51,7 @@ export default function EditRole({ role, permissionGroups }: Props) {
                 <Card className="max-w-3xl">
                     <CardContent>
                         <Form
-                            {...update.form(role.id)}
+                            {...update.form(role)}
                             className="flex flex-col gap-6"
                         >
                             {({ processing, errors }) => (

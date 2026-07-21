@@ -19,7 +19,7 @@ import { useTranslations } from '@/hooks/use-translations';
 import { create, destroy, edit, index } from '@/routes/super/roles';
 
 type RoleRow = {
-    id: number;
+    hash_id: string;
     name: string;
     permissions_count: number;
     users_count: number;
@@ -99,7 +99,7 @@ export default function RolesIndex({ roles }: Props) {
                                 <tbody>
                                     {roles.map((role) => (
                                         <tr
-                                            key={role.id}
+                                            key={role.hash_id}
                                             className="border-b last:border-0"
                                         >
                                             <td className="px-4 py-3">
@@ -139,7 +139,7 @@ export default function RolesIndex({ roles }: Props) {
                                                             >
                                                                 <Link
                                                                     href={edit(
-                                                                        role.id,
+                                                                        role,
                                                                     )}
                                                                 >
                                                                     <Pencil className="size-4" />
@@ -193,7 +193,7 @@ function DeleteRole({ role }: { role: RoleRow }) {
                         })}
                     </DialogDescription>
                 </DialogHeader>
-                <Form {...destroy.form(role.id)}>
+                <Form {...destroy.form(role)}>
                     {({ processing }) => (
                         <DialogFooter className="gap-2">
                             <DialogClose asChild>

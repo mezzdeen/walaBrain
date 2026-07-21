@@ -16,7 +16,7 @@ test('an owner can view their organization settings', function () {
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('organization')
-            ->where('organization.id', $organization->id)
+            ->where('organization.hash_id', $organization->getRouteKey())
             ->where('organization.name', 'Acme')
         );
 });

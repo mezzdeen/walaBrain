@@ -1,5 +1,6 @@
 export type User = {
-    id: number;
+    /** The opaque code that addresses the user in URLs. */
+    hash_id: string;
     first_name: string;
     last_name: string;
     /** Appended by the model: the two halves joined for display. */
@@ -10,11 +11,11 @@ export type User = {
     two_factor_enabled?: boolean;
     created_at: string;
     updated_at: string;
-    [key: string]: unknown;
 };
 
 export type Admin = {
-    id: number;
+    /** The opaque code that addresses the admin in URLs. */
+    hash_id: string;
     name: string;
     email: string;
 };

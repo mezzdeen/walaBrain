@@ -66,7 +66,7 @@ test('switching organization changes what the sidebar reports', function () {
 
     visit(route('profile.edit', absolute: false))
         ->click('@org-switcher-trigger')
-        ->click("@org-switcher-option-{$globex->id}")
+        ->click("@org-switcher-option-{$globex->getRouteKey()}")
         // The switch redirects, so the assertions below have to wait for the
         // new page rather than racing the one being replaced.
         ->waitForEvent('networkidle')

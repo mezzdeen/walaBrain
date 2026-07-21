@@ -17,10 +17,10 @@ test('admins can view the roles an organization owns', function () {
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('super/organizations/roles')
-            ->where('organization.id', $organization->id)
+            ->where('organization.hash_id', $organization->getRouteKey())
             ->has('roles', count(OrganizationRole::cases()))
             ->has('members', 1)
-            ->where('members.0.id', $member->id)
+            ->where('members.0.hash_id', $member->getRouteKey())
             ->where('members.0.roles', [OrganizationRole::Owner->value])
         );
 });

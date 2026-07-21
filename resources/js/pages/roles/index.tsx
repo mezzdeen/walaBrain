@@ -25,7 +25,7 @@ import { useTranslations } from '@/hooks/use-translations';
 import { destroy, index, store, update } from '@/routes/roles';
 
 type RoleRow = {
-    id: number;
+    hash_id: string;
     name: string;
     permissions: string[];
     permissions_count: number;
@@ -87,7 +87,7 @@ export default function OrganizationRoleSettings({
 
                 <div className="flex flex-col gap-3">
                     {roles.map((role) => (
-                        <Card key={role.id}>
+                        <Card key={role.hash_id}>
                             <CardContent className="flex items-center justify-between gap-4">
                                 <div className="flex flex-col gap-1">
                                     <div className="flex items-center gap-2">
@@ -168,19 +168,19 @@ function RoleDialog({
                 </DialogHeader>
 
                 <Form
-                    {...(role ? update.form(role.id) : store.form())}
+                    {...(role ? update.form(role) : store.form())}
                     className="flex flex-col gap-6"
                 >
                     {({ processing, errors }) => (
                         <>
                             <div className="grid gap-2">
                                 <Label
-                                    htmlFor={`role-name-${role?.id ?? 'new'}`}
+                                    htmlFor={`role-name-${role?.hash_id ?? 'new'}`}
                                 >
                                     {t('core.roles.name')}
                                 </Label>
                                 <Input
-                                    id={`role-name-${role?.id ?? 'new'}`}
+                                    id={`role-name-${role?.hash_id ?? 'new'}`}
                                     name="name"
                                     required
                                     defaultValue={role?.name}
@@ -242,7 +242,7 @@ function DeleteRole({ role }: { role: RoleRow }) {
                         })}
                     </DialogDescription>
                 </DialogHeader>
-                <Form {...destroy.form(role.id)}>
+                <Form {...destroy.form(role)}>
                     {({ processing }) => (
                         <DialogFooter className="gap-2">
                             <DialogClose asChild>

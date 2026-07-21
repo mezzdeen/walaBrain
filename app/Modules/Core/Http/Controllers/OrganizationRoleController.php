@@ -31,20 +31,22 @@ class OrganizationRoleController extends Controller
         Gate::authorize('manageRoles', $organization);
 
         return OrganizationRoles::within($organization, fn (): Response => Inertia::render('super/organizations/roles', [
-            'organization' => $organization->only(['id', 'name']),
+            'organization' => $organization->only(['hash_id', 'name']),
+            // `id` stays in both column lists: it is what `hash_id` is derived
+            // from, and a row loaded without it has no address to link to.
             'roles' => $this->rolesFor($organization)
                 ->withCount('permissions')
                 ->orderBy('name')
                 ->get(['id', 'name'])
                 ->map(fn (Role $role): array => [
-                    ...$role->only(['id', 'name', 'permissions_count']),
+                    ...$role->only(['hash_id', 'name', 'permissions_count']),
                     'protected' => OrganizationRole::tryFrom($role->name)?->isProtected() ?? false,
                 ]),
             // Eager loaded inside the organization's context, so the relation
             // captures this team rather than querying once per member.
             'members' => $organization->users()->with('roles')->get(['users.id', 'first_name', 'last_name', 'email'])
                 ->map(fn (User $member): array => [
-                    ...$member->only(['id', 'first_name', 'last_name', 'full_name', 'email']),
+                    ...$member->only(['hash_id', 'first_name', 'last_name', 'full_name', 'email']),
                     'roles' => $member->roles->pluck('name')->all(),
                 ]),
             'permissionGroups' => $this->permissionGroups(),

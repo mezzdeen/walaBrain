@@ -87,13 +87,13 @@ export function OrgSwitcher() {
     }
 
     const switchTo = (target: OrganizationSummary): void => {
-        if (target.id === organization.id) {
+        if (target.hash_id === organization.hash_id) {
             return;
         }
 
         // Neither scroll nor component state is worth keeping: the response
         // lands on the dashboard with a different organization's data.
-        router.put(switchMethod.url(target.id));
+        router.put(switchMethod.url(target));
     };
 
     return (
@@ -137,15 +137,15 @@ export function OrgSwitcher() {
                         </DropdownMenuLabel>
                         {organizations.map((candidate) => (
                             <DropdownMenuItem
-                                key={candidate.id}
+                                key={candidate.hash_id}
                                 onSelect={() => switchTo(candidate)}
                                 className="gap-2"
-                                data-test={`org-switcher-option-${candidate.id}`}
+                                data-test={`org-switcher-option-${candidate.hash_id}`}
                             >
                                 <span className="truncate">
                                     {candidate.name}
                                 </span>
-                                {candidate.id === organization.id && (
+                                {candidate.hash_id === organization.hash_id && (
                                     <Check className="ms-auto size-4" />
                                 )}
                             </DropdownMenuItem>

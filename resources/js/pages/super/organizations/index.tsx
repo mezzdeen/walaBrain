@@ -25,7 +25,7 @@ import {
 } from '@/routes/super/organizations';
 
 type OrganizationRow = {
-    id: number;
+    hash_id: string;
     name: string;
     users_count: number;
 };
@@ -95,12 +95,12 @@ export default function OrganizationsIndex({ organizations }: Props) {
                                 <tbody>
                                     {organizations.map((organization) => (
                                         <tr
-                                            key={organization.id}
+                                            key={organization.hash_id}
                                             className="border-b last:border-0"
                                         >
                                             <td className="px-4 py-3">
                                                 <Link
-                                                    href={show(organization.id)}
+                                                    href={show(organization)}
                                                     className="font-medium hover:underline"
                                                 >
                                                     {organization.name}
@@ -123,7 +123,7 @@ export default function OrganizationsIndex({ organizations }: Props) {
                                                         >
                                                             <Link
                                                                 href={edit(
-                                                                    organization.id,
+                                                                    organization,
                                                                 )}
                                                             >
                                                                 <Pencil className="size-4" />
@@ -186,7 +186,7 @@ function DeleteOrganization({
                         })}
                     </DialogDescription>
                 </DialogHeader>
-                <Form {...destroy.form(organization.id)}>
+                <Form {...destroy.form(organization)}>
                     {({ processing }) => (
                         <DialogFooter className="gap-2">
                             <DialogClose asChild>

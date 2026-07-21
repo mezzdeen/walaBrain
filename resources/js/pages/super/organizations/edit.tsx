@@ -10,7 +10,7 @@ import { index, update } from '@/routes/super/organizations';
 
 type Props = {
     organization: {
-        id: number;
+        hash_id: string;
         name: string;
     };
 };
@@ -46,7 +46,7 @@ export default function EditOrganization({ organization }: Props) {
                 <Card className="max-w-xl">
                     <CardContent>
                         <Form
-                            {...update.form(organization.id)}
+                            {...update.form(organization)}
                             className="flex flex-col gap-6"
                         >
                             {({ processing, errors }) => (

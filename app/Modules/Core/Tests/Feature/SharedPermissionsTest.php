@@ -36,7 +36,7 @@ test('a user is given the permissions of their active organization', function ()
     $this->actingAs($user)
         ->get(route('dashboard'))
         ->assertInertia(fn (Assert $page) => $page
-            ->where('organization.id', $organization->id)
+            ->where('organization.hash_id', $organization->getRouteKey())
             ->where('organization.name', $organization->name)
             ->where('permissions', [
                 OrganizationPermission::ViewOrganization->value,
@@ -54,7 +54,7 @@ test('permissions change when the user switches organization', function () {
         ->withSession([OrganizationContext::SESSION_KEY => $second->id])
         ->get(route('dashboard'))
         ->assertInertia(fn (Assert $page) => $page
-            ->where('organization.id', $second->id)
+            ->where('organization.hash_id', $second->getRouteKey())
             // A member of the second organization, but holding no role there.
             ->where('permissions', [])
         );
@@ -99,7 +99,7 @@ test('the organizations prop carries no pivot data', function () {
     $this->actingAs($user)
         ->get(route('dashboard'))
         ->assertInertia(fn (Assert $page) => $page
-            ->where('organizations', [['id' => $organization->id, 'name' => 'Acme']])
+            ->where('organizations', [['hash_id' => $organization->getRouteKey(), 'name' => 'Acme']])
         );
 });
 

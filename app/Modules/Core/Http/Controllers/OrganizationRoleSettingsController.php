@@ -45,7 +45,7 @@ class OrganizationRoleSettingsController extends Controller
                 ->orderBy('name')
                 ->get(['id', 'name'])
                 ->map(fn (Role $role): array => [
-                    ...$role->only(['id', 'name', 'permissions_count']),
+                    ...$role->only(['hash_id', 'name', 'permissions_count']),
                     'permissions' => $role->permissions->pluck('name')->all(),
                     'protected' => OrganizationRole::tryFrom($role->name)?->isProtected() ?? false,
                 ]),

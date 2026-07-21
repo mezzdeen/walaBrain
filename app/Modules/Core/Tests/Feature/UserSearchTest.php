@@ -13,7 +13,7 @@ test('admins can find users by the start of their email', function () {
 
     $response->assertOk();
     expect($response->json('users'))->toHaveCount(1)
-        ->and($response->json('users.0.id'))->toBe($match->id)
+        ->and($response->json('users.0.hash_id'))->toBe($match->getRouteKey())
         ->and($response->json('users.0.email'))->toBe('ada@example.com');
 });
 
@@ -27,7 +27,7 @@ test('admins can find users by part of their name', function () {
 
     $response->assertOk();
     expect($response->json('users'))->toHaveCount(1)
-        ->and($response->json('users.0.id'))->toBe($match->id);
+        ->and($response->json('users.0.hash_id'))->toBe($match->getRouteKey());
 });
 
 test('admins can find users by their whole name', function () {
@@ -40,7 +40,7 @@ test('admins can find users by their whole name', function () {
 
     $response->assertOk();
     expect($response->json('users'))->toHaveCount(1)
-        ->and($response->json('users.0.id'))->toBe($match->id);
+        ->and($response->json('users.0.hash_id'))->toBe($match->getRouteKey());
 });
 
 test('the search only exposes the fields the typeahead renders', function () {
@@ -51,7 +51,7 @@ test('the search only exposes the fields the typeahead renders', function () {
         ->getJson(route('super.users.search', ['q' => 'ada']));
 
     expect(array_keys($response->json('users.0')))
-        ->toEqualCanonicalizing(['id', 'first_name', 'last_name', 'full_name', 'email']);
+        ->toEqualCanonicalizing(['hash_id', 'first_name', 'last_name', 'full_name', 'email']);
 });
 
 test('a query shorter than two characters returns nothing', function () {

@@ -32,12 +32,14 @@ class RoleController extends Controller
     public function index(): Response
     {
         return Inertia::render('super/roles/index', [
+            // `id` stays in the column list: it is what `hash_id` is derived
+            // from, and a row loaded without it has no address to link to.
             'roles' => $this->platformRoles()
                 ->withCount(['permissions', 'users'])
                 ->orderBy('name')
                 ->get(['id', 'name'])
                 ->map(fn (Role $role): array => [
-                    ...$role->only(['id', 'name', 'permissions_count', 'users_count']),
+                    ...$role->only(['hash_id', 'name', 'permissions_count', 'users_count']),
                     'protected' => $this->isProtected($role),
                 ]),
         ]);
@@ -80,7 +82,7 @@ class RoleController extends Controller
 
         return Inertia::render('super/roles/edit', [
             'role' => [
-                ...$role->only(['id', 'name']),
+                ...$role->only(['hash_id', 'name']),
                 'permissions' => $role->permissions->pluck('name')->all(),
                 'protected' => $this->isProtected($role),
             ],

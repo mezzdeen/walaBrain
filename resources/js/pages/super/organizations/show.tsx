@@ -8,14 +8,14 @@ import { edit, index } from '@/routes/super/organizations';
 import { index as organizationRoles } from '@/routes/super/organizations/roles';
 
 type OrganizationMember = {
-    id: number;
+    hash_id: string;
     full_name: string;
     email: string;
 };
 
 type Props = {
     organization: {
-        id: number;
+        hash_id: string;
         name: string;
     };
     users: OrganizationMember[];
@@ -62,7 +62,7 @@ export default function ShowOrganization({ organization, users }: Props) {
                         </Button>
                         {can('organizations.roles.manage') && (
                             <Button variant="outline" asChild>
-                                <Link href={organizationRoles(organization.id)}>
+                                <Link href={organizationRoles(organization)}>
                                     <ShieldCheck className="size-4" />
                                     {t('core.roles.manage_roles')}
                                 </Link>
@@ -70,7 +70,7 @@ export default function ShowOrganization({ organization, users }: Props) {
                         )}
                         {can('organizations.update') && (
                             <Button asChild>
-                                <Link href={edit(organization.id)}>
+                                <Link href={edit(organization)}>
                                     <Pencil className="size-4" />
                                     {t('core.common.edit')}
                                 </Link>
@@ -104,7 +104,7 @@ export default function ShowOrganization({ organization, users }: Props) {
                                     <tbody>
                                         {users.map((user) => (
                                             <tr
-                                                key={user.id}
+                                                key={user.hash_id}
                                                 className="border-b last:border-0"
                                             >
                                                 <td className="px-4 py-3 font-medium">

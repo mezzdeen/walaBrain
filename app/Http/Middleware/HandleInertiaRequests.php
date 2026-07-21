@@ -61,7 +61,7 @@ class HandleInertiaRequests extends Middleware
             'permissions' => fn (): array => $this->permissionsFor($request),
             'organization' => fn (): ?array => $this->isAdminPlatform($request)
                 ? null
-                : OrganizationContext::current()?->only(['id', 'name']),
+                : OrganizationContext::current()?->only(['hash_id', 'name']),
             'organizations' => fn (): array => $this->switchableOrganizations($request),
             // The finished stylesheet, not the colour: the Blade root view has
             // already written this exact text for the first paint, and sending
@@ -127,10 +127,11 @@ class HandleInertiaRequests extends Middleware
     /**
      * The organizations the signed-in user may switch between.
      *
-     * Only id and name: mapped rather than serialized whole, so the pivot rows
-     * the relation carries do not ride along into the page props.
+     * Only the public code and the name: mapped rather than serialized whole,
+     * so the pivot rows the relation carries do not ride along into the page
+     * props.
      *
-     * @return list<array{id: int, name: string}>
+     * @return list<array{hash_id: string, name: string}>
      */
     protected function switchableOrganizations(Request $request): array
     {
@@ -144,11 +145,13 @@ class HandleInertiaRequests extends Middleware
             return [];
         }
 
+        // `organizations.id` stays in the column list: it is what `hash_id` is
+        // derived from, and a row loaded without it has no address to link to.
         return array_values($user->organizations()
             ->orderBy('name')
             ->get(['organizations.id', 'organizations.name'])
             ->map(fn (Organization $organization): array => [
-                'id' => $organization->id,
+                'hash_id' => $organization->hash_id,
                 'name' => $organization->name,
             ])
             ->all());

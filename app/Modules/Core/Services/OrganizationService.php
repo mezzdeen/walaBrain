@@ -29,6 +29,8 @@ final class OrganizationService
      */
     public function listing(): Collection
     {
+        // `id` stays in the column list: it is what `hash_id` is derived from,
+        // and a row loaded without it has no address to link to.
         return Organization::query()
             ->withCount('users')
             ->latest()
@@ -42,6 +44,8 @@ final class OrganizationService
      */
     public function members(Organization $organization): Collection
     {
+        // `users.id` stays in the column list: it is what `hash_id` is derived
+        // from, and a row loaded without it has no address to link to.
         return $organization->users()->get(['users.id', 'first_name', 'last_name', 'email']);
     }
 

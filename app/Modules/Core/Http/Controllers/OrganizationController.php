@@ -76,7 +76,7 @@ class OrganizationController extends Controller
     public function edit(Organization $organization): Response
     {
         return Inertia::render('super/organizations/edit', [
-            'organization' => $organization->only(['id', 'name']),
+            'organization' => $organization->only(['hash_id', 'name']),
         ]);
     }
 

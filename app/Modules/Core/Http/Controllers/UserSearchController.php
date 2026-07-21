@@ -65,6 +65,8 @@ class UserSearchController extends Controller
             })
             ->orderBy('email')
             ->limit(self::RESULT_LIMIT)
+            // `id` stays in the column list: it is what `hash_id` is derived
+            // from. The integer itself is hidden from the response.
             ->get(['id', 'first_name', 'last_name', 'email']);
 
         return response()->json(['users' => $users]);

@@ -2,6 +2,7 @@
 
 namespace App\Modules\Core\Models;
 
+use App\Modules\Core\Concerns\HasHashId;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 use Spatie\Permission\Models\Role as SpatieRole;
@@ -26,6 +27,12 @@ use Spatie\Permission\Models\Role as SpatieRole;
  */
 class Role extends SpatieRole
 {
+    // Safe alongside the `#[Fillable]` warning above: this adds an appended
+    // attribute and a hidden one, neither of which feeds `$fillable`. The
+    // permission package reads roles through `getAttributes()`, which sees
+    // neither, so its cache is unaffected.
+    use HasHashId;
+
     /**
      * The organization that owns the role, or null when the role is global.
      *
