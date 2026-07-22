@@ -4,12 +4,25 @@ use App\Modules\Core\Models\User;
 use Illuminate\Support\Facades\DB;
 
 /**
+ * The migration under test, reduced to the two methods these tests drive on it.
+ * The file returns an anonymous class, so there is no name to hint against.
+ */
+interface RollableMigration
+{
+    public function up(): void;
+
+    public function down(): void;
+}
+
+/**
  * Exercises the rollback of the identity migration directly.
  *
  * The migration's `down()` runs, its effect is asserted, and then `up()` is run
  * again to put the schema back the way the rest of the suite expects it — so
  * this test observes the rollback without leaving the users table rewritten for
  * whatever runs next.
+ *
+ * @return RollableMigration
  */
 function identityMigration(): object
 {

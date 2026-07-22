@@ -3,6 +3,7 @@
 use App\Modules\Core\Database\Seeders\DemoSeeder;
 use App\Modules\Core\Enums\OrganizationRole;
 use App\Modules\Core\Models\Organization;
+use App\Modules\Core\Models\Role;
 use App\Modules\Core\Models\User;
 use App\Modules\Core\Support\OrganizationRoles;
 
@@ -19,7 +20,13 @@ function demoRoles(Organization $organization, User $user): array
 {
     return OrganizationRoles::within(
         $organization,
-        fn (): array => $user->fresh()?->roles->pluck('name')->sort()->values()->all() ?? [],
+        fn (): array => array_values(
+            $user->fresh()?->roles
+                ->map(fn (Role $role): string => $role->name)
+                ->sort()
+                ->values()
+                ->all() ?? []
+        ),
     );
 }
 

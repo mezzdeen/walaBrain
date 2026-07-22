@@ -64,13 +64,16 @@ final class OrganizationRoles
      */
     public static function assignableNames(Organization $organization): array
     {
-        return Role::query()
-            ->where('guard_name', 'web')
-            ->where('organization_id', $organization->getKey())
-            ->where('name', '!=', OrganizationRole::Owner->value)
-            ->orderBy('name')
-            ->pluck('name')
-            ->all();
+        return array_values(
+            Role::query()
+                ->where('guard_name', 'web')
+                ->where('organization_id', $organization->getKey())
+                ->where('name', '!=', OrganizationRole::Owner->value)
+                ->orderBy('name')
+                ->pluck('name')
+                ->map(fn (string $name): string => $name)
+                ->all()
+        );
     }
 
     /**

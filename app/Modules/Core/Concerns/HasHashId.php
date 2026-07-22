@@ -62,7 +62,7 @@ trait HasHashId
      */
     protected function hashId(): Attribute
     {
-        return Attribute::get(fn (mixed $value, array $attributes): ?string => HashId::encode($this->getKey()));
+        return Attribute::make(get: fn (mixed $value, array $attributes): ?string => HashId::encode($this->getKey()));
     }
 
     /**

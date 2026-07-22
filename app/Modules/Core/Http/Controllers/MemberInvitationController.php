@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Modules\Core\Http\Requests\StoreMemberInvitationRequest;
 use App\Modules\Core\Models\Organization;
 use App\Modules\Core\Models\OrganizationInvitation;
+use App\Modules\Core\Support\HashId;
 use App\Modules\Core\Support\OrganizationContext;
 use App\Modules\Core\Support\OrganizationInvitations;
 use App\Modules\Core\Support\OrganizationRoles;
@@ -129,16 +130,18 @@ class MemberInvitationController extends Controller
      */
     private function pendingInvitations(Organization $organization): array
     {
-        return $organization->invitations()
-            ->pending()
-            ->latest()
-            ->get(['id', 'email', 'role', 'expires_at'])
-            ->map(fn (OrganizationInvitation $invitation): array => [
-                'hash_id' => $invitation->hash_id,
-                'email' => $invitation->email,
-                'role' => $invitation->role,
-                'expires_at' => $invitation->expires_at->toIso8601String(),
-            ])
-            ->all();
+        return array_values(
+            $organization->invitations()
+                ->pending()
+                ->latest()
+                ->get(['id', 'email', 'role', 'expires_at'])
+                ->map(fn (OrganizationInvitation $invitation): array => [
+                    'hash_id' => HashId::encode($invitation->id),
+                    'email' => $invitation->email,
+                    'role' => $invitation->role,
+                    'expires_at' => $invitation->expires_at->toIso8601String(),
+                ])
+                ->all()
+        );
     }
 }

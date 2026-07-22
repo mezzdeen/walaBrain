@@ -22,7 +22,7 @@ function memberHolding(Organization $organization, OrganizationPermission ...$pe
         'guard_name' => 'web',
         'organization_id' => $organization->getKey(),
     ]))->syncPermissions(array_map(
-        fn (OrganizationPermission $permission): Permission => Permission::findOrCreate($permission->value, 'web'),
+        fn (OrganizationPermission $permission) => Permission::findOrCreate($permission->value, 'web'),
         $permissions,
     )));
 

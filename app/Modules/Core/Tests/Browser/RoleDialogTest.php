@@ -41,11 +41,17 @@ test('the new role form is empty again after a role is created', function () {
 test('editing a role shows the saved values when the dialog is reopened', function () {
     $organization = Organization::factory()->create();
     $owner = memberOf($organization, OrganizationRole::Owner);
-    $role = OrganizationRoles::within($organization, fn () => tap(Role::create([
-        'name' => 'auditor',
-        'guard_name' => 'web',
-        'organization_id' => $organization->id,
-    ]))->syncPermissions([Permission::findOrCreate('members.view', 'web')]));
+    $role = OrganizationRoles::within($organization, fn () => tap(
+        new Role([
+            'name' => 'auditor',
+            'guard_name' => 'web',
+            'organization_id' => $organization->id,
+        ]),
+        function (Role $role): void {
+            $role->save();
+            $role->syncPermissions([Permission::findOrCreate('members.view', 'web')]);
+        },
+    ));
 
     $this->actingAs($owner);
 

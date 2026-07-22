@@ -72,12 +72,14 @@ class MemberController extends Controller
      */
     private function filterableRoles(Organization $organization): array
     {
-        return Role::query()
-            ->where('guard_name', 'web')
-            ->where('organization_id', $organization->getKey())
-            ->orderBy('name')
-            ->pluck('name')
-            ->map(fn (string $name): array => ['value' => $name, 'label' => $name])
-            ->all();
+        return array_values(
+            Role::query()
+                ->where('guard_name', 'web')
+                ->where('organization_id', $organization->getKey())
+                ->orderBy('name')
+                ->pluck('name')
+                ->map(fn (string $name): array => ['value' => $name, 'label' => $name])
+                ->all()
+        );
     }
 }

@@ -11,6 +11,7 @@ use Inertia\Testing\AssertableInertia as Assert;
 /**
  * The details a valid sign-up posts.
  *
+ * @param  array<string, string>  $overrides
  * @return array<string, string>
  */
 function registration(array $overrides = []): array
