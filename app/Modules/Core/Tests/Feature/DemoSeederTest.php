@@ -85,3 +85,41 @@ test('the demo accounts can sign in with the seeded password', function () {
 
     $this->assertAuthenticated();
 });
+
+test('the demo seeder creates nothing in production', function () {
+    app()->detectEnvironment(fn () => 'production');
+
+    app(DemoSeeder::class)->run();
+
+    // Known-password accounts have no place in a real deployment, so the seeder
+    // is a no-op there rather than a foothold.
+    expect(User::count())->toBe(0)
+        ->and(Organization::count())->toBe(0);
+});
+
+test('the demo seeder can be run again after an account was closed', function () {
+    app(DemoSeeder::class)->run();
+
+    // A demo account closes their account (soft delete), then the seeder runs
+    // again — a routine `migrate:fresh --seed` in development.
+    User::firstWhere('email', 'asmaa@app.com')->delete();
+
+    app(DemoSeeder::class)->run();
+
+    // Brought back rather than colliding with the email it still reserved, and
+    // no second copy left behind.
+    expect(User::where('email', 'asmaa@app.com')->count())->toBe(1)
+        ->and(User::withTrashed()->where('email', 'asmaa@app.com')->count())->toBe(1);
+});
+
+test('the demo seeder can be run again after an organization was removed', function () {
+    app(DemoSeeder::class)->run();
+
+    Organization::firstWhere('name', 'Nakheel')->delete();
+
+    app(DemoSeeder::class)->run();
+
+    // One organization named Nakheel, restored — not two, one trashed.
+    expect(Organization::where('name', 'Nakheel')->count())->toBe(1)
+        ->and(Organization::withTrashed()->where('name', 'Nakheel')->count())->toBe(1);
+});

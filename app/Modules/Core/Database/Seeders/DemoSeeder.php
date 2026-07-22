@@ -31,6 +31,14 @@ class DemoSeeder extends Seeder
      */
     public function run(): void
     {
+        // Known-password accounts that own organizations exist only to make
+        // local work easier, so they must never be created on a real
+        // deployment — a `db:seed --force` there would hand anyone who reads
+        // this repository a tenant owner's credentials.
+        if (app()->isProduction()) {
+            return;
+        }
+
         $asmaa = $this->user('Asmaa', 'Izz', 'asmaa@app.com');
         $tysier = $this->user('Tysier', 'Saleh', 'tysier@app.com');
 
@@ -48,6 +56,15 @@ class DemoSeeder extends Seeder
      */
     private function user(string $firstName, string $lastName, string $email): User
     {
+        // Bring back a closed demo account rather than colliding with the email
+        // it still reserves: a soft delete leaves the row, and the unique index
+        // with it, so a re-run has to restore before it can match.
+        $trashed = User::withTrashed()->firstWhere('email', $email);
+
+        if ($trashed?->trashed()) {
+            $trashed->restore();
+        }
+
         return User::firstOrCreate(
             ['email' => $email],
             [
@@ -68,6 +85,15 @@ class DemoSeeder extends Seeder
      */
     private function organization(string $name, User $owner, User $member): void
     {
+        // Restore a soft-deleted organization instead of seeding a second one
+        // of the same name: matched by name, `firstOrCreate` cannot see the
+        // trashed row and would otherwise leave two behind.
+        $trashed = Organization::withTrashed()->firstWhere('name', $name);
+
+        if ($trashed?->trashed()) {
+            $trashed->restore();
+        }
+
         $organization = Organization::firstOrCreate(['name' => $name]);
 
         OrganizationRoles::provision($organization);

@@ -44,4 +44,26 @@ return [
         'min_length' => 5,
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Default Super Admin
+    |--------------------------------------------------------------------------
+    |
+    | The account the seeder provisions so the admin platform has someone to
+    | sign in as. Read through config rather than env() directly, so a cached
+    | configuration still honours what the operator set: env() returns its
+    | default once `config:cache` has run, and a super admin quietly created
+    | with the fallback password would be a back door into every organization.
+    |
+    | The password has no default on purpose. Production must supply one; local
+    | development falls back to a throwaway in the seeder itself.
+    |
+    */
+
+    'admin' => [
+        'email' => env('ADMIN_EMAIL', 'admin@syaaq.com'),
+        'name' => env('ADMIN_NAME', 'Admin'),
+        'password' => env('ADMIN_PASSWORD'),
+    ],
+
 ];
