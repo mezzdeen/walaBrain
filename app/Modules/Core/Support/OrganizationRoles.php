@@ -53,6 +53,27 @@ final class OrganizationRoles
     }
 
     /**
+     * The names of the roles an organization may invite someone under: its own,
+     * ownership excepted.
+     *
+     * The single source both the invite form's role options and the store
+     * request's allowlist read from, so the two can never offer and reject
+     * different sets.
+     *
+     * @return list<string>
+     */
+    public static function assignableNames(Organization $organization): array
+    {
+        return Role::query()
+            ->where('guard_name', 'web')
+            ->where('organization_id', $organization->getKey())
+            ->where('name', '!=', OrganizationRole::Owner->value)
+            ->orderBy('name')
+            ->pluck('name')
+            ->all();
+    }
+
+    /**
      * Run a callback with the permission team pointed at the organization, then
      * restore whatever team was active before.
      *

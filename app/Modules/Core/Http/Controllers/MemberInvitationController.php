@@ -3,13 +3,12 @@
 namespace App\Modules\Core\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Modules\Core\Enums\OrganizationRole;
 use App\Modules\Core\Http\Requests\StoreMemberInvitationRequest;
 use App\Modules\Core\Models\Organization;
 use App\Modules\Core\Models\OrganizationInvitation;
-use App\Modules\Core\Models\Role;
 use App\Modules\Core\Support\OrganizationContext;
 use App\Modules\Core\Support\OrganizationInvitations;
+use App\Modules\Core\Support\OrganizationRoles;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -117,14 +116,10 @@ class MemberInvitationController extends Controller
      */
     private function assignableRoles(Organization $organization): array
     {
-        return Role::query()
-            ->where('guard_name', 'web')
-            ->where('organization_id', $organization->getKey())
-            ->where('name', '!=', OrganizationRole::Owner->value)
-            ->orderBy('name')
-            ->pluck('name')
-            ->map(fn (string $name): array => ['value' => $name, 'label' => $name])
-            ->all();
+        return array_map(
+            fn (string $name): array => ['value' => $name, 'label' => $name],
+            OrganizationRoles::assignableNames($organization),
+        );
     }
 
     /**

@@ -2,11 +2,10 @@
 
 namespace App\Modules\Core\Http\Requests;
 
-use App\Modules\Core\Enums\OrganizationRole;
 use App\Modules\Core\Models\Organization;
-use App\Modules\Core\Models\Role;
 use App\Modules\Core\Rules\NotADeletedAccount;
 use App\Modules\Core\Support\OrganizationContext;
+use App\Modules\Core\Support\OrganizationRoles;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
@@ -54,7 +53,7 @@ class StoreMemberInvitationRequest extends FormRequest
             // Ownership is granted from the platform, not handed out by an
             // organization to itself, so it is never an option here — only the
             // organization's own non-owner roles are.
-            'role' => ['required', 'string', Rule::in($this->assignableRoles($organization))],
+            'role' => ['required', 'string', Rule::in(OrganizationRoles::assignableNames($organization))],
         ];
     }
 
@@ -75,20 +74,5 @@ class StoreMemberInvitationRequest extends FormRequest
     public function organization(): Organization
     {
         return OrganizationContext::current();
-    }
-
-    /**
-     * The names of the roles this organization may invite someone under.
-     *
-     * @return list<string>
-     */
-    private function assignableRoles(Organization $organization): array
-    {
-        return Role::query()
-            ->where('guard_name', 'web')
-            ->where('organization_id', $organization->getKey())
-            ->where('name', '!=', OrganizationRole::Owner->value)
-            ->pluck('name')
-            ->all();
     }
 }
