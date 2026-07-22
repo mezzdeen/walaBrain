@@ -9,6 +9,7 @@ use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -99,6 +100,41 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
     public function preferredLocale(): ?string
     {
         return $this->locale;
+    }
+
+    /**
+     * Constrain the query to accounts matching a typed search term.
+     *
+     * Matches an email from the start and either name as a fragment, and splits
+     * on a space so a full name matches first and last together — "Ada Lov" is a
+     * first name followed by the start of a surname. LIKE wildcards in the term
+     * are escaped so a typed `%` searches for a literal percent rather than
+     * matching everything.
+     *
+     * The one place both the members roster and the invite typeahead express
+     * what "matching" means, so the two can never drift apart.
+     *
+     * @param  Builder<User>  $query
+     * @return Builder<User>
+     */
+    public function scopeMatchingSearch(Builder $query, string $term): Builder
+    {
+        $escaped = addcslashes($term, '%_\\');
+
+        return $query->where(function (Builder $builder) use ($escaped): void {
+            $builder->where('email', 'like', $escaped.'%')
+                ->orWhere('first_name', 'like', '%'.$escaped.'%')
+                ->orWhere('last_name', 'like', '%'.$escaped.'%');
+
+            if (str_contains($escaped, ' ')) {
+                [$first, $last] = explode(' ', $escaped, 2);
+
+                $builder->orWhere(function (Builder $nested) use ($first, $last): void {
+                    $nested->where('first_name', 'like', $first.'%')
+                        ->where('last_name', 'like', $last.'%');
+                });
+            }
+        });
     }
 
     /**

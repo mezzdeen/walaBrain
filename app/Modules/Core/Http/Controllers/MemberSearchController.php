@@ -28,9 +28,11 @@ class MemberSearchController extends Controller
      * Suggest existing accounts as an address is typed on the invite form.
      *
      * Answers the member field the same way {@see UserSearchController} answers
-     * the owner one, but gated on the organization's own invite permission and
-     * confined to it: people already in the organization are dropped, since
-     * there is nothing to invite them to.
+     * the owner one, but gated on the organization's own invite permission.
+     * Accounts already in the organization are not dropped — they are suggested
+     * like anyone else and flagged `already_member`, since hiding them would
+     * make it look like no account exists. The invite form's own validation is
+     * what refuses to invite someone already inside.
      */
     public function __invoke(Request $request): JsonResponse
     {
@@ -44,32 +46,8 @@ class MemberSearchController extends Controller
             return response()->json(['users' => []]);
         }
 
-        $escaped = addcslashes($query, '%_\\');
-
-        // Members of the organization are not filtered out: hiding an existing
-        // account makes it look like no account exists, which is the opposite of
-        // helpful. They are suggested like anyone else, and the invite form's
-        // own validation is what refuses to invite someone already inside.
         $users = User::query()
-            ->where(function ($builder) use ($escaped): void {
-                // Addresses are matched from the start: the user is typing one
-                // out, not searching for a fragment of it.
-                $builder->where('email', 'like', $escaped.'%')
-                    ->orWhere('first_name', 'like', '%'.$escaped.'%')
-                    ->orWhere('last_name', 'like', '%'.$escaped.'%');
-
-                // A query with a space in it reads as a whole name, which
-                // neither column matches on its own: "Ada Lov" is a first name
-                // followed by the start of a surname.
-                if (str_contains($escaped, ' ')) {
-                    [$first, $last] = explode(' ', $escaped, 2);
-
-                    $builder->orWhere(function ($nested) use ($first, $last): void {
-                        $nested->where('first_name', 'like', $first.'%')
-                            ->where('last_name', 'like', $last.'%');
-                    });
-                }
-            })
+            ->matchingSearch($query)
             ->orderBy('email')
             ->limit(self::RESULT_LIMIT)
             // `id` stays in the column list: it is what `hash_id` is derived

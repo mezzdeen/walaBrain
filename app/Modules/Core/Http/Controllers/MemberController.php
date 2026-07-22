@@ -42,7 +42,7 @@ class MemberController extends Controller
         // this organization.
         $members = OrganizationRoles::within($organization, fn (): array => $organization->users()
             ->with('roles')
-            ->when($search !== '', fn (Builder $query): Builder => $this->applySearch($query, $search))
+            ->when($search !== '', fn (Builder $query): Builder => $query->matchingSearch($search))
             ->when($role !== '', fn (Builder $query): Builder => $query->whereHas('roles', fn (Builder $roles): Builder => $roles->where('name', $role)))
             ->orderBy('first_name')
             ->orderBy('last_name')
@@ -63,35 +63,6 @@ class MemberController extends Controller
                 'role' => $role,
             ],
         ]);
-    }
-
-    /**
-     * Match the term against email from the start and either name as a fragment,
-     * splitting on a space so a full name matches first and last together.
-     *
-     * @param  Builder<User>  $query
-     * @return Builder<User>
-     */
-    private function applySearch(Builder $query, string $search): Builder
-    {
-        // Escape the LIKE wildcards in the term so a user typing `%` searches for
-        // a literal percent rather than matching everything.
-        $escaped = addcslashes($search, '%_\\');
-
-        return $query->where(function (Builder $builder) use ($escaped): void {
-            $builder->where('email', 'like', $escaped.'%')
-                ->orWhere('first_name', 'like', '%'.$escaped.'%')
-                ->orWhere('last_name', 'like', '%'.$escaped.'%');
-
-            if (str_contains($escaped, ' ')) {
-                [$first, $last] = explode(' ', $escaped, 2);
-
-                $builder->orWhere(function (Builder $nested) use ($first, $last): void {
-                    $nested->where('first_name', 'like', $first.'%')
-                        ->where('last_name', 'like', $last.'%');
-                });
-            }
-        });
     }
 
     /**
