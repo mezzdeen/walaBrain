@@ -29,6 +29,13 @@ export default function PlatformSettings({ settings }: Props) {
     // answer "what is switched on?" before it answers "what am I picking?".
     const [choice, setChoice] = useState(settings.registrationOpen);
 
+    // The providers live in state rather than on the inputs, so an edit made
+    // while the section is open survives the section being hidden and shown
+    // again — a controlled value is held here, where nothing unmounts, instead
+    // of on a checkbox that resets to its default every time the card is
+    // toggled.
+    const [providers, setProviders] = useState(settings.socialProviders);
+
     const unsaved = choice !== settings.registrationOpen;
 
     setLayoutProps({
@@ -201,7 +208,7 @@ export default function PlatformSettings({ settings }: Props) {
 
                                             <div className="flex flex-col gap-2">
                                                 {Object.entries(
-                                                    settings.socialProviders,
+                                                    providers,
                                                 ).map(([provider, enabled]) => (
                                                     <div
                                                         key={provider}
@@ -209,10 +216,21 @@ export default function PlatformSettings({ settings }: Props) {
                                                     >
                                                         <Checkbox
                                                             id={provider}
+                                                            data-test={`provider-${provider}`}
                                                             name={`social_providers[${provider}]`}
                                                             value="1"
-                                                            defaultChecked={
-                                                                enabled
+                                                            checked={enabled}
+                                                            onCheckedChange={(
+                                                                state,
+                                                            ) =>
+                                                                setProviders(
+                                                                    (current) => ({
+                                                                        ...current,
+                                                                        [provider]:
+                                                                            state ===
+                                                                            true,
+                                                                    }),
+                                                                )
                                                             }
                                                         />
                                                         <Label

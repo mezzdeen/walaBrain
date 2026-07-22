@@ -108,3 +108,24 @@ test('registration_open is required', function () {
         ->patch(route('super.settings.update'), [])
         ->assertSessionHasErrors('registration_open');
 });
+
+test('closing registration leaves the enabled providers untouched', function () {
+    $admin = adminWith(SuperPermission::ManagePlatformSettings);
+
+    // The starting state: open, with a provider switched on.
+    PlatformSettings::update([
+        PlatformSettings::RegistrationOpen => true,
+        PlatformSettings::SocialProviders => ['google' => true],
+    ]);
+
+    // Closing the platform posts only the toggle — the screen hides the
+    // provider section and posts nothing for it.
+    $this->actingAs($admin, 'super')
+        ->patch(route('super.settings.update'), ['registration_open' => '0'])
+        ->assertRedirect(route('super.settings.edit'));
+
+    // Closed, and the provider the admin never touched is still on rather than
+    // silently switched off by the save.
+    expect(PlatformSettings::registrationIsOpen())->toBeFalse()
+        ->and(PlatformSettings::socialProviders())->toBe(['google' => true]);
+});

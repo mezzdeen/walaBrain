@@ -70,3 +70,48 @@ test('the login page offers no way to sign up while the platform is closed', fun
         ->assertDontSee('Sign up')
         ->assertNoJavaScriptErrors();
 });
+
+test('closing the platform does not switch its providers off', function () {
+    $this->actingAs(adminWith(SuperPermission::ManagePlatformSettings), 'super');
+
+    // Open, with a provider switched on — the state the reviewer's scenario
+    // starts from.
+    PlatformSettings::update([
+        PlatformSettings::RegistrationOpen => true,
+        PlatformSettings::SocialProviders => ['google' => true],
+    ]);
+
+    visit(route('super.settings.edit', absolute: false))
+        ->assertSee('Currently open')
+        ->click('@registration-closed')
+        ->click('@save-platform-settings')
+        ->assertSee('Currently closed')
+        ->assertNoJavaScriptErrors();
+
+    // The provider the admin never touched is still enabled, not silently
+    // switched off by closing the platform.
+    expect(PlatformSettings::registrationIsOpen())->toBeFalse();
+    expect(PlatformSettings::socialProviders())->toBe(['google' => true]);
+});
+
+test('a provider edit survives flipping the registration card', function () {
+    $this->actingAs(adminWith(SuperPermission::ManagePlatformSettings), 'super');
+
+    PlatformSettings::update([
+        PlatformSettings::RegistrationOpen => true,
+        PlatformSettings::SocialProviders => ['google' => true],
+    ]);
+
+    // Uncheck the provider, flip the card closed then open again, then save.
+    // The edit is held in state, so hiding and showing the section must not
+    // reset it back to the stored value.
+    visit(route('super.settings.edit', absolute: false))
+        ->click('@provider-google')
+        ->click('@registration-closed')
+        ->click('@registration-open')
+        ->click('@save-platform-settings')
+        ->assertSee('Currently open')
+        ->assertNoJavaScriptErrors();
+
+    expect(PlatformSettings::socialProviders())->toBe(['google' => false]);
+});

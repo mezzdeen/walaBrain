@@ -30,19 +30,32 @@ class UpdatePlatformSettingsRequest extends FormRequest
     /**
      * Normalise the toggle and the checkboxes before they are validated.
      *
-     * Both arrive from the form as strings, so both are cast here.
-     *
-     * The two are treated differently when they are missing, because missing
-     * means different things. An unchecked box posts nothing at all, so an
-     * absent provider is a provider that was switched off — and the whole map
-     * is rebuilt from what the application supports, so an absent one cannot
-     * quietly keep its old value and an invented one cannot be introduced.
      * The toggle always posts, through a hidden input; if it did not arrive,
      * the request is malformed, and it is left absent so `required` says so
      * rather than being read as a silent instruction to close the platform.
      */
     protected function prepareForValidation(): void
     {
+        if ($this->has('registration_open')) {
+            $this->merge([
+                'registration_open' => filter_var($this->input('registration_open'), FILTER_VALIDATE_BOOLEAN),
+            ]);
+        }
+
+        // Providers are only editable while registration is open: the screen
+        // hides that section otherwise and posts nothing for it. So the map is
+        // rebuilt from the request only when the toggle is open — an unchecked
+        // box posts nothing, so an absent provider there is one switched off,
+        // and rebuilding from what the application supports keeps a stale row
+        // from re-introducing a dropped provider or an invented one from
+        // sneaking in. When the platform is being closed, `social_providers` is
+        // left off the validated data entirely, so `PlatformSettings::update`
+        // keeps the stored providers as they were instead of reading a hidden,
+        // unsubmitted section as an instruction to switch them all off.
+        if (! $this->boolean('registration_open')) {
+            return;
+        }
+
         $submitted = $this->input('social_providers');
         $submitted = is_array($submitted) ? $submitted : [];
 
@@ -56,11 +69,5 @@ class UpdatePlatformSettingsRequest extends FormRequest
         }
 
         $this->merge(['social_providers' => $providers]);
-
-        if ($this->has('registration_open')) {
-            $this->merge([
-                'registration_open' => filter_var($this->input('registration_open'), FILTER_VALIDATE_BOOLEAN),
-            ]);
-        }
     }
 }
