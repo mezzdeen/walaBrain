@@ -76,7 +76,10 @@ export default function OrganizationRoleSettings({
                         <RoleDialog
                             permissionGroups={permissionGroups}
                             trigger={
-                                <Button size="sm">
+                                <Button
+                                    size="sm"
+                                    data-test="role-create-trigger"
+                                >
                                     <Plus className="size-4" />
                                     {t('core.roles.new')}
                                 </Button>
@@ -119,6 +122,7 @@ export default function OrganizationRoleSettings({
                                                 <Button
                                                     variant="outline"
                                                     size="sm"
+                                                    data-test={`role-edit-${role.hash_id}`}
                                                 >
                                                     {t('core.common.edit')}
                                                 </Button>
@@ -147,75 +151,103 @@ function RoleDialog({
     permissionGroups: PermissionGroups;
     trigger: React.ReactNode;
 }) {
+    const [open, setOpen] = useState(false);
+
+    return (
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>{trigger}</DialogTrigger>
+            <DialogContent className="sm:max-w-2xl">
+                {/* Mounted only while open so every open re-reads the current
+                    role and starts the form from a clean state. */}
+                {open && (
+                    <RoleDialogForm
+                        role={role}
+                        permissionGroups={permissionGroups}
+                        onSuccess={() => setOpen(false)}
+                    />
+                )}
+            </DialogContent>
+        </Dialog>
+    );
+}
+
+function RoleDialogForm({
+    role,
+    permissionGroups,
+    onSuccess,
+}: {
+    role?: RoleRow;
+    permissionGroups: PermissionGroups;
+    onSuccess: () => void;
+}) {
     const { t } = useTranslations();
     const [permissions, setPermissions] = useState<string[]>(
         role?.permissions ?? [],
     );
 
     return (
-        <Dialog>
-            <DialogTrigger asChild>{trigger}</DialogTrigger>
-            <DialogContent className="sm:max-w-2xl">
-                <DialogHeader>
-                    <DialogTitle>
-                        {role
-                            ? t('core.roles.edit_title')
-                            : t('core.roles.new')}
-                    </DialogTitle>
-                    <DialogDescription>
-                        {t('core.roles.permissions_description')}
-                    </DialogDescription>
-                </DialogHeader>
+        <>
+            <DialogHeader>
+                <DialogTitle>
+                    {role ? t('core.roles.edit_title') : t('core.roles.new')}
+                </DialogTitle>
+                <DialogDescription>
+                    {t('core.roles.permissions_description')}
+                </DialogDescription>
+            </DialogHeader>
 
-                <Form
-                    {...(role ? update.form(role) : store.form())}
-                    className="flex flex-col gap-6"
-                >
-                    {({ processing, errors }) => (
-                        <>
-                            <div className="grid gap-2">
-                                <Label
-                                    htmlFor={`role-name-${role?.hash_id ?? 'new'}`}
-                                >
-                                    {t('core.roles.name')}
-                                </Label>
-                                <Input
-                                    id={`role-name-${role?.hash_id ?? 'new'}`}
-                                    name="name"
-                                    required
-                                    defaultValue={role?.name}
-                                    placeholder={t(
-                                        'core.roles.name_placeholder',
-                                    )}
-                                />
-                                <InputError message={errors.name} />
-                            </div>
-
-                            <PermissionMatrix
-                                groups={permissionGroups}
-                                selected={permissions}
-                                onChange={setPermissions}
+            <Form
+                {...(role ? update.form(role) : store.form())}
+                onSuccess={onSuccess}
+                className="flex flex-col gap-6"
+            >
+                {({ processing, errors }) => (
+                    <>
+                        <div className="grid gap-2">
+                            <Label
+                                htmlFor={`role-name-${role?.hash_id ?? 'new'}`}
+                            >
+                                {t('core.roles.name')}
+                            </Label>
+                            <Input
+                                id={`role-name-${role?.hash_id ?? 'new'}`}
+                                name="name"
+                                required
+                                defaultValue={role?.name}
+                                placeholder={t('core.roles.name_placeholder')}
+                                data-test="role-name-input"
                             />
-                            <InputError message={errors.permissions} />
+                            <InputError message={errors.name} />
+                        </div>
 
-                            <DialogFooter className="gap-2">
-                                <DialogClose asChild>
-                                    <Button variant="secondary" type="button">
-                                        {t('core.common.cancel')}
-                                    </Button>
-                                </DialogClose>
-                                <Button type="submit" disabled={processing}>
-                                    {processing && <Spinner />}
-                                    {role
-                                        ? t('core.roles.save_changes')
-                                        : t('core.roles.create_action')}
+                        <PermissionMatrix
+                            groups={permissionGroups}
+                            selected={permissions}
+                            onChange={setPermissions}
+                        />
+                        <InputError message={errors.permissions} />
+
+                        <DialogFooter className="gap-2">
+                            <DialogClose asChild>
+                                <Button variant="secondary" type="button">
+                                    {t('core.common.cancel')}
                                 </Button>
-                            </DialogFooter>
-                        </>
-                    )}
-                </Form>
-            </DialogContent>
-        </Dialog>
+                            </DialogClose>
+                            <Button
+                                type="submit"
+                                disabled={processing}
+                                data-test="role-submit"
+                            >
+                                {processing && <Spinner />}
+                                {role
+                                    ? t('core.roles.save_changes')
+                                    : t('core.roles.create_action')}
+                            </Button>
+                        </DialogFooter>
+                    </>
+                )}
+            </Form>
+        </>
     );
 }
 
