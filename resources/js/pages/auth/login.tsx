@@ -1,6 +1,6 @@
 import { Form, Head, setLayoutProps, usePage } from '@inertiajs/react';
 import InputError from '@/components/input-error';
-import PasskeyVerify from '@/components/passkey-verify';
+// import PasskeyVerify from '@/components/passkey-verify';
 import PasswordInput from '@/components/password-input';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
@@ -31,7 +31,7 @@ export default function Login({ status, canResetPassword }: Props) {
         <>
             <Head title={t('core.auth.log_in')} />
 
-            <PasskeyVerify />
+            {/* <PasskeyVerify /> */}
 
             <Form
                 {...store.form()}
