@@ -12,6 +12,7 @@ use App\Modules\Core\Http\Middleware\ShareInertiaProps;
 use App\Modules\Core\Listeners\ProvisionOrganizationForNewUser;
 use App\Modules\Core\Models\Admin;
 use App\Modules\Core\Models\Organization;
+use App\Modules\Core\Models\Permission;
 use App\Modules\Core\Models\PlatformSetting;
 use App\Modules\Core\Models\Role;
 use App\Modules\Core\Models\User;
@@ -32,6 +33,37 @@ use Laravel\Fortify\Fortify;
 
 class CoreServiceProvider extends ServiceProvider
 {
+    /**
+     * Name this module's models to the packages that have to instantiate them.
+     *
+     * Through the config repository from here rather than written into
+     * `config/auth.php` and `config/permission.php`, so the application's own
+     * configuration never names a class that belongs to a module — the same
+     * reason its routes no longer name a middleware alias this module
+     * registers. Every one of these is read lazily, on first use, long after
+     * this has run.
+     *
+     * Only where nothing is configured already, so an environment that names
+     * its own model still wins.
+     */
+    public function register(): void
+    {
+        config([
+            'auth.guards.super' => [
+                'driver' => 'session',
+                'provider' => 'admins',
+            ],
+            'auth.providers.admins' => [
+                'driver' => 'eloquent',
+                'model' => Admin::class,
+            ],
+            'auth.providers.users.model' => config('auth.providers.users.model') ?? User::class,
+            'permission.models.permission' => config('permission.models.permission') ?? Permission::class,
+            'permission.models.role' => config('permission.models.role') ?? Role::class,
+            'permission.models.team' => config('permission.models.team') ?? Organization::class,
+        ]);
+    }
+
     /**
      * Bootstrap the Core module's own routes, migrations and translations.
      */
@@ -86,7 +118,7 @@ class CoreServiceProvider extends ServiceProvider
 
     /**
      * Register the middleware the module contributes, both the aliases its own
-     * routes rely on and the two it adds to every web request.
+     * routes rely on and the three it adds to every web request.
      *
      * Declared here rather than in `bootstrap/app.php` so the module carries
      * everything it needs, the same way it carries its routes and policies.

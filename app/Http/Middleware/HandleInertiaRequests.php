@@ -49,10 +49,22 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
                 'admin' => null,
             ],
-            'locale' => app()->getLocale(),
+            // The application ships one language and no notion of writing
+            // direction, so these three agree with each other by construction.
+            // A module that knows about more replaces all three together.
+            'locale' => config('app.locale'),
             'direction' => 'ltr',
             'supportedLocales' => [config('app.locale')],
-            'translations' => [],
+            'translations' => (object) [],
+            // Every key the front end reads unguarded needs an answer here, or
+            // a page renders against `undefined` the moment no module supplies
+            // one. Empty and null are the safe answers: nothing is permitted,
+            // there is no organization, and no account can be self-created.
+            'permissions' => [],
+            'organization' => null,
+            'organizations' => [],
+            'registration' => null,
+            'brandColorCss' => '',
         ];
     }
 }

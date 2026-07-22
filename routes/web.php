@@ -2,10 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 
+// Everything the application itself serves. A module contributes its own
+// routes from its own provider, so nothing here names one — and nothing here
+// relies on a middleware alias a module registers.
 Route::inertia('/', 'welcome')->name('home');
-
-// `organization`: the dashboard is the tenant home and the page every switch
-// lands on, so it has nothing to show a user who belongs to no organization.
-Route::middleware(['auth:web', 'verified', 'organization'])->group(function () {
-    Route::inertia('dashboard', 'dashboard')->name('dashboard');
-});

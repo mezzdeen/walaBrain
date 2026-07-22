@@ -48,7 +48,7 @@ Route::middleware(['web', 'guest', 'registration'])->group(function () {
 // The guard is named rather than left to the default, which `actingAs` and any
 // future middleware can repoint. It is what keeps a platform admin out of the
 // company platform: they would otherwise satisfy `auth`, and the `Gate::before`
-// bypass in AppServiceProvider would then wave them past every policy here.
+// bypass this module registers would then wave them past every policy here.
 //
 // `verified` covers the whole group rather than the few screens that used to
 // name it: a confirmed address is the price of entry to the application, not a
@@ -56,6 +56,15 @@ Route::middleware(['web', 'guest', 'registration'])->group(function () {
 // in here — the notice, the resend and signing out are all Fortify's, and the
 // language and appearance switchers work off a cookie.
 Route::middleware(['web', 'auth:web', 'verified'])->group(function () {
+    // `organization`: the dashboard is the tenant home and the page every
+    // switch lands on, so it has nothing to show a user who belongs to no
+    // organization. Here rather than in the application's own routes, because
+    // an organization is this module's idea and so is the middleware that
+    // insists on one.
+    Route::inertia('dashboard', 'dashboard')
+        ->middleware('organization')
+        ->name('dashboard');
+
     Route::put('organizations/{organization}/switch', [OrganizationSwitchController::class, 'update'])
         ->name('organizations.switch');
 

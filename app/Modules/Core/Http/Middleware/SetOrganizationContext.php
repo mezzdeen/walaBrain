@@ -6,6 +6,7 @@ use App\Modules\Core\Models\User;
 use App\Modules\Core\Support\BrandColor;
 use App\Modules\Core\Support\OrganizationContext;
 use App\Modules\Core\Support\PermissionTeam;
+use App\Modules\Core\Support\Platform;
 use Closure;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -25,11 +26,10 @@ class SetOrganizationContext
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // The admin platform is decided by path rather than by which guard
-        // happens to be authenticated, because a browser can hold sessions on
-        // both at once — a super admin who is also a company user must not
-        // inherit that user's organization while administering the platform.
-        if ($request->is('super', 'super/*')) {
+        // A super admin who is also a company user must not inherit that
+        // user's organization while administering the platform; `Platform`
+        // is what decides which of the two this request belongs to.
+        if (Platform::isAdmin($request)) {
             // Opened up rather than merely cleared: the context is static, so a
             // company request earlier in the same process would otherwise hand
             // this one an organization belonging to a different user entirely.

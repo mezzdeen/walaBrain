@@ -9,6 +9,7 @@ use App\Modules\Core\Models\User;
 use App\Modules\Core\Support\BrandColor;
 use App\Modules\Core\Support\Locale;
 use App\Modules\Core\Support\OrganizationContext;
+use App\Modules\Core\Support\Platform;
 use App\Modules\Core\Support\PlatformSettings;
 use App\Modules\Core\Support\Translations;
 use Closure;
@@ -45,8 +46,13 @@ class ShareInertiaProps
     protected function props(Request $request): array
     {
         return [
+            // Both guards named rather than left to the default, which
+            // `auth:super` repoints for the rest of the request: `$request->user()`
+            // on the admin platform would hand an `Admin` to a prop the front end
+            // types as a `User`. The admin platform has no company user at all,
+            // so it is told so rather than shown whichever one shares the browser.
             'auth' => [
-                'user' => $request->user(),
+                'user' => Platform::isAdmin($request) ? null : $request->user('web'),
                 'admin' => $request->user('super'),
             ],
             // Closures, not values: this runs before the route middleware, so at
@@ -54,7 +60,7 @@ class ShareInertiaProps
             // run yet. Inertia resolves closures at render time, by which point
             // both have.
             'permissions' => fn (): array => $this->permissionsFor($request),
-            'organization' => fn (): ?array => $this->isAdminPlatform($request)
+            'organization' => fn (): ?array => Platform::isAdmin($request)
                 ? null
                 : OrganizationContext::current()?->only(['hash_id', 'name']),
             'organizations' => fn (): array => $this->switchableOrganizations($request),
@@ -63,13 +69,13 @@ class ShareInertiaProps
             // it rather than rebuilding it on the client is what keeps the two
             // from ever disagreeing. An Inertia visit never re-renders the root
             // view, so without this the colour would be stale until a reload.
-            'brandColorCss' => fn (): string => $this->isAdminPlatform($request)
+            'brandColorCss' => fn (): string => Platform::isAdmin($request)
                 ? ''
                 : BrandColor::css(OrganizationContext::current()?->color),
             // What the sign-in screen needs to know to offer a way to sign up,
             // and nothing more. Admin platform excluded: an admin account is
             // never self-created, so the question does not arise there.
-            'registration' => fn (): ?array => $this->isAdminPlatform($request)
+            'registration' => fn (): ?array => Platform::isAdmin($request)
                 ? null
                 : [
                     'open' => PlatformSettings::registrationIsOpen(),
@@ -98,7 +104,7 @@ class ShareInertiaProps
      */
     protected function permissionsFor(Request $request): array
     {
-        $identity = $this->isAdminPlatform($request)
+        $identity = Platform::isAdmin($request)
             ? $request->user('super')
             : $request->user('web');
 
@@ -130,7 +136,7 @@ class ShareInertiaProps
      */
     protected function switchableOrganizations(Request $request): array
     {
-        if ($this->isAdminPlatform($request)) {
+        if (Platform::isAdmin($request)) {
             return [];
         }
 
@@ -150,17 +156,5 @@ class ShareInertiaProps
                 'name' => $organization->name,
             ])
             ->all());
-    }
-
-    /**
-     * Whether the request is being served by the admin platform.
-     *
-     * Decided by path rather than by which guard is authenticated, because a
-     * browser can hold a session on both platforms at once and each must only
-     * ever see its own identity's data.
-     */
-    protected function isAdminPlatform(Request $request): bool
-    {
-        return $request->is('super', 'super/*');
     }
 }

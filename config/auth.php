@@ -1,8 +1,5 @@
 <?php
 
-use App\Modules\Core\Models\Admin;
-use App\Modules\Core\Models\User;
-
 return [
 
     /*
@@ -36,17 +33,16 @@ return [
     |
     | Supported: "session"
     |
+    | A module contributes the guards that address its own identities, and the
+    | model behind the `users` provider below, from its service provider. None
+    | of them are named here: the application has no identity model of its own.
+    |
     */
 
     'guards' => [
         'web' => [
             'driver' => 'session',
             'provider' => 'users',
-        ],
-
-        'super' => [
-            'driver' => 'session',
-            'provider' => 'admins',
         ],
     ],
 
@@ -70,18 +66,8 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', User::class),
+            'model' => env('AUTH_MODEL'),
         ],
-
-        'admins' => [
-            'driver' => 'eloquent',
-            'model' => env('AUTH_ADMIN_MODEL', Admin::class),
-        ],
-
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
     ],
 
     /*

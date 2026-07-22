@@ -1,8 +1,5 @@
 <?php
 
-use App\Modules\Core\Models\Organization;
-use App\Modules\Core\Models\Permission;
-use App\Modules\Core\Models\Role;
 use Spatie\Permission\DefaultTeamResolver;
 
 return [
@@ -18,7 +15,7 @@ return [
          * `Spatie\Permission\Contracts\Permission` contract.
          */
 
-        'permission' => Permission::class,
+        'permission' => null,
 
         /*
          * When using the "HasRoles" trait from this package, we need to know which
@@ -29,14 +26,14 @@ return [
          * `Spatie\Permission\Contracts\Role` contract.
          */
 
-        'role' => Role::class,
+        'role' => null,
 
         /*
          * When using the "Teams" feature from this package, we need to know which
          * Eloquent model should be used to retrieve your teams. Of course, it
          * is often just the "Team" model but you may use whatever you like.
          */
-        'team' => Organization::class,
+        'team' => null,
 
         /*
          * When using the "HasModels" trait and passing raw IDs to syncModels,

@@ -1,5 +1,6 @@
 <?php
 
+use App\Providers\ModuleServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -24,15 +25,21 @@ pest()->extend(TestCase::class)
 |--------------------------------------------------------------------------
 |
 | Pest boots exactly one Pest.php, this one, so a module's own bindings and
-| helpers have to be pulled in from here. Found by scanning rather than listed,
-| the same way the application finds each module's service provider: a module
-| with tests brings its own file, and removing the module removes it with no
-| edit here.
+| helpers have to be pulled in from here. Taken from the same list of modules
+| the application registers providers from, so a module with tests brings its
+| own file and removing the module removes it with no edit here.
+|
+| Everything these files declare shares one global scope, so a module names its
+| helpers for itself rather than for what they do.
 |
 */
 
-foreach (glob(__DIR__.'/../app/Modules/*/Tests/Pest.php') ?: [] as $module) {
-    require_once $module;
+foreach (ModuleServiceProvider::names() as $module) {
+    $bootstrap = ModuleServiceProvider::path()."/{$module}/Tests/Pest.php";
+
+    if (file_exists($bootstrap)) {
+        require_once $bootstrap;
+    }
 }
 
 /*
