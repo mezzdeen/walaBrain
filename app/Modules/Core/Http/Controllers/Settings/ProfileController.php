@@ -35,13 +35,24 @@ class ProfileController extends Controller
     {
         Gate::authorize('updateProfile', $request->user());
 
-        $request->user()->fill($request->validated());
+        $user = $request->user();
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        $user->fill($request->validated());
+
+        $emailChanged = $user->isDirty('email');
+
+        if ($emailChanged) {
+            $user->email_verified_at = null;
         }
 
-        $request->user()->save();
+        $user->save();
+
+        // A changed address is a claim until it answers, so ask it to. Without
+        // this the account is stranded behind the `verified` middleware with no
+        // mail to act on. Sent after the save so it goes to the stored address.
+        if ($emailChanged) {
+            $user->sendEmailVerificationNotification();
+        }
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Profile updated.')]);
 

@@ -42,6 +42,14 @@ trait ProfileValidationRules
         return [
             'required',
             'string',
+            // Fortify lowercases usernames on the way in, so an address that
+            // only differs in case has to resolve to the same account here or
+            // the owner locks themselves out: they would save `Ada@x.com` and
+            // then never match it at sign-in. The rule enforces it; every
+            // caller lower-cases the address first so a mixed-case entry is
+            // normalised rather than rejected, the way `StoreOrganizationRequest`
+            // handles the owner address.
+            'lowercase',
             'email',
             'max:255',
             $userId === null

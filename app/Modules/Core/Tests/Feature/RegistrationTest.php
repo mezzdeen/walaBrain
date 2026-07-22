@@ -166,3 +166,26 @@ test('closing the platform does not strand someone who signed up while it was op
     // middleware, so the link that was already mailed still works.
     $this->actingAs($user)->get(route('verification.notice'))->assertOk();
 });
+
+test('a mixed-case address is stored lower-cased so sign-in can find it', function () {
+    openRegistration();
+
+    $this->post(route('register.store'), registration(['email' => 'Asmaa@Example.com']))
+        ->assertRedirect();
+
+    // Stored lower-cased: Fortify matches the sign-in address in lower case, so
+    // an account kept under the mixed-case spelling could never be reached.
+    expect(User::query()->where('email', 'asmaa@example.com')->exists())->toBeTrue()
+        ->and(User::query()->where('email', 'Asmaa@Example.com')->exists())->toBeFalse();
+});
+
+test('a mixed-case address can not slip past the uniqueness check', function () {
+    openRegistration();
+    User::factory()->create(['email' => 'asmaa@example.com']);
+
+    $this->from(route('register'))
+        ->post(route('register.store'), registration(['email' => 'Asmaa@Example.com']))
+        ->assertSessionHasErrors('email');
+
+    expect(User::query()->where('email', 'asmaa@example.com')->count())->toBe(1);
+});

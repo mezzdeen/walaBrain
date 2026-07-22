@@ -1,5 +1,6 @@
 import { Form, Head, setLayoutProps, usePage } from '@inertiajs/react';
 import { Link } from '@inertiajs/react';
+import { useState } from 'react';
 import ProfileController from '@/actions/App/Modules/Core/Http/Controllers/Settings/ProfileController';
 import DeleteUser from '@/components/delete-user';
 import Heading from '@/components/heading';
@@ -25,6 +26,14 @@ export default function Profile({
 }) {
     const { auth } = usePage<PageProps>().props;
     const { t } = useTranslations();
+
+    // Changing the address asks for the account password; a name change does
+    // not. Tracked here so the field only appears once the address actually
+    // differs, matching what the server requires. Compared case-insensitively,
+    // since the server stores and matches the address in lower case.
+    const [email, setEmail] = useState(auth.user.email);
+    const emailChanged =
+        email.trim().toLowerCase() !== auth.user.email.toLowerCase();
 
     setLayoutProps({
         breadcrumbs: [
@@ -114,7 +123,8 @@ export default function Profile({
                                     id="email"
                                     type="email"
                                     className="mt-1 block w-full"
-                                    defaultValue={auth.user.email}
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
                                     name="email"
                                     required
                                     autoComplete="username"
@@ -128,6 +138,34 @@ export default function Profile({
                                     message={errors.email}
                                 />
                             </div>
+
+                            {emailChanged && (
+                                <div className="grid gap-2">
+                                    <Label htmlFor="current_password">
+                                        {t('core.settings.current_password')}
+                                    </Label>
+
+                                    <Input
+                                        id="current_password"
+                                        type="password"
+                                        className="mt-1 block w-full"
+                                        name="current_password"
+                                        required
+                                        autoComplete="current-password"
+                                    />
+
+                                    <p className="text-sm text-muted-foreground">
+                                        {t(
+                                            'core.settings.confirm_email_change',
+                                        )}
+                                    </p>
+
+                                    <InputError
+                                        className="mt-2"
+                                        message={errors.current_password}
+                                    />
+                                </div>
+                            )}
 
                             {mustVerifyEmail &&
                                 auth.user.email_verified_at === null && (

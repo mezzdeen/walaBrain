@@ -6,6 +6,7 @@ use App\Modules\Core\Concerns\PasswordValidationRules;
 use App\Modules\Core\Concerns\ProfileValidationRules;
 use App\Modules\Core\Models\User;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
 
 class CreateNewUser implements CreatesNewUsers
@@ -19,6 +20,15 @@ class CreateNewUser implements CreatesNewUsers
      */
     public function create(array $input): User
     {
+        // Lower-cased before validation for the same reason the sign-up and
+        // profile requests do it: the `lowercase` rule in `profileRules()`
+        // enforces it, and Fortify matches the address in lower case at
+        // sign-in, so an account created under a mixed-case spelling could
+        // never be reached.
+        if (isset($input['email'])) {
+            $input['email'] = Str::lower($input['email']);
+        }
+
         Validator::make($input, [
             ...$this->profileRules(),
             'password' => $this->passwordRules(),

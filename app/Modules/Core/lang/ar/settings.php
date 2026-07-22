@@ -31,6 +31,7 @@ return [
     'update_password_description' => 'تأكّد من استخدام كلمة مرور طويلة وعشوائية للحفاظ على أمان حسابك',
     'password' => 'كلمة المرور',
     'current_password' => 'كلمة المرور الحالية',
+    'confirm_email_change' => 'أكّد كلمة مرورك الحالية لتغيير عنوان بريدك.',
     'new_password' => 'كلمة المرور الجديدة',
     'confirm_password' => 'تأكيد كلمة المرور',
 

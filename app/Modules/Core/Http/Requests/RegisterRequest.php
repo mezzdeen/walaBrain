@@ -8,6 +8,7 @@ use App\Modules\Core\Models\User;
 use App\Modules\Core\Rules\NotDisposableEmail;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class RegisterRequest extends FormRequest
@@ -47,6 +48,11 @@ class RegisterRequest extends FormRequest
             'required',
             'string',
 
+            // Lower-cased for the same reason a profile update is: Fortify
+            // matches the sign-in address in lower case, so a `Foo@x.com`
+            // sign-up would be an account its owner could never reach.
+            'lowercase',
+
             // `dns` asks whether the domain accepts mail at all, which is what
             // separates a well formed address from a reachable one. Switched
             // off in tests, where a network call has no business being.
@@ -56,5 +62,16 @@ class RegisterRequest extends FormRequest
             new NotDisposableEmail,
             Rule::unique(User::class),
         ];
+    }
+
+    /**
+     * Normalise the address before it is validated, so a mixed-case sign-up
+     * resolves to the same account Fortify will look up at sign-in.
+     */
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('email')) {
+            $this->merge(['email' => Str::lower((string) $this->input('email'))]);
+        }
     }
 }

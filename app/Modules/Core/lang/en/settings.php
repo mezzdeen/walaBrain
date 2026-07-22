@@ -31,6 +31,7 @@ return [
     'update_password_description' => 'Ensure your account is using a long, random password to stay secure',
     'password' => 'Password',
     'current_password' => 'Current password',
+    'confirm_email_change' => 'Confirm your current password to change your email address.',
     'new_password' => 'New password',
     'confirm_password' => 'Confirm password',
 
