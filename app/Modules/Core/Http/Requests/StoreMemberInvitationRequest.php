@@ -7,6 +7,7 @@ use App\Modules\Core\Rules\NotADeletedAccount;
 use App\Modules\Core\Support\OrganizationContext;
 use App\Modules\Core\Support\OrganizationRoles;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
@@ -38,11 +39,17 @@ class StoreMemberInvitationRequest extends FormRequest
             // may not already belong to this organization, nor already hold a
             // standing invitation to it, and never a deleted account whose
             // invitation could not be accepted.
+            //
+            // Only a still-standing invitation blocks a fresh one: an expired or
+            // already-accepted row is spent, so it must not wall the address off
+            // from ever being invited again.
             'email' => [
                 'required', 'string', 'lowercase', 'email', 'max:255',
                 new NotADeletedAccount,
                 Rule::unique('organization_invitations', 'email')
-                    ->where('organization_id', $organization->getKey()),
+                    ->where('organization_id', $organization->getKey())
+                    ->whereNull('accepted_at')
+                    ->where(fn (Builder $query): Builder => $query->where('expires_at', '>', now())),
                 function (string $attribute, mixed $value, \Closure $fail) use ($organization): void {
                     if ($organization->users()->where('email', $value)->exists()) {
                         $fail('core::invitations.errors.already_member')->translate();
