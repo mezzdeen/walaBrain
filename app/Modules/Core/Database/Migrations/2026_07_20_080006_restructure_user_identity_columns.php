@@ -42,6 +42,14 @@ return new class extends Migration
      */
     public function down(): void
     {
+        // The column that records a soft delete is about to be dropped, and a
+        // row left behind without it reads as a live account again. These
+        // accounts were closed, so they are removed rather than resurrected —
+        // the schema being rolled back to has no way to say "deleted". Done
+        // while `deleted_at` still exists; the `organization_user` pivot
+        // cascades on the delete.
+        DB::table('users')->whereNotNull('deleted_at')->delete();
+
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn('locale');
             $table->dropSoftDeletes();
@@ -56,8 +64,15 @@ return new class extends Migration
             ->orderBy('id')
             ->chunk(200, function ($users): void {
                 foreach ($users as $user) {
+                    // A single-word name was split with a stand-in surname, so
+                    // dropping it back out is what lets the name round-trip to
+                    // exactly what it was rather than gaining a trailing "-".
+                    $last = $user->last_name === self::MISSING_SURNAME
+                        ? ''
+                        : (string) $user->last_name;
+
                     DB::table('users')->where('id', $user->id)->update([
-                        'name' => trim($user->first_name.' '.$user->last_name),
+                        'name' => trim($user->first_name.' '.$last),
                     ]);
                 }
             });
