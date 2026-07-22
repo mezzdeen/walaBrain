@@ -272,11 +272,12 @@ export function EmailCombobox({
                                             {user.email}
                                         </span>
                                     </span>
-                                    {user.already_member && copy.memberBadge && (
-                                        <span className="shrink-0 rounded-full border px-2 py-0.5 text-xs text-muted-foreground">
-                                            {copy.memberBadge}
-                                        </span>
-                                    )}
+                                    {user.already_member &&
+                                        copy.memberBadge && (
+                                            <span className="shrink-0 rounded-full border px-2 py-0.5 text-xs text-muted-foreground">
+                                                {copy.memberBadge}
+                                            </span>
+                                        )}
                                 </button>
                             </li>
                         ))}

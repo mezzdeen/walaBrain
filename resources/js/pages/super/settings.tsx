@@ -207,50 +207,56 @@ export default function PlatformSettings({ settings }: Props) {
                                             </div>
 
                                             <div className="flex flex-col gap-2">
-                                                {Object.entries(
-                                                    providers,
-                                                ).map(([provider, enabled]) => (
-                                                    <div
-                                                        key={provider}
-                                                        className="flex items-center gap-2"
-                                                    >
-                                                        <Checkbox
-                                                            id={provider}
-                                                            data-test={`provider-${provider}`}
-                                                            name={`social_providers[${provider}]`}
-                                                            value="1"
-                                                            checked={enabled}
-                                                            onCheckedChange={(
-                                                                state,
-                                                            ) =>
-                                                                setProviders(
-                                                                    (current) => ({
-                                                                        ...current,
-                                                                        [provider]:
-                                                                            state ===
-                                                                            true,
-                                                                    }),
-                                                                )
-                                                            }
-                                                        />
-                                                        <Label
-                                                            htmlFor={provider}
-                                                            className="text-sm font-normal"
+                                                {Object.entries(providers).map(
+                                                    ([provider, enabled]) => (
+                                                        <div
+                                                            key={provider}
+                                                            className="flex items-center gap-2"
                                                         >
-                                                            {t(
-                                                                `core.platform.providers.${provider}`,
-                                                            )}
-                                                        </Label>
-                                                        <Badge
-                                                            variant="outline"
-                                                            className="ms-1"
-                                                        >
-                                                            {t(
-                                                                'core.platform.providers_not_wired',
-                                                            )}
-                                                        </Badge>
-                                                    </div>
-                                                ))}
+                                                            <Checkbox
+                                                                id={provider}
+                                                                data-test={`provider-${provider}`}
+                                                                name={`social_providers[${provider}]`}
+                                                                value="1"
+                                                                checked={
+                                                                    enabled
+                                                                }
+                                                                onCheckedChange={(
+                                                                    state,
+                                                                ) =>
+                                                                    setProviders(
+                                                                        (
+                                                                            current,
+                                                                        ) => ({
+                                                                            ...current,
+                                                                            [provider]:
+                                                                                state ===
+                                                                                true,
+                                                                        }),
+                                                                    )
+                                                                }
+                                                            />
+                                                            <Label
+                                                                htmlFor={
+                                                                    provider
+                                                                }
+                                                                className="text-sm font-normal"
+                                                            >
+                                                                {t(
+                                                                    `core.platform.providers.${provider}`,
+                                                                )}
+                                                            </Label>
+                                                            <Badge
+                                                                variant="outline"
+                                                                className="ms-1"
+                                                            >
+                                                                {t(
+                                                                    'core.platform.providers_not_wired',
+                                                                )}
+                                                            </Badge>
+                                                        </div>
+                                                    ),
+                                                )}
                                             </div>
 
                                             <p className="text-xs text-muted-foreground">
