@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/sidebar';
 import { useInitials } from '@/hooks/use-initials';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useTranslations } from '@/hooks/use-translations';
 import { logout } from '@/routes/super';
 
 export function SuperNavUser() {
@@ -24,6 +25,7 @@ export function SuperNavUser() {
     const { state } = useSidebar();
     const isMobile = useIsMobile();
     const getInitials = useInitials();
+    const { t } = useTranslations();
 
     if (!auth.admin) {
         return null;
@@ -88,7 +90,7 @@ export function SuperNavUser() {
                                 data-test="super-logout-button"
                             >
                                 <LogOut className="me-2" />
-                                Log out
+                                {t('core.auth.log_out')}
                             </Link>
                         </DropdownMenuItem>
                     </DropdownMenuContent>

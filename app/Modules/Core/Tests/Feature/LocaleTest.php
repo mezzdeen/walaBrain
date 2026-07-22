@@ -14,9 +14,12 @@ test('the compiled dictionary carries module and framework messages', function (
     expect($messages['validation']['required'])->toBe('حقل :attribute مطلوب.');
 });
 
-test('the arabic dictionary falls back to english for untranslated keys', function () {
-    // `accepted_if` is only defined in the English validation file.
-    expect(Translations::for('ar')['validation']['accepted_if'])
+test('a locale with no translations falls back to english for every key', function () {
+    // No dictionary ships for French, so the compiled one is the English
+    // fallback rather than a wall of raw key names. Uses an unsupported locale
+    // on purpose: a supported one is kept at full parity, so it could never
+    // demonstrate the fallback.
+    expect(Translations::for('fr')['validation']['accepted_if'])
         ->toBe(__('validation.accepted_if', [], 'en'));
 });
 
