@@ -81,6 +81,15 @@ export function EmailCombobox({
     const containerRef = useRef<HTMLDivElement>(null);
     const debouncedEmail = useDebouncedValue(email);
 
+    // Held in a ref rather than read from the search effect's deps: callers pass
+    // this as an inline arrow, so a new reference every render would otherwise
+    // re-fire the search on each result and loop the field against the server.
+    const searchUrlRef = useRef(searchUrl);
+
+    useEffect(() => {
+        searchUrlRef.current = searchUrl;
+    });
+
     useEffect(() => {
         // Once someone is picked the field is settled; searching again would
         // only reopen the list under a confirmed answer. Stale results are not
@@ -93,7 +102,7 @@ export function EmailCombobox({
         const query = debouncedEmail.trim();
         const controller = new AbortController();
 
-        fetch(searchUrl(query), {
+        fetch(searchUrlRef.current(query), {
             headers: { Accept: 'application/json' },
             credentials: 'same-origin',
             signal: controller.signal,
@@ -118,7 +127,7 @@ export function EmailCombobox({
         // Abort in flight, so a slow early response cannot land on top of the
         // answer to what the user is actually typing now.
         return () => controller.abort();
-    }, [debouncedEmail, selected, searchUrl]);
+    }, [debouncedEmail, selected]);
 
     useEffect(() => {
         function handlePointerDown(event: PointerEvent) {
