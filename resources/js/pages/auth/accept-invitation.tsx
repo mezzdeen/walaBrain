@@ -10,7 +10,7 @@ import { useTranslations } from '@/hooks/use-translations';
 import { login } from '@/routes';
 import { store } from '@/routes/invitations';
 
-type Reason = 'invalid' | 'expired' | 'accepted';
+type Reason = 'invalid' | 'expired' | 'accepted' | 'wrong_account';
 
 type Props = {
     organization?: { name: string };

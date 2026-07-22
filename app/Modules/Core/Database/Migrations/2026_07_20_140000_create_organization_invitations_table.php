@@ -23,6 +23,8 @@ return new class extends Migration
             $table->string('token', 64)->unique();
 
             $table->foreignId('invited_by_admin_id')->nullable()->constrained('admins')->nullOnDelete();
+            $table->foreignId('invited_by_user_id')->nullable()->constrained('users')->nullOnDelete();
+
             $table->timestamp('expires_at');
             $table->timestamp('accepted_at')->nullable();
             $table->timestamps();
