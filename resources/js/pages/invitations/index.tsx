@@ -78,7 +78,7 @@ export default function MemberInvitations({ roles, invitations }: Props) {
                     </p>
                 </div>
 
-                <Card className="max-w-xl">
+                <Card>
                     <CardContent>
                         <Form
                             {...store.form()}

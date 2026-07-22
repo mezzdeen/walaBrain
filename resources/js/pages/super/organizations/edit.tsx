@@ -43,7 +43,7 @@ export default function EditOrganization({ organization }: Props) {
                     </p>
                 </div>
 
-                <Card className="max-w-xl">
+                <Card>
                     <CardContent>
                         <Form
                             {...update.form(organization)}

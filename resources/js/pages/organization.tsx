@@ -49,7 +49,7 @@ export default function Organization({
                     </p>
                 </div>
 
-                <Card className="max-w-xl">
+                <Card>
                     <CardContent>
                         <Form
                             {...OrganizationSettingsController.update.form()}
