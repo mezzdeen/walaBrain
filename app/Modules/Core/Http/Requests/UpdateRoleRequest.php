@@ -33,7 +33,7 @@ class UpdateRoleRequest extends FormRequest
                     ->ignore($this->route('role')),
             ],
             'permissions' => ['array'],
-            'permissions.*' => [Rule::in(SuperPermission::values())],
+            'permissions.*' => $this->permissionRules(SuperPermission::values()),
         ];
     }
 

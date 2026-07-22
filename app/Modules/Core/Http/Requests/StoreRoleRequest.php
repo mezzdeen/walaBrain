@@ -35,7 +35,7 @@ class StoreRoleRequest extends FormRequest
                 ),
             ],
             'permissions' => ['array'],
-            'permissions.*' => [Rule::in(SuperPermission::values())],
+            'permissions.*' => $this->permissionRules(SuperPermission::values()),
         ];
     }
 

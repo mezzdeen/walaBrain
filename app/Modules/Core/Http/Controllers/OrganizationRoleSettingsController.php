@@ -95,6 +95,9 @@ class OrganizationRoleSettingsController extends Controller
      */
     public function destroy(Role $role): RedirectResponse
     {
+        // `delete`, not `viewAny`: the policy is what refuses a protected role,
+        // another organization's role, and a super-platform role. Authorizing
+        // only the act of seeing roles would delete any of the three.
         Gate::authorize('delete', $role);
 
         $role->delete();

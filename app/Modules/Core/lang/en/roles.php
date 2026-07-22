@@ -92,4 +92,8 @@ return [
         ],
     ],
 
+    'errors' => [
+        'permission_not_held' => 'You can only grant permissions you hold yourself.',
+    ],
+
 ];

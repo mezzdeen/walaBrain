@@ -36,7 +36,7 @@ class StoreOrganizationRoleRequest extends FormRequest
                 ),
             ],
             'permissions' => ['array'],
-            'permissions.*' => [Rule::in(OrganizationPermission::values())],
+            'permissions.*' => $this->permissionRules(OrganizationPermission::values()),
         ];
     }
 

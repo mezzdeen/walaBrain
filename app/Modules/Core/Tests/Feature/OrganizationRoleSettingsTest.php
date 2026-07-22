@@ -3,11 +3,37 @@
 use App\Modules\Core\Enums\OrganizationPermission;
 use App\Modules\Core\Enums\OrganizationRole;
 use App\Modules\Core\Models\Organization;
+use App\Modules\Core\Models\Permission;
 use App\Modules\Core\Models\Role;
 use App\Modules\Core\Models\User;
 use App\Modules\Core\Support\OrganizationContext;
 use App\Modules\Core\Support\OrganizationRoles;
+use Illuminate\Support\Str;
 use Inertia\Testing\AssertableInertia as Assert;
+
+/**
+ * A member of the organization holding exactly the given organization
+ * permissions and nothing else, for asserting what a limited member may do.
+ */
+function memberHolding(Organization $organization, OrganizationPermission ...$permissions): User
+{
+    $role = OrganizationRoles::within($organization, fn () => tap(Role::create([
+        'name' => 'limited-'.Str::random(6),
+        'guard_name' => 'web',
+        'organization_id' => $organization->getKey(),
+    ]))->syncPermissions(array_map(
+        fn (OrganizationPermission $permission): Permission => Permission::findOrCreate($permission->value, 'web'),
+        $permissions,
+    )));
+
+    $user = User::factory()->create();
+    $user->organizations()->attach($organization);
+
+    setPermissionsTeamId($organization->getKey());
+    $user->assignRole($role);
+
+    return $user;
+}
 
 test('an owner can view their organization roles', function () {
     $organization = Organization::factory()->create();
@@ -219,4 +245,78 @@ test('permissions follow the organization the owner is acting on', function () {
 
 test('guests can not access the role settings', function () {
     $this->get(route('roles.index'))->assertRedirect(route('login'));
+});
+
+test('a member can not grant a permission they do not hold when editing a role', function () {
+    $organization = Organization::factory()->create();
+    $editor = memberHolding($organization, OrganizationPermission::ViewRoles, OrganizationPermission::UpdateRoles);
+    $role = OrganizationRoles::within($organization, fn () => Role::create([
+        'name' => 'auditor',
+        'guard_name' => 'web',
+        'organization_id' => $organization->id,
+    ]));
+
+    $this->actingAs($editor)
+        ->from(route('roles.index'))
+        ->put(route('roles.update', $role), [
+            'name' => 'auditor',
+            // RemoveMembers is a real organization permission, but not one the
+            // editor holds — so it must not be grantable through a role form.
+            'permissions' => [OrganizationPermission::RemoveMembers->value],
+        ])
+        ->assertRedirect(route('roles.index'))
+        ->assertSessionHasErrors('permissions.0');
+
+    expect($role->fresh()->permissions->pluck('name'))
+        ->not->toContain(OrganizationPermission::RemoveMembers->value);
+});
+
+test('a member can not grant a permission they do not hold when creating a role', function () {
+    $organization = Organization::factory()->create();
+    $creator = memberHolding($organization, OrganizationPermission::ViewRoles, OrganizationPermission::CreateRoles);
+
+    $this->actingAs($creator)
+        ->from(route('roles.index'))
+        ->post(route('roles.store'), [
+            'name' => 'auditor',
+            'permissions' => [OrganizationPermission::RemoveMembers->value],
+        ])
+        ->assertSessionHasErrors('permissions.0');
+
+    expect(Role::query()->where('organization_id', $organization->id)->where('name', 'auditor')->exists())
+        ->toBeFalse();
+});
+
+test('a member can grant a permission they do hold', function () {
+    $organization = Organization::factory()->create();
+    $creator = memberHolding(
+        $organization,
+        OrganizationPermission::ViewRoles,
+        OrganizationPermission::CreateRoles,
+        OrganizationPermission::ViewMembers,
+    );
+
+    $this->actingAs($creator)
+        ->from(route('roles.index'))
+        ->post(route('roles.store'), [
+            'name' => 'watcher',
+            'permissions' => [OrganizationPermission::ViewMembers->value],
+        ])
+        ->assertRedirect(route('roles.index'))
+        ->assertSessionHasNoErrors();
+
+    $role = Role::query()->where('organization_id', $organization->id)->firstWhere('name', 'watcher');
+    expect($role->permissions->pluck('name'))->toContain(OrganizationPermission::ViewMembers->value);
+});
+
+test('a member without the create permission can not create a role', function () {
+    $organization = Organization::factory()->create();
+    $viewer = memberHolding($organization, OrganizationPermission::ViewRoles);
+
+    $this->actingAs($viewer)
+        ->post(route('roles.store'), ['name' => 'auditor', 'permissions' => []])
+        ->assertForbidden();
+
+    expect(Role::query()->where('organization_id', $organization->id)->where('name', 'auditor')->exists())
+        ->toBeFalse();
 });

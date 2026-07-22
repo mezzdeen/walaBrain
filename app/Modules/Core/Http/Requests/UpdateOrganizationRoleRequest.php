@@ -36,7 +36,7 @@ class UpdateOrganizationRoleRequest extends FormRequest
                     ->ignore($this->route('role')),
             ],
             'permissions' => ['array'],
-            'permissions.*' => [Rule::in(OrganizationPermission::values())],
+            'permissions.*' => $this->permissionRules(OrganizationPermission::values()),
         ];
     }
 

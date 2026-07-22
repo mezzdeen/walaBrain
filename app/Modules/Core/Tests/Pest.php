@@ -9,9 +9,11 @@ use App\Modules\Core\Models\Organization;
 use App\Modules\Core\Models\Permission;
 use App\Modules\Core\Models\Role;
 use App\Modules\Core\Models\User;
+use App\Modules\Core\Support\OrganizationContext;
 use App\Modules\Core\Support\OrganizationRoles;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
+use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
 /*
@@ -27,6 +29,17 @@ use Tests\TestCase;
 
 pest()->extend(TestCase::class)
     ->use(RefreshDatabase::class)
+    // The organization context and the permission team are process-wide
+    // statics. A real request resets them on its way in, but a test that pokes
+    // them directly — or whose request left them set — hands them to the next
+    // test, so a test's outcome can otherwise depend on the one before it. Reset
+    // to the pristine boot state before each, so the order tests run in is never
+    // a hidden fixture.
+    ->beforeEach(function (): void {
+        OrganizationContext::useGlobal();
+        setPermissionsTeamId(null);
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+    })
     ->in(__DIR__);
 
 /*
