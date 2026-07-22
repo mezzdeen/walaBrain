@@ -1,6 +1,7 @@
 <?php
 
 use App\Modules\Core\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Testing\AssertableInertia as Assert;
 use Laravel\Fortify\Features;
@@ -101,4 +102,53 @@ test('correct password must be provided to update password', function () {
     $response
         ->assertSessionHasErrors('current_password')
         ->assertRedirect(route('security.edit'));
+});
+
+test('updating the password cycles the remember token so remember-me cookies stop working', function () {
+    $user = User::factory()->create(['remember_token' => 'stolen-token']);
+
+    $this->actingAs($user)
+        ->from(route('security.edit'))
+        ->put(route('user-password.update'), [
+            'current_password' => 'password',
+            'password' => 'new-password',
+            'password_confirmation' => 'new-password',
+        ])
+        ->assertSessionHasNoErrors();
+
+    // A remember-me cookie carries the old token, so cycling it revokes every
+    // one the previous password authorised.
+    expect($user->refresh()->remember_token)->not->toBe('stolen-token');
+});
+
+test('updating the password drops the user other sessions but not anyone else', function () {
+    config(['session.driver' => 'database']);
+
+    $user = User::factory()->create();
+    $stranger = User::factory()->create();
+
+    $session = fn (string $id, int $userId) => DB::table('sessions')->insert([
+        'id' => $id,
+        'user_id' => $userId,
+        'ip_address' => '127.0.0.1',
+        'user_agent' => 'test',
+        'payload' => 'x',
+        'last_activity' => now()->getTimestamp(),
+    ]);
+
+    $session('other-device', $user->id);
+    $session('stranger-device', $stranger->id);
+
+    $this->actingAs($user)
+        ->from(route('security.edit'))
+        ->put(route('user-password.update'), [
+            'current_password' => 'password',
+            'password' => 'new-password',
+            'password_confirmation' => 'new-password',
+        ])
+        ->assertSessionHasNoErrors();
+
+    // The user's other open session is gone; another person's is untouched.
+    expect(DB::table('sessions')->where('id', 'other-device')->exists())->toBeFalse()
+        ->and(DB::table('sessions')->where('id', 'stranger-device')->exists())->toBeTrue();
 });
