@@ -4,6 +4,7 @@ import {
     Settings2,
     ShieldCheck,
     UserPlus,
+    Users,
 } from 'lucide-react';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -19,6 +20,7 @@ import { useCan } from '@/hooks/use-can';
 import { useTranslations } from '@/hooks/use-translations';
 import { dashboard } from '@/routes';
 import { index as invitationsIndex } from '@/routes/invitations';
+import { index as membersIndex } from '@/routes/members';
 import { edit as editOrganization } from '@/routes/organization';
 import { index as rolesIndex } from '@/routes/roles';
 import type { NavItem } from '@/types';
@@ -45,6 +47,15 @@ export function AppSidebar() {
                       title: t('core.roles.title'),
                       href: rolesIndex(),
                       icon: ShieldCheck,
+                  },
+              ]
+            : []),
+        ...(can('members.manage')
+            ? [
+                  {
+                      title: t('core.nav.user_management'),
+                      href: membersIndex(),
+                      icon: Users,
                   },
               ]
             : []),

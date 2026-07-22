@@ -2,6 +2,7 @@
 
 use App\Modules\Core\Http\Controllers\Auth\RegistrationController;
 use App\Modules\Core\Http\Controllers\InvitationController;
+use App\Modules\Core\Http\Controllers\MemberController;
 use App\Modules\Core\Http\Controllers\MemberInvitationController;
 use App\Modules\Core\Http\Controllers\MemberSearchController;
 use App\Modules\Core\Http\Controllers\OrganizationRoleSettingsController;
@@ -110,6 +111,10 @@ Route::middleware(['web', 'auth:web', 'verified'])->group(function () {
         Route::post('invitations', [MemberInvitationController::class, 'store'])->name('invitations.manage.store');
         Route::delete('invitations/{invitation}', [MemberInvitationController::class, 'destroy'])->name('invitations.manage.destroy');
         Route::post('invitations/{invitation}/resend', [MemberInvitationController::class, 'resend'])->name('invitations.manage.resend');
+
+        // The owner's roster of everyone in the organization. Its own screen and
+        // permission, distinct from the invite form and its typeahead below.
+        Route::get('members', [MemberController::class, 'index'])->name('members.index');
 
         // Backs the invitee field on the invite form. Gated on the same invite
         // permission, and confined to accounts not already in the organization.

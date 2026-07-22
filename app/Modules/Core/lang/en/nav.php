@@ -18,6 +18,7 @@ return [
     'platform' => 'Platform',
     'platform_settings' => 'General settings',
     'general_administration' => 'General administration',
+    'user_management' => 'User management',
     'invite_user' => 'Invite user',
     'navigation_menu' => 'Navigation menu',
     'search' => 'Search',
