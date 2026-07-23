@@ -71,9 +71,9 @@ test('the demo seeder can be run twice without duplicating anything', function (
     $this->seed(DemoSeeder::class);
     $this->seed(DemoSeeder::class);
 
-    $this->assertDatabaseCount('users', 2);
-    $this->assertDatabaseCount('organizations', 2);
-    $this->assertDatabaseCount('organization_user', 4);
+    $this->assertDatabaseCount('users', 3);
+    $this->assertDatabaseCount('organizations', 3);
+    $this->assertDatabaseCount('organization_user', 5);
 
     $nakheel = Organization::query()->firstWhere('name', 'Nakheel');
     $asmaa = User::query()->firstWhere('email', 'asmaa@app.com');
