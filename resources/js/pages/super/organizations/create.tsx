@@ -42,7 +42,7 @@ export default function CreateOrganization() {
                 <Form
                     {...store.form()}
                     resetOnSuccess
-                    className="flex max-w-xl flex-col gap-4"
+                    className="flex flex-col gap-4"
                 >
                     {({ processing, errors }) => (
                         <>

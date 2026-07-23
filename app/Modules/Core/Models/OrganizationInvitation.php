@@ -2,8 +2,8 @@
 
 namespace App\Modules\Core\Models;
 
+use App\Modules\Core\Concerns\HasHashId;
 use App\Modules\Core\Database\Factories\OrganizationInvitationFactory;
-use App\Modules\Core\Enums\OrganizationRole;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -13,27 +13,35 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 /**
- * A standing offer for someone without an account to join an organization.
+ * A standing offer for someone to join an organization, held until accepted.
  *
- * Only issued for addresses the system does not know yet: an existing user is
- * attached to the organization outright, so there is nothing to keep pending.
+ * Issued two ways. The platform provisions an organization for an address with
+ * no account, and invites it to own the new tenant. A company then invites
+ * people into that tenant — existing accounts among them — under a role it
+ * chooses, and the offer stays pending for everyone until they accept, so the
+ * organization never appears to someone who has not taken it up.
+ *
+ * The role is stored as a plain name rather than an enum: an organization can
+ * invite under any role it owns, including ones it defined itself, which no
+ * enum could enumerate.
  *
  * @property int $id
  * @property int $organization_id
  * @property string $email
- * @property OrganizationRole $role
+ * @property string $role
  * @property string $token
  * @property int|null $invited_by_admin_id
+ * @property int|null $invited_by_user_id
  * @property Carbon $expires_at
  * @property Carbon|null $accepted_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['organization_id', 'email', 'role', 'token', 'invited_by_admin_id', 'expires_at'])]
+#[Fillable(['organization_id', 'email', 'role', 'token', 'invited_by_admin_id', 'invited_by_user_id', 'expires_at'])]
 class OrganizationInvitation extends Model
 {
     /** @use HasFactory<OrganizationInvitationFactory> */
-    use HasFactory;
+    use HasFactory, HasHashId;
 
     /**
      * The organization the invitation grants access to.
@@ -53,6 +61,16 @@ class OrganizationInvitation extends Model
     public function invitedBy(): BelongsTo
     {
         return $this->belongsTo(Admin::class, 'invited_by_admin_id');
+    }
+
+    /**
+     * The company user who issued the invitation, if they still exist.
+     *
+     * @return BelongsTo<User, $this>
+     */
+    public function invitedByUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'invited_by_user_id');
     }
 
     /**
@@ -95,7 +113,6 @@ class OrganizationInvitation extends Model
     protected function casts(): array
     {
         return [
-            'role' => OrganizationRole::class,
             'expires_at' => 'datetime',
             'accepted_at' => 'datetime',
         ];
@@ -103,6 +120,8 @@ class OrganizationInvitation extends Model
 
     /**
      * Create a new factory instance for the model.
+     *
+     * @return Factory<self>
      */
     protected static function newFactory(): Factory
     {

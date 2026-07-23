@@ -90,6 +90,20 @@ class OrganizationPolicy
     }
 
     /**
+     * Determine whether the identity can administer the organization's members.
+     *
+     * A company ability owned by the owner role: the member-management screen
+     * lists everyone in the organization, so it sits behind its own permission
+     * rather than the plain `members.view` that ordinary members also hold.
+     */
+    public function manageMembers(User|Admin $identity, Organization $organization): bool
+    {
+        return $identity instanceof User
+            && $identity->belongsToOrganization($organization)
+            && $identity->can(OrganizationPermission::ManageMembers->value);
+    }
+
+    /**
      * Determine whether the identity can invite people into the organization.
      *
      * A company ability only. The platform provisions an organization with its

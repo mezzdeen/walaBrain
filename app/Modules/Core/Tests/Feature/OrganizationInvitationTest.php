@@ -104,6 +104,33 @@ test('accepting an invitation creates the owner and signs them in', function () 
     expect($invitation->fresh()->accepted_at)->not->toBeNull();
 });
 
+test('a new invitee is given the role their invitation carries, not ownership', function () {
+    $organization = Organization::factory()->create();
+    OrganizationRoles::provision($organization);
+
+    $plainToken = Str::random(64);
+    OrganizationInvitation::factory()->create([
+        'organization_id' => $organization->getKey(),
+        'email' => 'member@example.com',
+        'role' => OrganizationRole::Member->value,
+        'token' => OrganizationInvitations::hash($plainToken),
+    ]);
+
+    $this->post(route('invitations.store', ['token' => $plainToken]), [
+        'first_name' => 'New',
+        'last_name' => 'Member',
+        'password' => 'Str0ng-Password!',
+        'password_confirmation' => 'Str0ng-Password!',
+    ])->assertRedirect(config('fortify.home'));
+
+    $user = User::query()->firstWhere('email', 'member@example.com');
+
+    OrganizationRoles::within($organization, function () use ($user): void {
+        expect($user->fresh()->hasRole(OrganizationRole::Member->value))->toBeTrue()
+            ->and($user->fresh()->hasRole(OrganizationRole::Owner->value))->toBeFalse();
+    });
+});
+
 test('an invitation can not be accepted twice', function () {
     $organization = Organization::factory()->create();
     OrganizationRoles::provision($organization);
@@ -161,13 +188,14 @@ test('an invitee whose address was registered in the meantime is sent to log in'
     expect(User::query()->where('email', 'stranger@example.com')->count())->toBe(1);
 });
 
-test('a signed in user is kept away from the invitation pages', function () {
+test('a signed in user on an invitation for another address is told so', function () {
     $organization = Organization::factory()->create();
     [, $plainToken] = invitationFor($organization);
 
     $this->actingAs(User::factory()->create())
         ->get(route('invitations.show', ['token' => $plainToken]))
-        ->assertRedirect();
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('reason', 'wrong_account'));
 });
 
 test('public registration is disabled unless the platform opens it', function () {

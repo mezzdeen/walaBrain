@@ -18,6 +18,7 @@ return [
     'platform' => 'المنصة',
     'platform_settings' => 'الإعدادات العامة',
     'general_administration' => 'الإدارة العامة',
+    'user_management' => 'إدارة المستخدمين',
     'invite_user' => 'دعوة مستخدم',
     'navigation_menu' => 'قائمة التنقل',
     'search' => 'بحث',

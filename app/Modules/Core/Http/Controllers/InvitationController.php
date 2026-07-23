@@ -6,11 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Modules\Core\Http\Requests\AcceptInvitationRequest;
 use App\Modules\Core\Models\OrganizationInvitation;
 use App\Modules\Core\Models\User;
+use App\Modules\Core\Support\OrganizationContext;
 use App\Modules\Core\Support\OrganizationInvitations;
-use App\Modules\Core\Support\OrganizationOwners;
+use App\Modules\Core\Support\OrganizationMembers;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -19,6 +22,11 @@ class InvitationController extends Controller
 {
     /**
      * Show the invitation, or explain why it cannot be used.
+     *
+     * One link serves everyone the invitation might reach, so the branch it
+     * lands on is decided here: a signed-in invitee confirms and joins, a
+     * signed-in stranger is turned away, an existing account is sent to sign in
+     * first, and a brand-new invitee finishes setting up their account.
      */
     public function show(string $token): Response|RedirectResponse
     {
@@ -36,11 +44,27 @@ class InvitationController extends Controller
             return $this->refuse('expired');
         }
 
-        // Someone registered this address between the invitation being sent and
-        // the link being opened. There is nothing to fill in, so send them to
-        // log in instead of offering a form that cannot succeed.
+        $user = Auth::guard('web')->user();
+
+        if ($user instanceof User) {
+            // A signed-in account can only take up an invitation addressed to
+            // it; anyone else is looking at someone else's link.
+            if (! $this->addresses($invitation, $user)) {
+                return $this->refuse('wrong_account');
+            }
+
+            return Inertia::render('invitations/accept', [
+                'organization' => ['name' => $invitation->organization->name],
+                'role' => $invitation->role,
+                'token' => $token,
+            ]);
+        }
+
+        // A guest whose address already belongs to an account has nothing to
+        // fill in: send them to sign in, remembering the link so they return
+        // here to accept once they have.
         if ($this->addressIsTaken($invitation)) {
-            return $this->redirectToLogin();
+            return redirect()->guest(route('login'));
         }
 
         return Inertia::render('auth/accept-invitation', [
@@ -49,6 +73,39 @@ class InvitationController extends Controller
             'token' => $token,
             'passwordRules' => Password::defaults()->toPasswordRulesString(),
         ]);
+    }
+
+    /**
+     * Take up an invitation as the already-signed-in account it names.
+     *
+     * The other half of {@see self::store()}: where that creates a new account
+     * for an invited address, this joins an existing one, so the organization
+     * finally appears to a user who had to accept it first.
+     */
+    public function accept(Request $request, string $token): RedirectResponse
+    {
+        $invitation = OrganizationInvitations::findPendingByToken($token);
+        $user = $request->user();
+
+        // Re-resolved and re-checked rather than trusted from `show`: the
+        // invitation may have been withdrawn or expired since, and the request
+        // must be the account it names.
+        if (! $invitation instanceof OrganizationInvitation
+            || ! $user instanceof User
+            || ! $this->addresses($invitation, $user)) {
+            return to_route('invitations.show', ['token' => $token]);
+        }
+
+        DB::transaction(function () use ($invitation, $user): void {
+            OrganizationMembers::join($invitation->organization, $user, $invitation->role);
+            $invitation->forceFill(['accepted_at' => now()])->save();
+        });
+
+        // Land them on the organization they just joined rather than whichever
+        // one they were last acting on.
+        OrganizationContext::switch($invitation->organization);
+
+        return to_route('dashboard');
     }
 
     /**
@@ -81,7 +138,7 @@ class InvitationController extends Controller
             // for. Making them prove it twice would be theatre.
             $user->forceFill(['email_verified_at' => now()])->save();
 
-            OrganizationOwners::assign($invitation->organization, $user);
+            OrganizationMembers::join($invitation->organization, $user, $invitation->role);
 
             $invitation->forceFill(['accepted_at' => now()])->save();
 
@@ -100,6 +157,18 @@ class InvitationController extends Controller
     private function refuse(string $reason): Response
     {
         return Inertia::render('auth/accept-invitation', ['reason' => $reason]);
+    }
+
+    /**
+     * Whether the invitation is addressed to the given account.
+     *
+     * Compared in lower case: addresses are stored lowered on both sides, but a
+     * mismatch here would silently hand one person's invitation to another, so
+     * it is not left to that.
+     */
+    private function addresses(OrganizationInvitation $invitation, User $user): bool
+    {
+        return Str::lower($user->email) === Str::lower($invitation->email);
     }
 
     /**

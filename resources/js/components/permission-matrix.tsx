@@ -60,6 +60,7 @@ export function PermissionMatrix({
                                     onCheckedChange={(checked) =>
                                         toggle(permission, checked === true)
                                     }
+                                    data-test={`permission-${permission.replaceAll('.', '-')}`}
                                 />
                                 <Label
                                     htmlFor={permission}

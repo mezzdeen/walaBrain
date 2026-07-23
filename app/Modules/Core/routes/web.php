@@ -2,7 +2,9 @@
 
 use App\Modules\Core\Http\Controllers\Auth\RegistrationController;
 use App\Modules\Core\Http\Controllers\InvitationController;
+use App\Modules\Core\Http\Controllers\MemberController;
 use App\Modules\Core\Http\Controllers\MemberInvitationController;
+use App\Modules\Core\Http\Controllers\MemberSearchController;
 use App\Modules\Core\Http\Controllers\OrganizationRoleSettingsController;
 use App\Modules\Core\Http\Controllers\OrganizationSettingsController;
 use App\Modules\Core\Http\Controllers\OrganizationSwitchController;
@@ -27,11 +29,21 @@ use Inertia\Inertia;
 // An invitation link is a way into the application that does not depend on
 // self-registration being open, so these have to be reachable while signed out
 // whichever way the platform is set.
-Route::middleware(['web', 'guest'])->group(function () {
+//
+// `show` is not `guest`-only: one link serves a brand-new invitee and an
+// existing account alike, and the controller decides which they are. `store`
+// creates the invited account, so it stays for guests; `accept` joins an
+// account that already exists, so it is for the signed in.
+Route::middleware('web')->group(function () {
     Route::get('invitations/{token}', [InvitationController::class, 'show'])->name('invitations.show');
+
     Route::post('invitations/{token}', [InvitationController::class, 'store'])
-        ->middleware('throttle:10,1')
+        ->middleware(['guest', 'throttle:10,1'])
         ->name('invitations.store');
+
+    Route::post('invitations/{token}/accept', [InvitationController::class, 'accept'])
+        ->middleware(['auth:web', 'throttle:10,1'])
+        ->name('invitations.accept');
 });
 
 // The other way in, and only while the platform is open to it — `registration`
@@ -93,9 +105,22 @@ Route::middleware(['web', 'auth:web', 'verified'])->group(function () {
         Route::put('roles/{role}', [OrganizationRoleSettingsController::class, 'update'])->name('roles.update');
         Route::delete('roles/{role}', [OrganizationRoleSettingsController::class, 'destroy'])->name('roles.destroy');
 
-        // Distinct from the guest `invitations.show`/`store` pair below, which
-        // accept an invitation by token. This is where one is issued from.
+        // Distinct from the `invitations.show`/`store`/`accept` routes above,
+        // which take up an invitation by token. This is where one is issued from.
         Route::get('invitations', [MemberInvitationController::class, 'index'])->name('invitations.index');
+        Route::post('invitations', [MemberInvitationController::class, 'store'])->name('invitations.manage.store');
+        Route::delete('invitations/{invitation}', [MemberInvitationController::class, 'destroy'])->name('invitations.manage.destroy');
+        Route::post('invitations/{invitation}/resend', [MemberInvitationController::class, 'resend'])->name('invitations.manage.resend');
+
+        // The owner's roster of everyone in the organization. Its own screen and
+        // permission, distinct from the invite form and its typeahead below.
+        Route::get('members', [MemberController::class, 'index'])->name('members.index');
+
+        // Backs the invitee field on the invite form. Gated on the same invite
+        // permission, and confined to accounts not already in the organization.
+        Route::get('members/search', MemberSearchController::class)
+            ->middleware('throttle:30,1')
+            ->name('members.search');
     });
 
     Route::redirect('settings', '/settings/profile');

@@ -40,12 +40,15 @@ class DemoSeeder extends Seeder
         }
 
         $asmaa = $this->user('Asmaa', 'Izz', 'asmaa@app.com');
-        $tysier = $this->user('Tysier', 'Saleh', 'tysier@app.com');
+        $tysier = $this->user('Tysier', 'Waleed', 'tysier@app.com');
+        $mayar = $this->user('mayar', 'Waleed', 'mayar@app.com');
 
         $this->organization('Nakheel', owner: $asmaa, member: $tysier);
 
         // The mirror image: whoever was the employee above runs this one.
         $this->organization('Rawabi', owner: $tysier, member: $asmaa);
+
+        $this->organization('Baby', owner: $mayar);
     }
 
     /**
@@ -79,11 +82,13 @@ class DemoSeeder extends Seeder
     /**
      * Create the organization, provision its roles, and staff it.
      *
-     * Safe to run more than once: the organization is matched by name, and both
-     * role assignments are additive, so re-seeding cannot strip either account
-     * of what it holds in the other organization.
+     * The member is optional: an organization can be seeded with an owner alone,
+     * which leaves an existing account outside it to invite for real. Safe to
+     * run more than once: the organization is matched by name, and both role
+     * assignments are additive, so re-seeding cannot strip either account of
+     * what it holds in the other organization.
      */
-    private function organization(string $name, User $owner, User $member): void
+    private function organization(string $name, User $owner, ?User $member = null): void
     {
         // Restore a soft-deleted organization instead of seeding a second one
         // of the same name: matched by name, `firstOrCreate` cannot see the
@@ -98,6 +103,12 @@ class DemoSeeder extends Seeder
 
         OrganizationRoles::provision($organization);
         OrganizationOwners::assign($organization, $owner);
+
+        // Nobody to staff when no member was given: the owner alone is enough
+        // for an organization, and leaving it at that is the point.
+        if (! $member instanceof User) {
+            return;
+        }
 
         $organization->users()->syncWithoutDetaching([$member->getKey()]);
 

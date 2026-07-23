@@ -13,6 +13,7 @@ enum OrganizationPermission: string
     case UpdateOrganization = 'organization.update';
 
     case ViewMembers = 'members.view';
+    case ManageMembers = 'members.manage';
     case InviteMembers = 'members.invite';
     case UpdateMembers = 'members.update';
     case RemoveMembers = 'members.remove';

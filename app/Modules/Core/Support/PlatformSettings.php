@@ -39,7 +39,7 @@ final class PlatformSettings
      * Closed, and no providers: the safe reading of an unanswered question, and
      * the behaviour that was hard coded before this table existed.
      *
-     * @return array<string, mixed>
+     * @return array{registration_open: bool, social_providers: array<string, bool>}
      */
     public static function defaults(): array
     {

@@ -24,14 +24,6 @@ final class OrganizationOwners
      */
     public static function assign(Organization $organization, User $user): void
     {
-        $organization->users()->syncWithoutDetaching([$user->getKey()]);
-
-        // Roles are team owned, so the role has to be resolved with the
-        // permission team pointed at this organization. `assignRole` rather than
-        // `syncRoles`: the latter would strip the roles the user holds in every
-        // other organization.
-        OrganizationRoles::within($organization, function () use ($user): void {
-            $user->assignRole(OrganizationRole::Owner->value);
-        });
+        OrganizationMembers::join($organization, $user, OrganizationRole::Owner->value);
     }
 }

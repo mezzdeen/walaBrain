@@ -38,6 +38,8 @@ final class HashId
      * The null case is real rather than defensive: a query that selects a
      * column list without `id` produces models whose key is null, and encoding
      * that would hand every row the same code.
+     *
+     * @return ($key is null ? null : string)
      */
     public static function encode(?int $key): ?string
     {

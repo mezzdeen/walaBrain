@@ -31,9 +31,10 @@ class OrganizationInvitationFactory extends Factory
         return [
             'organization_id' => Organization::factory(),
             'email' => fake()->unique()->safeEmail(),
-            'role' => OrganizationRole::Owner,
+            'role' => OrganizationRole::Owner->value,
             'token' => OrganizationInvitations::hash(Str::random(64)),
             'invited_by_admin_id' => null,
+            'invited_by_user_id' => null,
             'expires_at' => now()->addDays(OrganizationInvitations::EXPIRES_AFTER_DAYS),
             'accepted_at' => null,
         ];

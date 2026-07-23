@@ -1,0 +1,43 @@
+<?php
+
+namespace Pest\PendingCalls;
+
+/**
+ * Pest types the `$this` inside a test closure as this TestCall proxy, whose own
+ * mixin only reaches PHPUnit — so the analysed module tests see none of the
+ * Laravel or Fortify methods the closures call on `$this`, all of which the
+ * proxy forwards to the bound test case at run time. Declared here as `@method`
+ * (the only tag PHPStan lets a stub add absent methods with) and merged onto the
+ * real class, whose own chaining — `it(...)->throws(...)` — is untouched.
+ *
+ * Only methods reached directly on `$this` need listing; a new one first shows
+ * up as an undefined method on TestCall. The request helpers return `mixed`
+ * rather than a named TestResponse: PHPStan resolves no class named in an
+ * `@method` tag, so the type is left open and the response chain
+ * (`->assertOk()`, `->assertRedirect()`) rides on the test run instead.
+ *
+ * @method $this actingAs($user, string|null $guard = null)
+ * @method $this assertAuthenticated(string|null $guard = null)
+ * @method $this assertAuthenticatedAs($user, string|null $guard = null)
+ * @method $this assertGuest(string|null $guard = null)
+ * @method $this assertDatabaseHas($table, array<string, mixed> $data = [], string|null $connection = null)
+ * @method $this assertDatabaseMissing($table, array<string, mixed> $data = [], string|null $connection = null)
+ * @method $this assertDatabaseCount($table, int $count, string|null $connection = null)
+ * @method $this assertSoftDeleted($table, array<string, mixed> $data = [], string|null $connection = null, string $deletedAtColumn = 'deleted_at')
+ * @method $this assertNotSoftDeleted($table, array<string, mixed> $data = [], string|null $connection = null, string $deletedAtColumn = 'deleted_at')
+ * @method $this assertModelExists($model)
+ * @method $this assertModelMissing($model)
+ * @method $this from(string $url)
+ * @method $this seed(class-string|array<int, class-string> $class = 'Database\Seeders\DatabaseSeeder')
+ * @method $this withHeader(string $name, string $value)
+ * @method $this withUnencryptedCookie(string $name, string $value)
+ * @method $this withSession(array<string, mixed> $data)
+ * @method mixed get($uri, array<string, string> $headers = [])
+ * @method mixed getJson($uri, array<string, string> $headers = [], int $options = 0)
+ * @method mixed post($uri, array<string, mixed> $data = [], array<string, string> $headers = [])
+ * @method mixed put($uri, array<string, mixed> $data = [], array<string, string> $headers = [])
+ * @method mixed patch($uri, array<string, mixed> $data = [], array<string, string> $headers = [])
+ * @method mixed delete($uri, array<string, mixed> $data = [], array<string, string> $headers = [])
+ * @method void skipUnlessFortifyHas(string $feature, string|null $message = null)
+ */
+final class TestCall {}

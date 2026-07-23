@@ -2,6 +2,7 @@
 
 namespace App\Modules\Core\Services;
 
+use App\Modules\Core\Enums\OrganizationRole;
 use App\Modules\Core\Models\Admin;
 use App\Modules\Core\Models\Organization;
 use App\Modules\Core\Models\User;
@@ -73,7 +74,7 @@ final class OrganizationService
 
             $organization = Organization::create(['name' => $name]);
             OrganizationRoles::provision($organization);
-            OrganizationInvitations::issue($organization, $ownerEmail, $invitedBy);
+            OrganizationInvitations::issue($organization, $ownerEmail, OrganizationRole::Owner->value, $invitedBy);
 
             return $organization;
         });

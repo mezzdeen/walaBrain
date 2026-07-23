@@ -67,7 +67,7 @@ function superAdmin(): Admin
 {
     seedPermissions();
 
-    return tap(Admin::factory()->create())->assignRole(SuperRole::SuperAdmin->value);
+    return tap(Admin::factory()->create(), fn (Admin $admin) => $admin->assignRole(SuperRole::SuperAdmin->value));
 }
 
 /**
@@ -85,11 +85,11 @@ function adminWith(SuperPermission ...$permissions): Admin
     ]);
 
     $role->syncPermissions(array_map(
-        fn (SuperPermission $permission): Permission => Permission::findOrCreate($permission->value, 'super'),
+        fn (SuperPermission $permission) => Permission::findOrCreate($permission->value, 'super'),
         $permissions,
     ));
 
-    return tap(Admin::factory()->create())->assignRole($role);
+    return tap(Admin::factory()->create(), fn (Admin $admin) => $admin->assignRole($role));
 }
 
 /**
