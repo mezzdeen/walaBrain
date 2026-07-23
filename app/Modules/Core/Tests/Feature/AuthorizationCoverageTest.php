@@ -32,6 +32,7 @@ const UNAUTHORIZED_ACTIONS = [
     'Auth\AuthenticatedSessionController@destroy' => 'signing out is always allowed to the signed-in',
     'InvitationController@show' => 'guest facing: the signed token is the authorization',
     'InvitationController@store' => 'guest facing: the signed token is the authorization',
+    'InvitationController@accept' => 'guest facing: the signed token and matching address are the authorization, which redirects rather than denies',
     'Auth\RegistrationController@create' => 'guest facing: the `registration` middleware is the authorization',
     'Auth\RegistrationController@store' => 'guest facing: the `registration` middleware is the authorization',
 ];

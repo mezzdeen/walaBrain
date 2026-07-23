@@ -48,6 +48,8 @@ class MemberInvitationController extends Controller
      */
     public function store(StoreMemberInvitationRequest $request): RedirectResponse
     {
+        Gate::authorize('inviteMembers', $request->organization());
+
         OrganizationInvitations::issue(
             $request->organization(),
             $request->validated('email'),
@@ -65,7 +67,7 @@ class MemberInvitationController extends Controller
      */
     public function destroy(OrganizationInvitation $invitation): RedirectResponse
     {
-        $this->authorizeForOrganization($invitation);
+        Gate::authorize('inviteMembers', $this->organizationActingOn($invitation));
 
         $invitation->delete();
 
@@ -83,7 +85,7 @@ class MemberInvitationController extends Controller
      */
     public function resend(OrganizationInvitation $invitation): RedirectResponse
     {
-        $this->authorizeForOrganization($invitation);
+        Gate::authorize('inviteMembers', $this->organizationActingOn($invitation));
 
         OrganizationInvitations::reissue($invitation);
 
@@ -93,20 +95,20 @@ class MemberInvitationController extends Controller
     }
 
     /**
-     * Confirm the invitation belongs to the organization being acted on before
-     * anything is done to it, then that the actor may invite into it.
+     * The organization being acted on, once the invitation is confirmed to
+     * belong to it — the caller authorizes against what this returns.
      *
      * The organization check comes first so an invitation from another tenant is
      * a 404 — the same answer an invitation that never existed gets — rather
      * than a 403 that would confirm it is real.
      */
-    private function authorizeForOrganization(OrganizationInvitation $invitation): void
+    private function organizationActingOn(OrganizationInvitation $invitation): Organization
     {
         $organization = OrganizationContext::current();
 
         abort_unless($invitation->organization_id === $organization->getKey(), 404);
 
-        Gate::authorize('inviteMembers', $organization);
+        return $organization;
     }
 
     /**
