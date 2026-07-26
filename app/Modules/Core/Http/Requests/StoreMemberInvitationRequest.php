@@ -9,21 +9,11 @@ use App\Modules\Core\Support\OrganizationRoles;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class StoreMemberInvitationRequest extends FormRequest
 {
-    /**
-     * Only someone the organization has granted the invite permission may issue
-     * one, against the organization they are acting on.
-     */
-    public function authorize(): bool
-    {
-        return Gate::allows('inviteMembers', $this->organization());
-    }
-
     /**
      * Get the validation rules that apply to the request.
      *
