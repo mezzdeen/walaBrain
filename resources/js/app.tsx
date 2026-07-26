@@ -1,10 +1,13 @@
 import { createInertiaApp } from '@inertiajs/react';
+import { DirectionProvider } from '@radix-ui/react-direction';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { initializeTheme } from '@/hooks/use-appearance';
 import AppLayout from '@/layouts/app-layout';
 import AuthLayout from '@/layouts/auth-layout';
 import SettingsLayout from '@/layouts/settings/layout';
+import SuperLayout from '@/layouts/super-layout';
+import { initializeBrandColor } from '@/lib/brand-color';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -14,6 +17,10 @@ createInertiaApp({
         switch (true) {
             case name === 'welcome':
                 return null;
+            case name.startsWith('super/auth/'):
+                return AuthLayout;
+            case name.startsWith('super/'):
+                return SuperLayout;
             case name.startsWith('auth/'):
                 return AuthLayout;
             case name.startsWith('settings/'):
@@ -23,12 +30,17 @@ createInertiaApp({
         }
     },
     strictMode: true,
-    withApp(app) {
+    // Radix reads the direction from context rather than the document, and the
+    // page is handed to us here so it stays identical on the server and during
+    // hydration. A language switch reloads the page, so this never goes stale.
+    withApp(app, { page }) {
         return (
-            <TooltipProvider delayDuration={0}>
-                {app}
-                <Toaster />
-            </TooltipProvider>
+            <DirectionProvider dir={page.props.direction}>
+                <TooltipProvider delayDuration={0}>
+                    {app}
+                    <Toaster />
+                </TooltipProvider>
+            </DirectionProvider>
         );
     },
     progress: {
@@ -38,3 +50,7 @@ createInertiaApp({
 
 // This will set light / dark mode on load...
 initializeTheme();
+
+// Keeps the organization's brand colour in step across visits. The root view
+// has already applied it for this page; this is what carries it to the next.
+initializeBrandColor();

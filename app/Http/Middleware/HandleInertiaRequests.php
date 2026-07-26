@@ -29,6 +29,12 @@ class HandleInertiaRequests extends Middleware
     /**
      * Define the props that are shared by default.
      *
+     * Only what the application itself owns. A module contributes its own props
+     * from its own middleware, which runs after this one and so overwrites any
+     * key it also provides: `Inertia::share()` merges, last writer winning.
+     * The defaults below are what keeps the shell renderable when no module
+     * supplies the richer values.
+     *
      * @see https://inertiajs.com/shared-data
      *
      * @return array<string, mixed>
@@ -38,10 +44,27 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'name' => config('app.name'),
+            'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'auth' => [
                 'user' => $request->user(),
+                'admin' => null,
             ],
-            'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            // The application ships one language and no notion of writing
+            // direction, so these three agree with each other by construction.
+            // A module that knows about more replaces all three together.
+            'locale' => config('app.locale'),
+            'direction' => 'ltr',
+            'supportedLocales' => [config('app.locale')],
+            'translations' => (object) [],
+            // Every key the front end reads unguarded needs an answer here, or
+            // a page renders against `undefined` the moment no module supplies
+            // one. Empty and null are the safe answers: nothing is permitted,
+            // there is no organization, and no account can be self-created.
+            'permissions' => [],
+            'organization' => null,
+            'organizations' => [],
+            'registration' => null,
+            'brandColorCss' => '',
         ];
     }
 }

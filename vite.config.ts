@@ -15,6 +15,11 @@ export default defineConfig({
                 bunny('Instrument Sans', {
                     weights: [400, 500, 600],
                 }),
+                // Instrument Sans carries no Arabic glyphs; this is the
+                // per-glyph fallback for right-to-left locales.
+                bunny('IBM Plex Sans Arabic', {
+                    weights: [400, 500, 600],
+                }),
             ],
         }),
         inertia(),

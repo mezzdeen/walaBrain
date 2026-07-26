@@ -1,0 +1,26 @@
+<?php
+
+namespace App\Modules\Core\Http\Requests\Settings;
+
+use App\Modules\Core\Models\User;
+use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Foundation\Http\FormRequest;
+use Laravel\Fortify\InteractsWithTwoFactorState;
+
+/**
+ * @method User user(string|null $guard = null)
+ */
+class TwoFactorAuthenticationRequest extends FormRequest
+{
+    use InteractsWithTwoFactorState;
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, ValidationRule|array<mixed>|string>
+     */
+    public function rules(): array
+    {
+        return [];
+    }
+}

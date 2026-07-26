@@ -1,5 +1,6 @@
 <?php
 
+use App\Providers\ModuleServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -16,7 +17,43 @@ use Tests\TestCase;
 
 pest()->extend(TestCase::class)
     ->use(RefreshDatabase::class)
-    ->in('Feature');
+    ->in('Feature', 'Browser');
+
+/*
+|--------------------------------------------------------------------------
+| Modules
+|--------------------------------------------------------------------------
+|
+| Pest boots exactly one Pest.php, this one, so a module's own bindings and
+| helpers have to be pulled in from here. Taken from the same list of modules
+| the application registers providers from, so a module with tests brings its
+| own file and removing the module removes it with no edit here.
+|
+| Everything these files declare shares one global scope, so a module names its
+| helpers for itself rather than for what they do.
+|
+*/
+
+foreach (ModuleServiceProvider::names() as $module) {
+    $bootstrap = ModuleServiceProvider::path()."/{$module}/Tests/Pest.php";
+
+    if (file_exists($bootstrap)) {
+        require_once $bootstrap;
+    }
+}
+
+/*
+|--------------------------------------------------------------------------
+| Browser Testing
+|--------------------------------------------------------------------------
+|
+| Browser tests boot the compiled front-end in a real browser, so they wait
+| a little longer than the default to let Inertia hydrate and the full page
+| reloads that follow a locale change settle.
+|
+*/
+
+pest()->browser()->timeout(10000);
 
 /*
 |--------------------------------------------------------------------------
@@ -32,19 +69,3 @@ pest()->extend(TestCase::class)
 expect()->extend('toBeOne', function () {
     return $this->toBe(1);
 });
-
-/*
-|--------------------------------------------------------------------------
-| Functions
-|--------------------------------------------------------------------------
-|
-| While Pest is very powerful out-of-the-box, you may have some testing code specific to your
-| project that you don't want to repeat in every file. Here you can also expose helpers as
-| global functions to help you to reduce the number of lines of code in your test files.
-|
-*/
-
-function something()
-{
-    // ..
-}

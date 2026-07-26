@@ -161,7 +161,9 @@ return [
     */
 
     'features' => [
-        Features::registration(),
+        // Registration is deliberately absent: accounts are only created by
+        // accepting an organization invitation, so there is no public sign-up.
+        // See App\Modules\Core\Http\Controllers\InvitationController.
         Features::resetPasswords(),
         Features::emailVerification(),
         Features::twoFactorAuthentication([

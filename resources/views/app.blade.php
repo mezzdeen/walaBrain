@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" @class(['dark' => ($appearance ?? 'system') == 'dark'])>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ $direction ?? 'ltr' }}" @class(['dark' => ($appearance ?? 'system') == 'dark'])>
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -29,6 +29,13 @@
                 background-color: oklch(0.145 0 0);
             }
         </style>
+
+        {{-- The active organization's brand colour, written here so the first
+             paint is already branded. Empty for the admin platform, for a
+             signed-out visitor, and for an organization that has chosen none.
+             Unescaped on purpose: this is CSS built by BrandColor from a
+             validated hex value, never free text. --}}
+        <style id="brand-color">{!! $brandColorCss ?? '' !!}</style>
 
         <link rel="icon" href="/favicon.ico" sizes="any">
         <link rel="icon" href="/favicon.svg" type="image/svg+xml">

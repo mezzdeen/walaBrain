@@ -1,6 +1,7 @@
 includes:
     - vendor/larastan/larastan/extension.neon
     - vendor/nesbot/carbon/extension.neon
+    - vendor/pestphp/pest/extension.neon
 
 parameters:
     paths:
@@ -9,5 +10,22 @@ parameters:
         - config/
         - database/
         - routes/
+
+    # Module tests live under app/ and are analysed, but the global helpers they
+    # call are defined here. Scanned rather than analysed: it makes the symbols
+    # known without reporting on the file itself.
+    scanFiles:
+        - tests/Pest.php
+
+    # Inside a Pest test closure `$this` is Pest's TestCall proxy, whose mixin
+    # only reaches PHPUnit — so the Laravel and Fortify methods the analysed
+    # module tests call on `$this` go unseen. The stub declares that surface.
+    stubFiles:
+        - tests/stubs/pest-testcall.stub
+
+    # `expect(...)->not` and the other chained readers reach for properties Pest
+    # resolves at runtime; treat its expectation objects as open bags of them.
+    universalObjectCratesClasses:
+        - Pest\Mixins\Expectation
 
     level: 7

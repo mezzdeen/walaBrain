@@ -4,12 +4,15 @@ import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useTranslations } from '@/hooks/use-translations';
 
 type Props = {
     onSuccess: () => void;
 };
 
 export default function PasskeyRegistration({ onSuccess }: Props) {
+    const { t } = useTranslations();
+
     const [name, setName] = useState(() => {
         const ua = navigator.userAgent;
 
@@ -29,7 +32,11 @@ export default function PasskeyRegistration({ onSuccess }: Props) {
             { pattern: /Windows/, name: 'Windows' },
         ].find(({ pattern }) => pattern.test(ua))?.name;
 
-        return [browser, os].filter(Boolean).join(' on ') || '';
+        if (browser && os) {
+            return t('core.settings.passkey_default_name', { browser, os });
+        }
+
+        return browser ?? os ?? '';
     });
 
     const [showForm, setShowForm] = useState(false);
@@ -59,7 +66,7 @@ export default function PasskeyRegistration({ onSuccess }: Props) {
     if (!isSupported) {
         return (
             <div className="text-sm text-muted-foreground">
-                Passkeys are not supported in this browser.
+                {t('core.settings.passkeys_unsupported')}
             </div>
         );
     }
@@ -67,7 +74,7 @@ export default function PasskeyRegistration({ onSuccess }: Props) {
     if (!showForm) {
         return (
             <Button variant="outline" onClick={() => setShowForm(true)}>
-                Add passkey
+                {t('core.settings.add_passkey')}
             </Button>
         );
     }
@@ -78,18 +85,20 @@ export default function PasskeyRegistration({ onSuccess }: Props) {
             className="space-y-4 rounded-lg border border-border bg-muted/50 p-4"
         >
             <div className="grid gap-2">
-                <Label htmlFor="passkey-name">Passkey name</Label>
+                <Label htmlFor="passkey-name">
+                    {t('core.settings.passkey_name')}
+                </Label>
                 <Input
                     id="passkey-name"
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="e.g., MacBook Pro, iPhone"
+                    placeholder={t('core.settings.passkey_name_placeholder')}
                     className="mt-1 block w-full border-foreground/20"
                     autoFocus
                 />
                 <p className="text-xs text-muted-foreground">
-                    A name helps you identify this passkey later.
+                    {t('core.settings.passkey_name_hint')}
                 </p>
             </div>
 
@@ -97,10 +106,12 @@ export default function PasskeyRegistration({ onSuccess }: Props) {
 
             <div className="flex gap-2">
                 <Button type="submit" disabled={isLoading || !name.trim()}>
-                    {isLoading ? 'Registering...' : 'Register passkey'}
+                    {isLoading
+                        ? t('core.settings.registering')
+                        : t('core.settings.register_passkey')}
                 </Button>
                 <Button type="button" variant="ghost" onClick={handleCancel}>
-                    Cancel
+                    {t('core.common.cancel')}
                 </Button>
             </div>
         </form>
