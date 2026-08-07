@@ -68,6 +68,7 @@ return [
         'roles' => 'Roles',
         'organization' => 'Organization',
         'members' => 'Members',
+        'processes' => 'Processes',
         'spaces' => 'Spaces',
         'diagnostics' => 'Diagnostics',
         'settings' => 'Platform settings',
@@ -80,6 +81,7 @@ return [
     | literal 'members.manage' key could never be reached.
     */
     'abilities' => [
+        'design' => 'Design',
         'view' => 'View',
         'create' => 'Create',
         'update' => 'Update',

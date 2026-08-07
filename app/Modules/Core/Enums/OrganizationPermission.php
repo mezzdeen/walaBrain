@@ -23,6 +23,12 @@ enum OrganizationPermission: string
     // space, so that administering spaces and working in them stay separate.
     case ManageSpaces = 'spaces.manage';
 
+    // Shaping a process rather than working within one: a board's fields and
+    // groups, the forms that create nodes on it, and the flows that react. One
+    // capability rather than one per artefact, because they are the same job —
+    // and where it can be exercised is decided by space membership, not here.
+    case DesignProcesses = 'processes.design';
+
     case ViewRoles = 'roles.view';
     case CreateRoles = 'roles.create';
     case UpdateRoles = 'roles.update';
