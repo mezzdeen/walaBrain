@@ -47,6 +47,7 @@ class OrganizationController extends Controller
             $request->validated('name'),
             $email,
             $request->user('super'),
+            $request->validated('locale'),
         );
 
         Inertia::flash('toast', [

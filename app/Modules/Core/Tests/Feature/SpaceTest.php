@@ -32,7 +32,7 @@ test('an organization is created with a default space', function () {
 
     expect($spaces)->toHaveCount(1)
         ->and($spaces->first()->is_default)->toBeTrue()
-        ->and($spaces->first()->name)->toBe(__('core.spaces.default_name'));
+        ->and($spaces->first()->name)->toBe(__('core::spaces.default_name'));
 });
 
 test('provisioning the default space twice does not make a second one', function () {

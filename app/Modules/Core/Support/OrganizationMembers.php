@@ -2,6 +2,7 @@
 
 namespace App\Modules\Core\Support;
 
+use App\Modules\Core\Exceptions\InvalidReportingLine;
 use App\Modules\Core\Models\Organization;
 use App\Modules\Core\Models\User;
 
@@ -32,5 +33,67 @@ final class OrganizationMembers
         OrganizationRoles::within($organization, function () use ($user, $roleName): void {
             $user->assignRole($roleName);
         });
+    }
+
+    /**
+     * Say who a member reports to in the organization, or that they report to
+     * nobody.
+     *
+     * Three things a reporting line can never be, refused here rather than left
+     * to the caller: a manager from outside the organization, which would cross
+     * a boundary nothing else in the application crosses; somebody managing
+     * themselves; and a loop, which would leave the line with no top and send
+     * anything walking it round forever.
+     *
+     * @throws InvalidReportingLine
+     */
+    public static function setManager(Organization $organization, User $member, ?User $manager): void
+    {
+        if ($manager instanceof User) {
+            if ($manager->is($member)) {
+                throw InvalidReportingLine::selfReferential($member);
+            }
+
+            if (! $manager->belongsToOrganization($organization)) {
+                throw InvalidReportingLine::notAMember($manager, $organization);
+            }
+
+            if (self::wouldCloseALoop($organization, $member, $manager)) {
+                throw InvalidReportingLine::circular($member, $manager);
+            }
+        }
+
+        $organization->users()->updateExistingPivot($member->getKey(), [
+            'manager_id' => $manager?->getKey(),
+        ]);
+    }
+
+    /**
+     * Whether making the manager report-to of the member would close a loop.
+     *
+     * Walks up from the proposed manager: if the member is already somewhere
+     * above them, the new link would join the two ends of the same chain. The
+     * visited set guards the walk itself, so a loop that somehow already exists
+     * in the data cannot hang this.
+     */
+    private static function wouldCloseALoop(Organization $organization, User $member, User $manager): bool
+    {
+        $seen = [];
+        $current = $manager;
+
+        while ($current instanceof User) {
+            if ($current->is($member)) {
+                return true;
+            }
+
+            if (isset($seen[$current->getKey()])) {
+                return true;
+            }
+
+            $seen[$current->getKey()] = true;
+            $current = $current->managerIn($organization);
+        }
+
+        return false;
     }
 }

@@ -21,10 +21,15 @@ final class Spaces
      * Safe to call more than once. The name is a translation because nobody has
      * typed one yet — an organization that has just come into existence has no
      * author to write it — and it is theirs to rename afterwards like any other.
+     *
+     * Translated into the organization's working language rather than the
+     * locale of whoever happens to be creating it: this is authored content
+     * from the moment it exists, and a platform admin reading English has no
+     * business naming an Arabic organization's first space in English.
      */
     public static function provisionDefault(Organization $organization): Space
     {
-        return OrganizationContext::for($organization, function (): Space {
+        return OrganizationContext::for($organization, function () use ($organization): Space {
             $existing = Space::query()->where('is_default', true)->first();
 
             if ($existing instanceof Space) {
@@ -32,7 +37,7 @@ final class Spaces
             }
 
             return Space::create([
-                'name' => __('core.spaces.default_name'),
+                'name' => __('core::spaces.default_name', [], $organization->locale),
                 'position' => 0,
                 'is_default' => true,
             ]);

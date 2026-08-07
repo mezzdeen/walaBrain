@@ -88,7 +88,9 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
      */
     public function organizations(): BelongsToMany
     {
-        return $this->belongsToMany(Organization::class)->withTimestamps();
+        return $this->belongsToMany(Organization::class)
+            ->withPivot('manager_id')
+            ->withTimestamps();
     }
 
     /**
@@ -145,6 +147,56 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
         $key = $organization instanceof Organization ? $organization->getKey() : $organization;
 
         return $this->organizations()->whereKey($key)->exists();
+    }
+
+    /**
+     * Who the user reports to in the given organization, if anyone.
+     *
+     * Answered per organization rather than per person: someone who belongs to
+     * two reports to different people in each, and the answer for one says
+     * nothing about the other.
+     */
+    public function managerIn(Organization $organization): ?User
+    {
+        $membership = $this->organizations()
+            ->whereKey($organization->getKey())
+            ->first();
+
+        $managerId = $membership?->getRelationValue('pivot')?->getAttribute('manager_id');
+
+        return is_int($managerId) ? self::query()->find($managerId) : null;
+    }
+
+    /**
+     * The people who report to the user in the given organization.
+     *
+     * @return Collection<int, User>
+     */
+    public function directReportsIn(Organization $organization): Collection
+    {
+        /** @var Collection<int, User> */
+        return self::query()
+            ->whereHas(
+                'organizations',
+                // The pivot column is named in full: inside `whereHas` this is
+                // an ordinary query over the joined tables, not the relation's
+                // own builder, so `wherePivot` is not available here.
+                fn (Builder $query) => $query->whereKey($organization->getKey())
+                    ->where('organization_user.manager_id', $this->getKey()),
+            )
+            ->get();
+    }
+
+    /**
+     * Determine whether the user is the given member's manager in the
+     * organization.
+     *
+     * The question authorization asks before letting somebody assign work to
+     * another person, or hand them an approval to decide.
+     */
+    public function managesInOrganization(User $member, Organization $organization): bool
+    {
+        return $member->managerIn($organization)?->is($this) === true;
     }
 
     /**

@@ -7,6 +7,7 @@ use App\Modules\Core\Models\Admin;
 use App\Modules\Core\Models\Organization;
 use App\Modules\Core\Models\User;
 use App\Modules\Core\Notifications\OrganizationOwnershipGranted;
+use App\Modules\Core\Support\Locale;
 use App\Modules\Core\Support\OrganizationContext;
 use App\Modules\Core\Support\OrganizationInvitations;
 use App\Modules\Core\Support\OrganizationOwners;
@@ -59,22 +60,24 @@ final class OrganizationService
      * needs to know which of the two outcomes happened, and the lookup is a read
      * that has no business holding a write transaction open.
      */
-    public function create(string $name, string $ownerEmail, ?Admin $invitedBy = null): OrganizationCreationResult
+    public function create(string $name, string $ownerEmail, ?Admin $invitedBy = null, ?string $locale = null): OrganizationCreationResult
     {
+        $locale ??= Locale::default();
+
         $owner = User::query()->firstWhere('email', $ownerEmail);
 
         // An organization without its roles cannot be administered, and one
         // without an owner cannot be reached at all, so all of it either happens
         // together or not at all.
-        $organization = DB::transaction(function () use ($name, $ownerEmail, $owner, $invitedBy): Organization {
+        $organization = DB::transaction(function () use ($name, $ownerEmail, $owner, $invitedBy, $locale): Organization {
             if ($owner instanceof User) {
-                $organization = $this->createForOwner($owner, $name);
+                $organization = $this->createForOwner($owner, $name, $locale);
                 $owner->notify(new OrganizationOwnershipGranted($organization));
 
                 return $organization;
             }
 
-            $organization = Organization::create(['name' => $name]);
+            $organization = Organization::create(['name' => $name, 'locale' => $locale]);
             OrganizationRoles::provision($organization);
             Spaces::provisionDefault($organization);
             OrganizationInvitations::issue($organization, $ownerEmail, OrganizationRole::Owner->value, $invitedBy);
@@ -96,10 +99,16 @@ final class OrganizationService
      * scoped by one — see {@see OrganizationContext}
      * for what that costs if it is skipped.
      */
-    public function createForOwner(User $owner, string $name): Organization
+    public function createForOwner(User $owner, string $name, ?string $locale = null): Organization
     {
-        return DB::transaction(function () use ($owner, $name): Organization {
-            $organization = Organization::create(['name' => $name]);
+        return DB::transaction(function () use ($owner, $name, $locale): Organization {
+            $organization = Organization::create([
+                'name' => $name,
+                // Someone signing themselves up is the organization's first
+                // author, so their own language is the best guess at the one it
+                // will write in. They can change it.
+                'locale' => $locale ?? $owner->preferredLocale() ?? Locale::default(),
+            ]);
 
             OrganizationRoles::provision($organization);
             Spaces::provisionDefault($organization);
