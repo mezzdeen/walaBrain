@@ -5,6 +5,7 @@ use App\Modules\Core\Http\Controllers\InvitationController;
 use App\Modules\Core\Http\Controllers\MemberController;
 use App\Modules\Core\Http\Controllers\MemberInvitationController;
 use App\Modules\Core\Http\Controllers\MemberSearchController;
+use App\Modules\Core\Http\Controllers\NotificationController;
 use App\Modules\Core\Http\Controllers\OrganizationRoleSettingsController;
 use App\Modules\Core\Http\Controllers\OrganizationSettingsController;
 use App\Modules\Core\Http\Controllers\OrganizationSwitchController;
@@ -122,6 +123,14 @@ Route::middleware(['web', 'auth:web', 'verified'])->group(function () {
             ->middleware('throttle:30,1')
             ->name('members.search');
     });
+
+    // Outside the `organization` group on purpose: someone with no organization
+    // still has notifications about their own account, and being shut out of
+    // the one screen that would tell them so is the wrong way round.
+    Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('notifications/read', [NotificationController::class, 'readAll'])->name('notifications.read-all');
+    Route::patch('notifications/{notification}', [NotificationController::class, 'update'])->name('notifications.update');
+    Route::delete('notifications/{notification}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
 
     Route::redirect('settings', '/settings/profile');
 

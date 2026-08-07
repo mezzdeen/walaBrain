@@ -28,32 +28,36 @@ Phases are additive: each one keeps everything the previous phase delivered and 
 
 ## Phase 0 — Platform Foundation
 
-**Status**: in progress. Everything the pillars stand on, and none of the pillars themselves.
+**Status**: complete, bar the screens noted below. Everything the pillars stand on, and none of the pillars themselves.
 
 **Already built and tested**: business lines with enforced tenancy isolation; one account holding membership of several business lines with deliberate switching; custom roles and a capability matrix; invitations by email; sign-in with passkeys, password, and two-factor; Arabic and English throughout with right-to-left layout; the separate administration platform for Platform Admins; and platform settings.
 
-**Still to build.** These belong here rather than in Phase 1 because every one of them is shared foundation: they live alongside the existing capabilities, and each is needed by more than one pillar. Building any pillar first would mean inventing them separately, three different ways.
+**Built in this phase.** These belong here rather than in Phase 1 because every one of them is shared foundation: they live alongside the existing capabilities, and each is needed by more than one pillar. Building any pillar first would have meant inventing them separately, three different ways.
 
-| Capability | Why it is foundation |
-|---|---|
-| **Append-only activity timeline** | Written to by four of the five pillars, and the source of every reporting KPI in 09-notifications-and-audit.md. Must be impossible to edit or delete by construction. |
-| **Working language** on a business line | Fixes the language of every authored label (02-tenancy-and-roles.md). Cheap now, invasive once boards exist. |
-| **Capabilities for the work itself** | The existing list covers a business line, its members, and its roles — not spaces, boards, nodes, forms, flows, task assignment, the calendar, or audit visibility. |
-| **Managers and reporting lines** | Assignment rule 3 is the first approval step in both worked processes, and has nothing behind it (02-tenancy-and-roles.md). |
-| **Spaces and space membership** | Boards have nowhere to live without them (02-tenancy-and-roles.md, 03-boards-and-nodes.md). |
-| **In-app notification centre** | Email delivery exists; the second of the two channels in 09-notifications-and-audit.md does not. |
-| **File attachments** | The File field type, and the invoice on the Phase 1 pilot form (03-boards-and-nodes.md, 10-example-processes.md). |
-| **A running queue worker and scheduler** | Sleeping runs, reminders, escalation, and hold expiry are all background work (05-flows.md, 08-comms-calendar.md). |
+| Capability | Why it is foundation | State |
+|---|---|---|
+| **Append-only activity timeline** | Written to by four of the five pillars, and the source of every reporting KPI in 09-notifications-and-audit.md. Impossible to edit or delete, enforced by the database rather than by a model alone. | Done |
+| **Spaces and space membership** | Boards have nowhere to live without them. Administering a space is a capability; reaching one is membership, at view or edit (02-tenancy-and-roles.md). | Domain done, screens outstanding |
+| **Working language** on a business line | Fixes the language of every authored label (02-tenancy-and-roles.md). | Done |
+| **Managers and reporting lines** | Assignment rule 3 is the first approval step in both worked processes, and had nothing behind it (02-tenancy-and-roles.md). | Domain done, screens outstanding |
+| **Tenant-safe background work** | Sleeping runs, reminders, escalation and hold expiry all happen off the request, where no middleware has set a business line (05-flows.md, 08-comms-calendar.md). | Done |
+| **In-app notification centre** | Email delivery already existed; the second of the two channels in 09-notifications-and-audit.md did not. | Domain done, screens outstanding |
 
-**Order**: the activity timeline first. Nothing depends on it, everything writes to it, and append-only is far cheaper to guarantee from its first commit than to impose once four modules already log through it.
+**Deferred out of this phase**:
 
-**What Phase 0 does not include**: any of the five pillars. No boards, nodes, fields, forms, flows, approvals, tasks, comms calendar, or reporting. Business-day deadline maths and the holiday calendar are deliberately deferred to Phase 2, where 07-tasks-and-deadlines.md's counting rules first matter.
+- **File attachments** — the File field type and the invoice on the pilot form (03-boards-and-nodes.md, 10-example-processes.md). Nothing else in the foundation depends on storage, so it moves to Phase 1 alongside the field types that need it.
+- **Capabilities for boards, forms and flows** — added with the features they authorize rather than up front, since a permission that authorizes nothing still appears as a checkbox in the role matrix and reads as though it does something. Only `spaces.manage` exists so far, because only spaces do.
+- **Business-day deadline maths and the holiday calendar** — Phase 2, where 07-tasks-and-deadlines.md's counting rules first matter.
+
+**What Phase 0 does not include**: any of the five pillars. No boards, nodes, fields, forms, flows, approvals, tasks, comms calendar, or reporting.
 
 **Success criteria**:
 
-- A business line can be created with a working language, spaces, space members, and reporting lines, without a single board existing.
-- Every change to a record leaves an entry on a timeline that nothing in the application can edit or delete.
-- A queued job and a scheduled command both run with the right business line in context, proving background work is tenant-safe before any flow depends on it.
+- A business line can be created with a working language, spaces, space members, and reporting lines, without a single board existing. ✅
+- Every change to a record leaves an entry on a timeline that nothing in the application can edit or delete. ✅
+- A queued job and a scheduled command both run with the right business line in context, proving background work is tenant-safe before any flow depends on it. ✅
+
+Three of the six capabilities have their domain and no screens yet: spaces, reporting lines, and the notification centre are reachable from code and tests but not from the interface. That is deliberate — boards need the models rather than the screens — but it means US-02.7, US-02.8, US-02.9 and US-09.6 are not satisfied until those screens exist, and they should be built alongside the first Phase 1 work that needs them.
 
 See 12-platform-foundation.md for the detail of each, and for the conventions every module built afterwards follows.
 

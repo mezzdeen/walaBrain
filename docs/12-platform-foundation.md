@@ -87,22 +87,25 @@ Postgres indexes and sorts `jsonb` perfectly well, but the indexes that make it 
 
 What does need care from the first migration is the storage contract per field type — an amount stored so it always casts to a number, a date stored so it always sorts chronologically. A single value written with a thousands separator breaks sorting on that column for everyone, and it is not a mistake that announces itself.
 
-## What Core Still Needs
+## What Core Gained in Phase 0
 
-These are the foundation-level capabilities the pillars depend on, and they are Phase 0's remaining scope (11-roadmap.md). They belong in `Core`, built once and shared, rather than being invented separately inside each pillar module:
+Six capabilities, all shared foundation rather than any pillar's own. Each is described in full where it belongs — this is a map, not a second description:
 
-| Needed | Why | Wanted by |
+| Capability | What to know about it | See |
 |---|---|---|
-| **Working language** on a business line | Fixes the language authored content is written in | 02-tenancy-and-roles.md |
-| **Space, and space membership** with view/edit access | The container boards live in, and who can browse it | 02, 03 |
-| **Append-only activity timeline** | Nearly every document writes to it; it must behave identically everywhere and be impossible to edit or delete | 03, 06, 07, 08, 09 |
-| **In-app notification centre** with read state | Half of the two-channel notification requirement; email is already available | 09 |
-| **Business-day calculation and holiday calendar** | Sunday–Thursday work week plus each business line's own holidays, used by every deadline | 07 |
-| **File attachments** | The File field type, plus invoices and campaign briefs | 03, 04, 10 |
-| **A running queue worker and scheduler** | Sleeping runs, reminders, escalation, and hold expiry are all background work | 05, 08, 09 |
-| **New capabilities** for spaces, boards, forms, flows, calendar, and audit visibility | The existing capability list covers the business line itself, its members, and its roles — not yet the work inside it | 02 |
+| **Append-only activity timeline** | Append-only by construction: the model refuses updates and deletes, and a database trigger refuses them again, because a model is stepped around the moment anyone writes a query builder statement or opens a psql session. Corrections are new entries. | 09 |
+| **Spaces and space membership** | Administering a space is a capability held through a role; reaching one is membership, at view or edit. Every organization is created with one default space, implicit for all its members. | 02, 03 |
+| **Working language** | The language a business line's people author in, as distinct from the language each person reads the interface in. | 02 |
+| **Managers and reporting lines** | Optional, and held per membership rather than per person. Grants assigning a report work and deciding their approvals, and nothing more. | 02, 06, 07 |
+| **Tenant-safe background work** | A job carries its organization into the worker automatically, and a worker clears it between jobs so nothing is inherited by whatever runs next. | 05, 08, 09 |
+| **In-app notification centre** | Confined to the organization someone is working in, plus the notifications about their own account, which belong to no organization at all. | 09 |
 
-The audit timeline is the one most worth building first and building well. It is the source of every reporting KPI in 09-notifications-and-audit.md, it is written to by four of the five pillars, and it is the one thing in the platform that must never be editable — retrofitting that guarantee later is considerably harder than starting with it.
+### Still needed, and where it went
+
+- **File attachments** — deferred to Phase 1, alongside the field types that need them. Nothing in the foundation depends on storage.
+- **Capabilities for boards, forms and flows** — each is added with the feature it authorizes. A permission that authorizes nothing still renders as a checkbox in the role matrix and reads as though it does something, so only `spaces.manage` exists so far.
+- **Business-day calculation and the holiday calendar** — Phase 2, where the counting rules in 07-tasks-and-deadlines.md first matter.
+- **Screens** for spaces, reporting lines and the notification centre. All three have their models, policies and tests; none has an interface yet, so the user stories that describe administering them are not satisfied until it exists.
 
 ## Out of Scope / Later
 

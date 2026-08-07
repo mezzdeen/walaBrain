@@ -21,8 +21,18 @@ use Illuminate\Support\Facades\Route;
 /**
  * Actions that are deliberately not authorized, and why.
  *
- * Each of these is reachable without an identity to authorize, so a policy
- * would deny every caller rather than the wrong ones.
+ * Two reasons qualify, and nothing else does.
+ *
+ * The first is that the action is reachable without an identity to authorize,
+ * so a policy would deny every caller rather than the wrong ones.
+ *
+ * The second is that the action reaches its records only through the signed-in
+ * person's own relation, so ownership is a property of the query rather than a
+ * question asked afterwards. A policy there could never return false, and
+ * having one would suggest the check matters when the scoping is what is
+ * actually holding. An id belonging to somebody else is not found rather than
+ * forbidden, which is also the better answer: it does not confirm the record
+ * exists.
  *
  * @var array<string, string>
  */
@@ -35,6 +45,10 @@ const UNAUTHORIZED_ACTIONS = [
     'InvitationController@accept' => 'guest facing: the signed token and matching address are the authorization, which redirects rather than denies',
     'Auth\RegistrationController@create' => 'guest facing: the `registration` middleware is the authorization',
     'Auth\RegistrationController@store' => 'guest facing: the `registration` middleware is the authorization',
+    'NotificationController@index' => 'reads only the signed-in person\'s own notifications, in the organization they are working in',
+    'NotificationController@readAll' => 'writes only the signed-in person\'s own notifications, in the organization they are working in',
+    'NotificationController@update' => 'resolved through the person\'s own notifications, so another\'s id is not found rather than forbidden',
+    'NotificationController@destroy' => 'resolved through the person\'s own notifications, so another\'s id is not found rather than forbidden',
 ];
 
 test('every controller action is authorized', function () {

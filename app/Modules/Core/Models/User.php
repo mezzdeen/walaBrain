@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -91,6 +92,30 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
         return $this->belongsToMany(Organization::class)
             ->withPivot('manager_id')
             ->withTimestamps();
+    }
+
+    /**
+     * Everything the person has been notified about, newest first.
+     *
+     * Overridden so the database channel writes the module's own notification
+     * rather than the framework's, which is what knows about organizations.
+     *
+     * @return MorphMany<Notification, $this>
+     */
+    public function notifications(): MorphMany
+    {
+        return $this->morphMany(Notification::class, 'notifiable')->latest();
+    }
+
+    /**
+     * What the person should see in their notification centre while working in
+     * the given organization.
+     *
+     * @return Builder<Notification>
+     */
+    public function notificationsIn(?Organization $organization): Builder
+    {
+        return $this->notifications()->getQuery()->visibleIn($organization);
     }
 
     /**
