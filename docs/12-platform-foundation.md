@@ -76,9 +76,20 @@ The reference number is new work, specified in 04-forms.md. The public link code
 
 One operational caution: link codes are derived from a configured alphabet rather than stored. Changing that alphabet after deployment silently invalidates every link and bookmark ever issued. It is set once per deployment and treated as a constant.
 
+## Storing a Record's Own Fields
+
+Boards let a Process Designer invent fields, so a node cannot have a fixed set of columns. The split is:
+
+- **Real columns** for anything queried *across* boards — the owning business line, board, group, assignee, due date, and status. My Work sorts every node by due date across every board in a business line, and the flow engine finds overdue work the same way; neither can afford to be a JSON extraction.
+- **A `jsonb` column** for the board's own user-defined fields, keyed by field.
+
+Postgres indexes and sorts `jsonb` perfectly well, but the indexes that make it fast are written per field, and a field a Process Designer has not invented yet cannot be indexed in advance. That is a real ceiling with a known remedy rather than a free lunch, and it is a long way off at the volumes in 09-notifications-and-audit.md.
+
+What does need care from the first migration is the storage contract per field type — an amount stored so it always casts to a number, a date stored so it always sorts chronologically. A single value written with a thousands separator breaks sorting on that column for everyone, and it is not a mistake that announces itself.
+
 ## What Core Still Needs
 
-These are foundation-level capabilities the pillars depend on. They belong in `Core`, built once and shared, rather than being invented separately inside each pillar module:
+These are the foundation-level capabilities the pillars depend on, and they are Phase 0's remaining scope (11-roadmap.md). They belong in `Core`, built once and shared, rather than being invented separately inside each pillar module:
 
 | Needed | Why | Wanted by |
 |---|---|---|

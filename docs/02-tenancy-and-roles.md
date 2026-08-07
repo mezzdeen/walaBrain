@@ -30,6 +30,23 @@ The working language is separate from the **interface language**, which every pe
 
 Because the working language shapes every board and form built afterwards, it is chosen when the business line is created and is not expected to change. Changing it later does not retranslate content already authored.
 
+## Managers and Reporting Lines
+
+Each membership can name one **manager**, who must be a member of the same business line. It is optional: a person may have none, and a business line can run without naming any at all.
+
+It belongs to the membership rather than the person, because someone who belongs to two business lines usually reports to different people in each — and a manager resolved from the person alone could be someone outside the business line the work belongs to, which the isolation rule forbids. Nobody can be their own manager, and reporting lines cannot form a loop.
+
+A Business-Line Admin sets and changes managers alongside the rest of a person's membership.
+
+Being someone's manager grants exactly two things:
+
+- **Assigning them work.** A manager can create a task for a direct report (07-tasks-and-deadlines.md).
+- **Deciding their approvals.** A flow step assigned to "the requester's manager" resolves to them (06-approvals.md).
+
+It grants nothing else — not reading everything a report does, not their My Work, not their audit timelines. A general "managers see everything below them" rule would become a second permission system running alongside roles and quietly overriding them, so authorization asks whether someone holds the capability **or** is the relevant manager, decided case by case, rather than treating the reporting line as a role.
+
+Because it is optional, a flow can reach an approval step with no manager to assign it to. The run does not skip the step and does not fail silently: it pauses and notifies the Business-Line Admin to assign someone. A visible stall is the only acceptable outcome — an approval that quietly disappears is worse than one that waits.
+
 ## Built-in Roles
 
 Two roles are built in and exist in every business line:
@@ -99,7 +116,7 @@ Getting a business line ready to run its first process follows the same sequence
 2. The Business-Line Admin creates its spaces and boards for the process it will pilot (US-02.7, 03-boards-and-nodes.md).
 3. The Business-Line Admin invites the people who will use it, by company email address (US-02.3).
 4. The Business-Line Admin defines whatever custom roles the process needs and assigns them, including Process Designer for whoever will build the forms and flows (US-02.4, US-02.5, US-02.6).
-5. The Business-Line Admin adds those people to the spaces they work in, at view or edit access (US-02.8).
+5. The Business-Line Admin adds those people to the spaces they work in, at view or edit access (US-02.8), and names each person's manager where the process routes approvals to one (US-02.9).
 6. The Process Designer builds the board's fields, forms, and flow, and the business line is ready to take its first submission (04-forms.md, 05-flows.md).
 
 ## Two Isolated Business Lines
@@ -188,6 +205,13 @@ flowchart TD
 - Given someone has edit access and holds Process Designer, they can also design that space's boards, forms, and flows.
 - Given someone is not a member of a space, it does not appear to them at all — but a task or approval routed to them from a board in it still reaches their My Work and can be opened and completed.
 - Removing someone from a space takes effect immediately and does not reassign work they already hold.
+
+**US-02.9** — As a Business-Line Admin, I want to name a person's manager, so that approvals and tasks can be routed to whoever they report to.
+- Given a member of my business line, I can set their manager to another member of the same business line, and change or clear it later.
+- I cannot set someone as their own manager, or create a loop in the reporting line.
+- Given a person has a manager, an Approval or Task step assigned to "the requester's manager" resolves to them (06-approvals.md, 07-tasks-and-deadlines.md).
+- Given a person has no manager and a run reaches a step assigned to one, the run pauses and I am notified to assign someone, rather than the step being skipped.
+- Being someone's manager lets them assign that person a task and decide their approvals; it does not reveal that person's other work.
 
 ## Out of Scope / Later
 

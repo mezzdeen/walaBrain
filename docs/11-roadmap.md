@@ -19,8 +19,8 @@ Phases are additive: each one keeps everything the previous phase delivered and 
 
 | Phase | Focus | Pilot process | What retires |
 |---|---|---|---|
-| 0 — Platform Foundation | Tenancy, roles, invitations, sign-in, Arabic and English, admin platform | — | — |
-| 1 — Boards & Pilot | Spaces, boards, forms, approvals, tasks, My Work | Finance payment request | Finance request tracking sheet |
+| 0 — Platform Foundation | Tenancy, roles, invitations, sign-in, Arabic and English, admin platform, spaces, managers, activity timeline | — | — |
+| 1 — Boards & Pilot | Boards, nodes, fields, forms, approvals, tasks, My Work | Finance payment request | Finance request tracking sheet |
 | 2 — Dynamic Flows | Conditions, business-day deadlines, infeasibility checks | Marketing campaign request | Campaign planning sheet |
 | 3 — Comms Calendar | Channels, slots, booking lifecycle | Campaign channel bookings | Channel booking sheet or calendar |
 | 4 — People Processes | Onboarding, offboarding, activation windows, escalation | Onboarding and offboarding | HR onboarding and exit checklists |
@@ -28,18 +28,42 @@ Phases are additive: each one keeps everything the previous phase delivered and 
 
 ## Phase 0 — Platform Foundation
 
-**Status**: built and tested. This phase is not a plan; it is what the following phases start from.
+**Status**: in progress. Everything the pillars stand on, and none of the pillars themselves.
 
-**Delivered**: business lines with enforced tenancy isolation; one account holding membership of several business lines with deliberate switching; custom roles and a capability matrix; invitations by email; sign-in with passkeys, password, and two-factor; Arabic and English throughout with right-to-left layout; the separate administration platform for Platform Admins; and platform settings.
+**Already built and tested**: business lines with enforced tenancy isolation; one account holding membership of several business lines with deliberate switching; custom roles and a capability matrix; invitations by email; sign-in with passkeys, password, and two-factor; Arabic and English throughout with right-to-left layout; the separate administration platform for Platform Admins; and platform settings.
 
-**What it does not include**: anything in the five pillars. No spaces, boards, nodes, fields, forms, flows, approvals, tasks, comms calendar, audit timeline, or reporting exists yet. See 12-platform-foundation.md for the capabilities Phase 1 must add to the foundation before the pillars can be built on it — the append-only audit timeline in particular, which four of the five pillars write to.
+**Still to build.** These belong here rather than in Phase 1 because every one of them is shared foundation: they live alongside the existing capabilities, and each is needed by more than one pillar. Building any pillar first would mean inventing them separately, three different ways.
+
+| Capability | Why it is foundation |
+|---|---|
+| **Append-only activity timeline** | Written to by four of the five pillars, and the source of every reporting KPI in 09-notifications-and-audit.md. Must be impossible to edit or delete by construction. |
+| **Working language** on a business line | Fixes the language of every authored label (02-tenancy-and-roles.md). Cheap now, invasive once boards exist. |
+| **Capabilities for the work itself** | The existing list covers a business line, its members, and its roles — not spaces, boards, nodes, forms, flows, task assignment, the calendar, or audit visibility. |
+| **Managers and reporting lines** | Assignment rule 3 is the first approval step in both worked processes, and has nothing behind it (02-tenancy-and-roles.md). |
+| **Spaces and space membership** | Boards have nowhere to live without them (02-tenancy-and-roles.md, 03-boards-and-nodes.md). |
+| **In-app notification centre** | Email delivery exists; the second of the two channels in 09-notifications-and-audit.md does not. |
+| **File attachments** | The File field type, and the invoice on the Phase 1 pilot form (03-boards-and-nodes.md, 10-example-processes.md). |
+| **A running queue worker and scheduler** | Sleeping runs, reminders, escalation, and hold expiry are all background work (05-flows.md, 08-comms-calendar.md). |
+
+**Order**: the activity timeline first. Nothing depends on it, everything writes to it, and append-only is far cheaper to guarantee from its first commit than to impose once four modules already log through it.
+
+**What Phase 0 does not include**: any of the five pillars. No boards, nodes, fields, forms, flows, approvals, tasks, comms calendar, or reporting. Business-day deadline maths and the holiday calendar are deliberately deferred to Phase 2, where 07-tasks-and-deadlines.md's counting rules first matter.
+
+**Success criteria**:
+
+- A business line can be created with a working language, spaces, space members, and reporting lines, without a single board existing.
+- Every change to a record leaves an entry on a timeline that nothing in the application can edit or delete.
+- A queued job and a scheduled command both run with the right business line in context, proving background work is tenant-safe before any flow depends on it.
+
+See 12-platform-foundation.md for the detail of each, and for the conventions every module built afterwards follows.
 
 ## Phase 1 — Boards & Pilot
 
 **Scope**:
 
-- Spaces and space membership, boards, groups, and nodes. Business lines, custom roles, invitations, and sign-in already exist from Phase 0.
+- Boards, groups, and nodes. Business lines, custom roles, invitations, sign-in, spaces, managers, and the activity timeline all come from Phase 0.
 - The ten field types and the table view with filters.
+- Tasks created by hand as well as by a flow, and the default Tasks board a business line starts with (07-tasks-and-deadlines.md).
 - Forms that create nodes and issue reference numbers.
 - Sequential approvals with approve, reject, and request-changes decisions. Approval chains are fixed at design time — threshold-based branching arrives with Phase 2's Condition steps.
 - Tasks with deadlines anchored to the submission date, counted in calendar days. Business-day and holiday-aware counting arrives with Phase 2.
