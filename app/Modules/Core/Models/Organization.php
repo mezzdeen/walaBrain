@@ -2,6 +2,7 @@
 
 namespace App\Modules\Core\Models;
 
+use App\Modules\Core\Concerns\HasActivityTimeline;
 use App\Modules\Core\Concerns\HasHashId;
 use App\Modules\Core\Database\Factories\OrganizationFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -24,10 +25,10 @@ use Illuminate\Support\Carbon;
 #[Fillable(['name', 'color'])]
 class Organization extends Model
 {
+    use HasActivityTimeline, HasHashId, SoftDeletes;
+
     /** @use HasFactory<OrganizationFactory> */
     use HasFactory;
-
-    use HasHashId, SoftDeletes;
 
     /**
      * Discard outstanding invitations when the organization goes away.
