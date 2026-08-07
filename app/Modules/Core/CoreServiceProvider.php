@@ -22,14 +22,17 @@ use App\Modules\Core\Policies\PlatformSettingPolicy;
 use App\Modules\Core\Policies\RolePolicy;
 use App\Modules\Core\Policies\SpacePolicy;
 use App\Modules\Core\Policies\UserPolicy;
+use App\Modules\Core\Support\OrganizationContext;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Contracts\Http\Kernel as KernelContract;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Http\Kernel;
+use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Fortify\Fortify;
 
@@ -74,6 +77,7 @@ class CoreServiceProvider extends ServiceProvider
         $this->registerMorphMap();
         $this->registerPolicies();
         $this->registerMiddleware();
+        $this->registerQueueTenancy();
         $this->registerListeners();
         $this->registerFortifyActions();
 
@@ -165,6 +169,63 @@ class CoreServiceProvider extends ServiceProvider
     private function registerListeners(): void
     {
         Event::listen(Verified::class, ProvisionOrganizationForNewUser::class);
+    }
+
+    /**
+     * Carry the organization a job was dispatched from into the worker that
+     * runs it.
+     *
+     * Middleware sets the active organization for web requests, and a queued
+     * job runs long after the request that dispatched it has gone. Without
+     * this, every job touching a tenant-owned record either reads nothing or
+     * throws, and the only remedy would be for each one to remember to name its
+     * organization — which is a thing to forget, silently, in the one place
+     * nobody watches.
+     *
+     * Done globally rather than through a base class or a trait so a job cannot
+     * opt out by accident. Most of the platform's real work happens on a queue:
+     * a flow run sleeping for a fortnight, a reminder, an escalation, a hold
+     * expiring.
+     */
+    private function registerQueueTenancy(): void
+    {
+        // Stamped at dispatch, when the organization is still known.
+        Queue::createPayloadUsing(fn (): array => [
+            'organizationId' => OrganizationContext::current()?->getKey(),
+        ]);
+
+        Queue::before(function (JobProcessing $event): void {
+            $organizationId = $event->job->payload()['organizationId'] ?? null;
+
+            if (! is_int($organizationId)) {
+                // Dispatched by something that belongs to no tenant — a console
+                // command, a scheduled sweep. It stays unscoped, and anything
+                // inside it that needs an organization has to name one.
+                OrganizationContext::useGlobal();
+
+                return;
+            }
+
+            // A null here means the organization was deleted between dispatch
+            // and processing. Deliberately not treated as "act across every
+            // tenant": the job is confined to nothing and its scoped writes
+            // throw, which is the safe reading of a tenant that no longer
+            // exists.
+            OrganizationContext::use(Organization::query()->find($organizationId));
+        });
+
+        // A worker serves one job after another in a single long-lived process,
+        // so anything left set is inherited by whatever runs next — the leak
+        // this whole arrangement exists to prevent. Cleared after a job
+        // finishes and after one fails, since a failure leaves it set just the
+        // same.
+        $forget = function (): void {
+            OrganizationContext::clear();
+            setPermissionsTeamId(null);
+        };
+
+        Queue::after($forget);
+        Queue::exceptionOccurred($forget);
     }
 
     /**

@@ -156,6 +156,19 @@ final class OrganizationContext
      * throw. Mirrors {@see PermissionTeam::on()}, and moves the permission team
      * too so role checks inside the callback agree with the organization.
      *
+     * One trap when dispatching a job from inside one of these. `Job::dispatch()`
+     * returns a PendingDispatch that only pushes the job when it is destroyed,
+     * so returning it from the callback keeps it alive past the restore below,
+     * and it is pushed with whatever context came after rather than the one it
+     * was written under:
+     *
+     *     OrganizationContext::for($org, fn () => Job::dispatch());     // wrong
+     *     OrganizationContext::for($org, function () { Job::dispatch(); }); // right
+     *
+     * The arrow function returns it; the block body drops it where it stands.
+     * Inside an ordinary request this never arises, because the context belongs
+     * to the whole request rather than to a block.
+     *
      * @template TReturn
      *
      * @param  callable(): TReturn  $callback
