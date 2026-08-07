@@ -18,6 +18,11 @@ enum OrganizationPermission: string
     case UpdateMembers = 'members.update';
     case RemoveMembers = 'members.remove';
 
+    // Creating, renaming, removing and staffing spaces. Reaching what is inside
+    // one is not a permission at all — that is space membership, granted per
+    // space, so that administering spaces and working in them stay separate.
+    case ManageSpaces = 'spaces.manage';
+
     case ViewRoles = 'roles.view';
     case CreateRoles = 'roles.create';
     case UpdateRoles = 'roles.update';

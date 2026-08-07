@@ -68,6 +68,7 @@ return [
         'roles' => 'Roles',
         'organization' => 'Organization',
         'members' => 'Members',
+        'spaces' => 'Spaces',
         'diagnostics' => 'Diagnostics',
         'settings' => 'Platform settings',
     ],

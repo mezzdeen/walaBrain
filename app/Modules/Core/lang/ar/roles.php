@@ -68,6 +68,7 @@ return [
         'roles' => 'الأدوار',
         'organization' => 'المؤسسة',
         'members' => 'الأعضاء',
+        'spaces' => 'المساحات',
         'diagnostics' => 'الفحوصات',
         'settings' => 'إعدادات المنصة',
     ],

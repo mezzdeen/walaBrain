@@ -11,6 +11,7 @@ use App\Modules\Core\Support\OrganizationContext;
 use App\Modules\Core\Support\OrganizationInvitations;
 use App\Modules\Core\Support\OrganizationOwners;
 use App\Modules\Core\Support\OrganizationRoles;
+use App\Modules\Core\Support\Spaces;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -51,7 +52,8 @@ final class OrganizationService
     }
 
     /**
-     * Create an organization, provision its roles, and settle its ownership.
+     * Create an organization, provision its roles and its default space, and
+     * settle its ownership.
      *
      * The owner is looked up before the transaction opens because the caller
      * needs to know which of the two outcomes happened, and the lookup is a read
@@ -74,6 +76,7 @@ final class OrganizationService
 
             $organization = Organization::create(['name' => $name]);
             OrganizationRoles::provision($organization);
+            Spaces::provisionDefault($organization);
             OrganizationInvitations::issue($organization, $ownerEmail, OrganizationRole::Owner->value, $invitedBy);
 
             return $organization;
@@ -99,6 +102,7 @@ final class OrganizationService
             $organization = Organization::create(['name' => $name]);
 
             OrganizationRoles::provision($organization);
+            Spaces::provisionDefault($organization);
             OrganizationOwners::assign($organization, $owner);
 
             return $organization;
