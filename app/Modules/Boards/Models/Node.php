@@ -41,6 +41,7 @@ use Illuminate\Support\Carbon;
  * @property int|null $assignee_id
  * @property Carbon|null $due_date
  * @property string|null $status
+ * @property Carbon|null $completed_at
  * @property array<string, mixed>|null $values
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
@@ -128,6 +129,32 @@ class Node extends Model
     }
 
     /**
+     * Constrain to the work still to be done.
+     *
+     * @param  Builder<Node>  $query
+     * @return Builder<Node>
+     */
+    public function scopeOpen(Builder $query): Builder
+    {
+        return $query->whereNull('completed_at');
+    }
+
+    /**
+     * Whether the node's due date has passed without it being finished.
+     *
+     * Overdue is a flag on the current state rather than a stage of its own: an
+     * item can be overdue whether it has been started or not, and completing it
+     * late clears the flag without erasing that it was late — the timeline
+     * keeps that.
+     */
+    public function isOverdue(): bool
+    {
+        return $this->completed_at === null
+            && $this->due_date !== null
+            && $this->due_date->isPast();
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -136,6 +163,7 @@ class Node extends Model
     {
         return [
             'due_date' => 'date',
+            'completed_at' => 'datetime',
             'values' => 'array',
         ];
     }

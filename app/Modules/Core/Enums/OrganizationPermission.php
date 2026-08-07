@@ -29,6 +29,12 @@ enum OrganizationPermission: string
     // and where it can be exercised is decided by space membership, not here.
     case DesignProcesses = 'processes.design';
 
+    // Handing work to somebody who is neither you nor one of your reports.
+    // Assigning to yourself needs nothing, and a manager assigning to their own
+    // report is answered by the reporting line rather than by a permission —
+    // this is for the people whose job is routing work across a business line.
+    case AssignTasks = 'tasks.assign';
+
     case ViewRoles = 'roles.view';
     case CreateRoles = 'roles.create';
     case UpdateRoles = 'roles.update';

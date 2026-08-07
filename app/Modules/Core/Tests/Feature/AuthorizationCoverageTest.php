@@ -49,6 +49,7 @@ const UNAUTHORIZED_ACTIONS = [
     'NotificationController@readAll' => 'writes only the signed-in person\'s own notifications, in the organization they are working in',
     'NotificationController@update' => 'resolved through the person\'s own notifications, so another\'s id is not found rather than forbidden',
     'NotificationController@destroy' => 'resolved through the person\'s own notifications, so another\'s id is not found rather than forbidden',
+    'MyWorkController@index' => 'reads only the work assigned to the signed-in person, in the organization they are working in',
 ];
 
 test('every controller action is authorized', function () {
@@ -106,7 +107,7 @@ function controllerAction(RoutingRoute $route): ?string
         return null;
     }
 
-    return preg_replace('/^App\\\\(Modules\\\\Core\\\\)?Http\\\\Controllers\\\\/', '', $class).'@'.$method;
+    return preg_replace('/^App\\\\(Modules\\\\\\w+\\\\)?Http\\\\Controllers\\\\/', '', $class).'@'.$method;
 }
 
 /**

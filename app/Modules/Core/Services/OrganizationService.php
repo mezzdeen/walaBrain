@@ -3,6 +3,7 @@
 namespace App\Modules\Core\Services;
 
 use App\Modules\Core\Enums\OrganizationRole;
+use App\Modules\Core\Events\OrganizationCreated;
 use App\Modules\Core\Models\Admin;
 use App\Modules\Core\Models\Organization;
 use App\Modules\Core\Models\User;
@@ -82,6 +83,8 @@ final class OrganizationService
             Spaces::provisionDefault($organization);
             OrganizationInvitations::issue($organization, $ownerEmail, OrganizationRole::Owner->value, $invitedBy);
 
+            OrganizationCreated::dispatch($organization);
+
             return $organization;
         });
 
@@ -113,6 +116,10 @@ final class OrganizationService
             OrganizationRoles::provision($organization);
             Spaces::provisionDefault($organization);
             OrganizationOwners::assign($organization, $owner);
+
+            // Announced once everything Core owns is in place, so a listener
+            // furnishing the organization finds a space to put things in.
+            OrganizationCreated::dispatch($organization);
 
             return $organization;
         });

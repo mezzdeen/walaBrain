@@ -24,6 +24,7 @@ use App\Modules\Core\Policies\SpacePolicy;
 use App\Modules\Core\Policies\UserPolicy;
 use App\Modules\Core\Support\OrganizationContext;
 use Illuminate\Auth\Events\Verified;
+use Illuminate\Auth\Middleware\EnsureEmailIsVerified;
 use Illuminate\Contracts\Http\Kernel as KernelContract;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Http\Kernel;
@@ -156,6 +157,29 @@ class CoreServiceProvider extends ServiceProvider
         $kernel->addToMiddlewarePriorityBefore(
             SubstituteBindings::class,
             SetOrganizationContext::class,
+        );
+
+        // And `RequiresOrganization` in front of bindings too, for the other
+        // half of the same problem. Resolving a route binding for a model that
+        // is organization scoped runs a scoped query, which throws outright
+        // when there is no organization — so a user who belongs to none would
+        // get a 500 from the binding before this middleware ever got to send
+        // them somewhere sensible. Sequenced after `SetOrganizationContext`, so
+        // it is deciding on a context that has already been resolved.
+        $kernel->addToMiddlewarePriorityBefore(
+            SubstituteBindings::class,
+            RequiresOrganization::class,
+        );
+
+        // Prioritising it pulled it ahead of `verified`, which is not in the
+        // priority list at all, so an unverified user was being told they have
+        // no organization instead of being asked to confirm their address.
+        // Confirming the address comes first: it is the price of entry to the
+        // application, and everything after it assumes an account that is
+        // really theirs.
+        $kernel->addToMiddlewarePriorityBefore(
+            RequiresOrganization::class,
+            EnsureEmailIsVerified::class,
         );
     }
 

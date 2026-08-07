@@ -69,6 +69,7 @@ return [
         'organization' => 'المؤسسة',
         'members' => 'الأعضاء',
         'processes' => 'العمليات',
+        'tasks' => 'المهام',
         'spaces' => 'المساحات',
         'diagnostics' => 'الفحوصات',
         'settings' => 'إعدادات المنصة',
@@ -81,6 +82,7 @@ return [
     | literal 'members.manage' key could never be reached.
     */
     'abilities' => [
+        'assign' => 'إسناد',
         'design' => 'تصميم',
         'view' => 'عرض',
         'create' => 'إنشاء',
