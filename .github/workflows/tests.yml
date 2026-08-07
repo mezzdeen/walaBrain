@@ -13,6 +13,24 @@ jobs:
   ci:
     runs-on: ubuntu-latest
 
+    services:
+      # Mirrors local development: Postgres 18 with trust authentication, so
+      # the empty DB_PASSWORD in .env.example works here without a secret.
+      # POSTGRES_DB is the application database `composer setup` migrates.
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_DB: wp-internal-system
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -23,6 +41,7 @@ jobs:
         uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
         with:
           php-version: '8.4'
+          extensions: pdo_pgsql, pgsql
           tools: composer:v2
           coverage: none
 
@@ -30,6 +49,11 @@ jobs:
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v6
         with:
           node-version: '22'
+
+      # The service creates the application database; the suite runs against a
+      # second one named in phpunit.xml, so a test run never touches it.
+      - name: Create testing database
+        run: psql -h 127.0.0.1 -U postgres -c 'CREATE DATABASE "wp-internal-system-testing"'
 
       - name: Setup Application
         run: composer setup
