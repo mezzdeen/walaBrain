@@ -3,14 +3,19 @@
 namespace App\Modules\Core\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Core\Exceptions\InvalidReportingLine;
 use App\Modules\Core\Models\Organization;
 use App\Modules\Core\Models\Role;
 use App\Modules\Core\Models\User;
+use App\Modules\Core\Support\HashId;
 use App\Modules\Core\Support\OrganizationContext;
+use App\Modules\Core\Support\OrganizationMembers;
 use App\Modules\Core\Support\OrganizationRoles;
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -52,17 +57,67 @@ class MemberController extends Controller
             ->map(fn (User $member): array => [
                 ...$member->only(['hash_id', 'full_name', 'email']),
                 'roles' => $member->roles->pluck('name')->all(),
+                'manager' => $member->managerIn($organization)?->hash_id,
             ])
             ->all());
 
         return Inertia::render('members/index', [
             'members' => $members,
+
+            // Everyone a member could report to, for the manager column.
+            'managerOptions' => $organization->users()
+                ->orderBy('first_name')
+                ->get(['users.id', 'first_name', 'last_name'])
+                ->map(fn (User $candidate): array => [
+                    'hash_id' => (string) $candidate->hash_id,
+                    'name' => $candidate->full_name,
+                ])->values()->all(),
             'roles' => $this->filterableRoles($organization),
             'filters' => [
                 'search' => $search,
                 'role' => $role,
             ],
         ]);
+    }
+
+    /**
+     * Say who a member reports to here, or that they report to nobody.
+     *
+     * The write half of the reporting line: the rules — same organization, no
+     * self-management, no loops — are enforced where the line is set, and an
+     * attempt that breaks one comes back as the validation error it is.
+     */
+    public function updateManager(Request $request, User $member): RedirectResponse
+    {
+        $organization = OrganizationContext::current();
+
+        Gate::authorize('manageMembers', $organization);
+
+        abort_unless($member->belongsToOrganization($organization), 404);
+
+        /** @var array{manager: string|null} $validated */
+        $validated = $request->validate([
+            'manager' => ['nullable', 'string'],
+        ]);
+
+        $manager = null;
+
+        if (is_string($validated['manager']) && $validated['manager'] !== '') {
+            $key = HashId::decode($validated['manager']);
+            $manager = $key === null ? null : $organization->users()->whereKey($key)->first();
+
+            if ($manager === null) {
+                throw ValidationException::withMessages(['manager' => __('core::members.manager_unknown')]);
+            }
+        }
+
+        try {
+            OrganizationMembers::setManager($organization, $member, $manager);
+        } catch (InvalidReportingLine) {
+            throw ValidationException::withMessages(['manager' => __('core::members.manager_invalid')]);
+        }
+
+        return back();
     }
 
     /**

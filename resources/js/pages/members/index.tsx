@@ -15,7 +15,7 @@ import {
 import { useCan } from '@/hooks/use-can';
 import { useTranslations } from '@/hooks/use-translations';
 import { index as invitationsIndex } from '@/routes/invitations';
-import { index } from '@/routes/members';
+import { index, manager as updateManager } from '@/routes/members';
 
 type RoleOption = {
     value: string;
@@ -27,10 +27,17 @@ type Member = {
     full_name: string;
     email: string;
     roles: string[];
+    manager: string | null;
+};
+
+type ManagerOption = {
+    hash_id: string;
+    name: string;
 };
 
 type Props = {
     members: Member[];
+    managerOptions: ManagerOption[];
     roles: RoleOption[];
     filters: {
         search: string;
@@ -42,7 +49,15 @@ type Props = {
 // and is translated back to an unset filter when navigating.
 const ALL_ROLES = 'all';
 
-export default function Members({ members, roles, filters }: Props) {
+// Same trick for the manager column: "nobody" is a real choice.
+const NO_MANAGER = 'none';
+
+export default function Members({
+    members,
+    managerOptions,
+    roles,
+    filters,
+}: Props) {
     const { t } = useTranslations();
     const { can } = useCan();
 
@@ -164,6 +179,9 @@ export default function Members({ members, roles, filters }: Props) {
                                         <th className="px-4 py-3 font-medium">
                                             {t('core.members.th_role')}
                                         </th>
+                                        <th className="px-4 py-3 font-medium">
+                                            {t('core.members.manager')}
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -201,6 +219,67 @@ export default function Members({ members, roles, filters }: Props) {
                                                         )}
                                                     </div>
                                                 )}
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <Select
+                                                    value={
+                                                        member.manager ??
+                                                        NO_MANAGER
+                                                    }
+                                                    onValueChange={(value) =>
+                                                        router.patch(
+                                                            updateManager(
+                                                                member.hash_id,
+                                                            ).url,
+                                                            {
+                                                                manager:
+                                                                    value ===
+                                                                    NO_MANAGER
+                                                                        ? null
+                                                                        : value,
+                                                            },
+                                                            {
+                                                                preserveScroll: true,
+                                                            },
+                                                        )
+                                                    }
+                                                >
+                                                    <SelectTrigger
+                                                        className="w-44"
+                                                        data-test={`manager-${member.hash_id}`}
+                                                    >
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem
+                                                            value={NO_MANAGER}
+                                                        >
+                                                            {t(
+                                                                'core.members.no_manager',
+                                                            )}
+                                                        </SelectItem>
+                                                        {managerOptions
+                                                            .filter(
+                                                                (option) =>
+                                                                    option.hash_id !==
+                                                                    member.hash_id,
+                                                            )
+                                                            .map((option) => (
+                                                                <SelectItem
+                                                                    key={
+                                                                        option.hash_id
+                                                                    }
+                                                                    value={
+                                                                        option.hash_id
+                                                                    }
+                                                                >
+                                                                    {
+                                                                        option.name
+                                                                    }
+                                                                </SelectItem>
+                                                            ))}
+                                                    </SelectContent>
+                                                </Select>
                                             </td>
                                         </tr>
                                     ))}

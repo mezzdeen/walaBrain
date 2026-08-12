@@ -37,8 +37,10 @@ use Illuminate\Support\Carbon;
  * @property int $board_id
  * @property int|null $group_id
  * @property string $title
+ * @property string|null $reference
  * @property string|null $description
  * @property int|null $assignee_id
+ * @property int|null $creator_id
  * @property Carbon|null $due_date
  * @property string|null $status
  * @property Carbon|null $completed_at
@@ -47,7 +49,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
  */
-#[Fillable(['board_id', 'group_id', 'title', 'description', 'assignee_id', 'due_date', 'status', 'values'])]
+#[Fillable(['board_id', 'group_id', 'title', 'reference', 'description', 'assignee_id', 'creator_id', 'due_date', 'status', 'values'])]
 class Node extends Model
 {
     /** @use HasFactory<NodeFactory> */
@@ -81,6 +83,16 @@ class Node extends Model
     public function assignee(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assignee_id');
+    }
+
+    /**
+     * Who brought the node into existence, where anyone personally did.
+     *
+     * @return BelongsTo<User, $this>
+     */
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'creator_id');
     }
 
     /**

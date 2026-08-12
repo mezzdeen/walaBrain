@@ -34,7 +34,9 @@ class NodePolicy
     public function view(User|Admin $identity, Node $node): bool
     {
         return $identity instanceof User
-            && ($this->isAssigned($identity, $node) || $identity->can('view', $node->board->space));
+            && ($this->isAssigned($identity, $node)
+                || $this->isCreator($identity, $node)
+                || $identity->can('view', $node->board->space));
     }
 
     /**
@@ -57,6 +59,20 @@ class NodePolicy
     }
 
     /**
+     * Determine whether the identity can revise and resubmit the node.
+     *
+     * Only its submitter, and only while it has been handed back to them —
+     * which is what the changes_requested status says. The status is written
+     * by whatever automation sent it back; this policy only reads it.
+     */
+    public function resubmit(User|Admin $identity, Node $node): bool
+    {
+        return $identity instanceof User
+            && $this->isCreator($identity, $node)
+            && $node->status === 'changes_requested';
+    }
+
+    /**
      * Determine whether the identity can remove the node.
      *
      * Not extended to the assignee: being asked to do something is not
@@ -73,5 +89,18 @@ class NodePolicy
     private function isAssigned(User $user, Node $node): bool
     {
         return $node->assignee_id === $user->getKey();
+    }
+
+    /**
+     * Whether this person submitted the node.
+     *
+     * A submitter follows their own request wherever it went — a finance
+     * request lives on a finance board its requester cannot browse, and being
+     * unable to see what happened to your own submission would defeat the
+     * point of tracking it.
+     */
+    private function isCreator(User $user, Node $node): bool
+    {
+        return $node->creator_id === $user->getKey();
     }
 }

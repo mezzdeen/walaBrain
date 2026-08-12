@@ -9,6 +9,7 @@ use App\Modules\Boards\Models\Node;
 use App\Modules\Boards\Support\Boards;
 use App\Modules\Core\Enums\OrganizationPermission;
 use App\Modules\Core\Models\User;
+use App\Modules\Core\Support\MyWorkSources;
 use App\Modules\Core\Support\OrganizationContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -54,6 +55,10 @@ class MyWorkController extends Controller
             // reports because they manage them; everybody in the business line
             // if they hold the capability for routing work generally.
             'assignable' => $this->assignableTo($user),
+
+            // What other modules have waiting on this person — approvals, once
+            // Flows is installed — without this module naming any of them.
+            ...MyWorkSources::collect($user),
         ]);
     }
 

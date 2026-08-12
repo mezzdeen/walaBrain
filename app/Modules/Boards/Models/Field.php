@@ -35,7 +35,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
  */
-#[Fillable(['board_id', 'name', 'type', 'options', 'help', 'is_required', 'position'])]
+#[Fillable(['organization_id', 'board_id', 'name', 'type', 'options', 'help', 'is_required', 'position'])]
 class Field extends Model
 {
     /** @use HasFactory<FieldFactory> */

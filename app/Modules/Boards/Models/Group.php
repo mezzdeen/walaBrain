@@ -29,7 +29,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
  */
-#[Fillable(['board_id', 'name', 'position'])]
+#[Fillable(['organization_id', 'board_id', 'name', 'position'])]
 class Group extends Model
 {
     /** @use HasFactory<GroupFactory> */

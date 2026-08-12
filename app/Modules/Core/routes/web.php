@@ -116,6 +116,7 @@ Route::middleware(['web', 'auth:web', 'verified'])->group(function () {
         // The owner's roster of everyone in the organization. Its own screen and
         // permission, distinct from the invite form and its typeahead below.
         Route::get('members', [MemberController::class, 'index'])->name('members.index');
+        Route::patch('members/{member}/manager', [MemberController::class, 'updateManager'])->name('members.manager');
 
         // Backs the invitee field on the invite form. Gated on the same invite
         // permission, and confined to accounts not already in the organization.

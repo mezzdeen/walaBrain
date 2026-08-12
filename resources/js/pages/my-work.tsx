@@ -1,5 +1,5 @@
-import { Form, Head, setLayoutProps } from '@inertiajs/react';
-import { CalendarClock, Check, Plus } from 'lucide-react';
+import { Form, Head, Link, setLayoutProps } from '@inertiajs/react';
+import { CalendarClock, Check, Plus, Stamp } from 'lucide-react';
 import InputError from '@/components/input-error';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { useTranslations } from '@/hooks/use-translations';
+import { show as showApproval } from '@/routes/approvals';
 import { complete, index, store } from '@/routes/my-work';
 
 type Task = {
@@ -30,12 +31,20 @@ type Person = {
     name: string;
 };
 
+type PendingApproval = {
+    hash_id: string;
+    reference: string | null;
+    title: string;
+    requested_at: string | null;
+};
+
 type Props = {
     tasks: Task[];
     assignable: Person[];
+    approvals?: PendingApproval[];
 };
 
-export default function MyWork({ tasks, assignable }: Props) {
+export default function MyWork({ tasks, assignable, approvals = [] }: Props) {
     const { t, locale } = useTranslations();
 
     setLayoutProps({
@@ -153,6 +162,54 @@ export default function MyWork({ tasks, assignable }: Props) {
                         </Form>
                     </CardContent>
                 </Card>
+
+                {approvals.length > 0 && (
+                    <section
+                        className="flex flex-col gap-2"
+                        data-test="approvals-section"
+                    >
+                        <h2 className="text-sm font-semibold">
+                            {t('flows.approvals.title')}
+                        </h2>
+                        <ul className="grid gap-2">
+                            {approvals.map((approval) => (
+                                <li key={approval.hash_id}>
+                                    <Card>
+                                        <CardContent className="flex items-center justify-between gap-4 py-4">
+                                            <div className="min-w-0">
+                                                <div className="flex items-center gap-2">
+                                                    <Stamp className="size-4 text-muted-foreground" />
+                                                    <span className="truncate font-medium">
+                                                        {approval.reference ??
+                                                            approval.title}
+                                                    </span>
+                                                </div>
+                                                <p className="mt-1 text-sm text-muted-foreground">
+                                                    {approval.title}
+                                                    {approval.requested_at
+                                                        ? ` · ${t('flows.approvals.requested', { date: approval.requested_at })}`
+                                                        : ''}
+                                                </p>
+                                            </div>
+                                            <Button asChild size="sm">
+                                                <Link
+                                                    href={showApproval(
+                                                        approval.hash_id,
+                                                    )}
+                                                    data-test={`approval-${approval.hash_id}`}
+                                                >
+                                                    {t(
+                                                        'flows.approvals.decide',
+                                                    )}
+                                                </Link>
+                                            </Button>
+                                        </CardContent>
+                                    </Card>
+                                </li>
+                            ))}
+                        </ul>
+                    </section>
+                )}
 
                 {tasks.length === 0 ? (
                     <Card data-test="my-work-empty">

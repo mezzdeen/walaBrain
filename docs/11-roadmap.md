@@ -63,6 +63,8 @@ See 12-platform-foundation.md for the detail of each, and for the conventions ev
 
 ## Phase 1 — Boards & Pilot
 
+**Status**: complete. The pilot process runs end to end; the deviations and deferrals are listed at the end of this section.
+
 **Scope**:
 
 - Boards, groups, and nodes. Business lines, custom roles, invitations, sign-in, spaces, managers, and the activity timeline all come from Phase 0.
@@ -77,10 +79,21 @@ See 12-platform-foundation.md for the detail of each, and for the conventions ev
 
 **Success criteria**:
 
-- The finance team's request-tracking spreadsheet is retired.
-- Every payment and collection request is submitted, approved, and executed inside the platform.
-- Requesters can see their request's status in My Work without asking finance directly.
-- Every approval decision is recorded on the node's activity timeline.
+- The finance team's request-tracking spreadsheet is retired. *(For the pilot business line to judge, once it runs a real month through the platform.)*
+- Every payment and collection request is submitted, approved, and executed inside the platform. ✅
+- Requesters can see their request's status without asking finance directly. ✅
+- Every approval decision is recorded on the node's activity timeline, permanently. ✅
+
+**Delivered beyond the pilot**: the board table view with per-column filtering and sorting; the spaces screen; the node page with its full timeline; hand-written tasks alongside flow-generated ones; the manager column on the members screen; submissions halting whole — with a clear message — when a manager-assigned step finds no manager.
+
+**Deviations and deferrals, recorded rather than implied**:
+
+- **Designer screens do not exist.** Boards, fields, forms, and flows are created by seeding or by code; a Process Designer cannot yet build a process from the interface. US-03.1 through US-03.3, US-04.1 through US-04.3 and US-05.1 through US-05.3 wait on those screens.
+- **A form presents its board's whole field schema** in board order; choosing a subset per form arrives with the designer screens.
+- **Versioning is an integer stamped onto each run**, not yet the draft-and-freeze model of 04-forms.md; runs record which version they operate under, which is the half reporting needs.
+- **A missing manager blocks the submission** with a clear error rather than pausing the run and notifying the Business-Line Admin as 02-tenancy-and-roles.md prefers; the stall is visible either way, and the pause-and-notify shape needs the run to exist first.
+- **Assignment rules**: a specific person and the requester's manager are implemented; role/team queues and person-field assignment arrive with the phases that need them.
+- **File fields, drafts, infeasible-timeline validation, and approval due dates** are deferred as this roadmap already sequences them.
 
 - **US-11.1** — As a Business-Line Admin, I want to launch the platform with a single process, so that my team learns the platform without disrupting every process at once.
   - Given the finance request process is ready, when the pilot starts, then no other process is migrated in the same window.

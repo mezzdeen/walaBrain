@@ -2,6 +2,11 @@
 
 return [
 
+    'manager' => 'Manager',
+    'no_manager' => 'No manager',
+    'manager_unknown' => 'That person is not in this business line.',
+    'manager_invalid' => 'That reporting line is not allowed: nobody manages themselves, and a chain cannot loop.',
+
     /*
     |--------------------------------------------------------------------------
     | Member Management Language Lines
