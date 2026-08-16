@@ -61,7 +61,7 @@ return [
     */
 
     'admin' => [
-        'email' => env('ADMIN_EMAIL', 'admin@syaaq.com'),
+        'email' => env('ADMIN_EMAIL', 'admin@walabrain.com'),
         'name' => env('ADMIN_NAME', 'Admin'),
         'password' => env('ADMIN_PASSWORD'),
     ],

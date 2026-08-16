@@ -58,5 +58,15 @@ jobs:
       - name: Setup Application
         run: composer setup
 
+      # The browser tests drive a real Chromium, and a fresh runner has none:
+      # `npm install` fetches the playwright package but never its browsers.
+      # Without this the whole browser suite fails at the plugin's version
+      # guard before a single test runs. The version is printed first so a
+      # future failure here says which playwright the runner actually resolved.
+      - name: Install Playwright browsers
+        run: |
+          ./node_modules/.bin/playwright --version
+          ./node_modules/.bin/playwright install --with-deps chromium
+
       - name: Run CI Checks
         run: composer ci:check
