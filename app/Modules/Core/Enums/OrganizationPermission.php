@@ -18,23 +18,6 @@ enum OrganizationPermission: string
     case UpdateMembers = 'members.update';
     case RemoveMembers = 'members.remove';
 
-    // Creating, renaming, removing and staffing spaces. Reaching what is inside
-    // one is not a permission at all — that is space membership, granted per
-    // space, so that administering spaces and working in them stay separate.
-    case ManageSpaces = 'spaces.manage';
-
-    // Shaping a process rather than working within one: a board's fields and
-    // groups, the forms that create nodes on it, and the flows that react. One
-    // capability rather than one per artefact, because they are the same job —
-    // and where it can be exercised is decided by space membership, not here.
-    case DesignProcesses = 'processes.design';
-
-    // Handing work to somebody who is neither you nor one of your reports.
-    // Assigning to yourself needs nothing, and a manager assigning to their own
-    // report is answered by the reporting line rather than by a permission —
-    // this is for the people whose job is routing work across a business line.
-    case AssignTasks = 'tasks.assign';
-
     case ViewRoles = 'roles.view';
     case CreateRoles = 'roles.create';
     case UpdateRoles = 'roles.update';

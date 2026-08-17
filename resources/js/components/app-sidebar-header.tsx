@@ -1,6 +1,7 @@
 import { AppearanceSwitcher } from '@/components/appearance-switcher';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { LanguageSwitcher } from '@/components/language-switcher';
+import { NotificationBell } from '@/components/notification-bell';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import type { BreadcrumbItem as BreadcrumbItemType } from '@/types';
 
@@ -17,6 +18,7 @@ export function AppSidebarHeader({
             </div>
 
             <div className="ms-auto flex items-center gap-1">
+                <NotificationBell />
                 <LanguageSwitcher />
                 <AppearanceSwitcher />
             </div>

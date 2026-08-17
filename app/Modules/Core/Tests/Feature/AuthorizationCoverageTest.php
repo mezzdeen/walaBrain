@@ -49,7 +49,6 @@ const UNAUTHORIZED_ACTIONS = [
     'NotificationController@readAll' => 'writes only the signed-in person\'s own notifications, in the organization they are working in',
     'NotificationController@update' => 'resolved through the person\'s own notifications, so another\'s id is not found rather than forbidden',
     'NotificationController@destroy' => 'resolved through the person\'s own notifications, so another\'s id is not found rather than forbidden',
-    'MyWorkController@index' => 'reads only the work assigned to the signed-in person, in the organization they are working in',
 ];
 
 test('every controller action is authorized', function () {

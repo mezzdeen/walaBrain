@@ -15,12 +15,10 @@ use App\Modules\Core\Models\Organization;
 use App\Modules\Core\Models\Permission;
 use App\Modules\Core\Models\PlatformSetting;
 use App\Modules\Core\Models\Role;
-use App\Modules\Core\Models\Space;
 use App\Modules\Core\Models\User;
 use App\Modules\Core\Policies\OrganizationPolicy;
 use App\Modules\Core\Policies\PlatformSettingPolicy;
 use App\Modules\Core\Policies\RolePolicy;
-use App\Modules\Core\Policies\SpacePolicy;
 use App\Modules\Core\Policies\UserPolicy;
 use App\Modules\Core\Support\OrganizationContext;
 use Illuminate\Auth\Events\Verified;
@@ -103,7 +101,6 @@ class CoreServiceProvider extends ServiceProvider
         Gate::policy(Organization::class, OrganizationPolicy::class);
         Gate::policy(PlatformSetting::class, PlatformSettingPolicy::class);
         Gate::policy(Role::class, RolePolicy::class);
-        Gate::policy(Space::class, SpacePolicy::class);
         Gate::policy(User::class, UserPolicy::class);
 
         Gate::before(
@@ -264,7 +261,6 @@ class CoreServiceProvider extends ServiceProvider
             'user' => User::class,
             'admin' => Admin::class,
             'organization' => Organization::class,
-            'space' => Space::class,
         ]);
     }
 }

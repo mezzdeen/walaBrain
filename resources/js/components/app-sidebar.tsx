@@ -1,8 +1,6 @@
 import {
     Building2,
     LayoutGrid,
-    KanbanSquare,
-    ListChecks,
     Settings2,
     ShieldCheck,
     UserPlus,
@@ -23,10 +21,8 @@ import { useTranslations } from '@/hooks/use-translations';
 import { dashboard } from '@/routes';
 import { index as invitationsIndex } from '@/routes/invitations';
 import { index as membersIndex } from '@/routes/members';
-import { index as myWork } from '@/routes/my-work';
 import { edit as editOrganization } from '@/routes/organization';
 import { index as rolesIndex } from '@/routes/roles';
-import { index as spacesIndex } from '@/routes/spaces';
 import type { NavItem } from '@/types';
 
 export function AppSidebar() {
@@ -79,16 +75,6 @@ export function AppSidebar() {
             title: t('core.nav.dashboard'),
             href: dashboard(),
             icon: LayoutGrid,
-        },
-        {
-            title: t('boards.tasks.title'),
-            href: myWork(),
-            icon: ListChecks,
-        },
-        {
-            title: t('boards.spaces.title'),
-            href: spacesIndex(),
-            icon: KanbanSquare,
         },
         // Holding none of the three leaves nothing to group, so the heading
         // goes too rather than expanding onto an empty list.

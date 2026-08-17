@@ -1,11 +1,8 @@
 <?php
 
 use App\Modules\Core\Models\Organization;
-use App\Modules\Core\Models\Space;
 use App\Modules\Core\Models\User;
 use App\Modules\Core\Services\OrganizationService;
-use App\Modules\Core\Support\OrganizationContext;
-use App\Modules\Core\Support\Spaces;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,29 +20,12 @@ test('an organization has a working language', function () {
     expect($organization->locale)->toBe('en');
 });
 
-test('the default space is named in the organization\'s language, not the reader\'s', function () {
-    $organization = Organization::factory()->create(['locale' => 'ar']);
-
-    // A platform admin reading English has no business naming an Arabic
-    // organization's first space in English.
-    app()->setLocale('en');
-
-    $space = Spaces::provisionDefault($organization);
-
-    expect($space->name)->toBe(__('core::spaces.default_name', [], 'ar'))
-        ->and($space->name)->not->toBe(__('core::spaces.default_name', [], 'en'));
-});
-
 test('someone signing themselves up sets the language they write in', function () {
     $owner = User::factory()->create(['locale' => 'ar']);
 
     $organization = app(OrganizationService::class)->createForOwner($owner, 'التسويق');
 
     expect($organization->locale)->toBe('ar');
-
-    $space = OrganizationContext::for($organization, fn () => Space::query()->where('is_default', true)->first());
-
-    expect($space->name)->toBe(__('core::spaces.default_name', [], 'ar'));
 });
 
 test('an owner with no language of their own falls back to the platform default', function () {

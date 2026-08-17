@@ -13,7 +13,6 @@ use App\Modules\Core\Support\OrganizationContext;
 use App\Modules\Core\Support\OrganizationInvitations;
 use App\Modules\Core\Support\OrganizationOwners;
 use App\Modules\Core\Support\OrganizationRoles;
-use App\Modules\Core\Support\Spaces;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -80,7 +79,6 @@ final class OrganizationService
 
             $organization = Organization::create(['name' => $name, 'locale' => $locale]);
             OrganizationRoles::provision($organization);
-            Spaces::provisionDefault($organization);
             OrganizationInvitations::issue($organization, $ownerEmail, OrganizationRole::Owner->value, $invitedBy);
 
             OrganizationCreated::dispatch($organization);
@@ -114,11 +112,10 @@ final class OrganizationService
             ]);
 
             OrganizationRoles::provision($organization);
-            Spaces::provisionDefault($organization);
             OrganizationOwners::assign($organization, $owner);
 
             // Announced once everything Core owns is in place, so a listener
-            // furnishing the organization finds a space to put things in.
+            // furnishing the organization finds it fully provisioned.
             OrganizationCreated::dispatch($organization);
 
             return $organization;
